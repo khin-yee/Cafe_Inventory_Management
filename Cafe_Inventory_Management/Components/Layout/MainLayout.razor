@@ -1,0 +1,69 @@
+﻿@inherits LayoutComponentBase
+@using Cafe_Inventory_Management.UI.Services
+@using MudBlazor
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<MudThemeProvider IsDarkMode="false" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+@if (!IsLoginPage)
+{
+    <MudLayout>
+        @if (!IsLoginPage)
+        {
+            @* Fixed App Bar for Dashboard *@
+            <MudAppBar Elevation="1" Dense= "true" Style="background-color: white; border-bottom: 1px solid #eee; z-index: 1300;" Fixed="true">
+                <MudText Typo="Typo.h6" Style="font-weight:900; color:#1B1212; letter-spacing: 1px;">
+                    CHANOHOLIC
+                </MudText>
+                <MudSpacer />
+                <AuthorizeView>
+                    <Authorized>
+                        <MudText Typo="Typo.body1" Class="mr-3" Style="color: #666;">
+                            Welcome, <b>@context.User.FindFirst(c => c.Type == "name")?.Value</b>
+                        </MudText>
+                        <MudButton OnClick="Logout" Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Logout">
+                            Logout
+                        </MudButton>
+                    </Authorized>
+                </AuthorizeView>
+            </MudAppBar>
+
+            <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
+                <NavMenu />
+            </MudDrawer>
+
+            @* Dashboard Content Wrapper with Padding-Top *@
+            <MudMainContent Style="background-color: #FAF9F6; min-height: 100vh;">
+                <div style="padding-top: 64px;" class="pa-8">
+                    @Body
+                </div>
+            </MudMainContent>
+        }
+        else
+        {
+            @* Login Content: No App Bar, No Sidebar, No Padding, No White Box *@
+            <MudMainContent Style="background-color: #111827;">
+                @* Match your login background color *@
+                @Body
+            </MudMainContent>
+        }
+    </MudLayout>
+}
+else
+{
+        <MudLayout>
+        @Body
+
+</MudLayout>
+}
+
+@code {
+    private bool IsLoginPage => Navigation.ToBaseRelativePath(Navigation.Uri) == "" ||
+                                Navigation.ToBaseRelativePath(Navigation.Uri).ToLower().Contains("signin") ||
+                                Navigation.ToBaseRelativePath(Navigation.Uri).ToLower().Contains("login");
+
+    void Logout() => Navigation.NavigateTo("/auth/logout", true);
+}

@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35913.81
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe_Inventory_Managemet.API", "Cafe_Inventory_Managemet.API\Cafe_Inventory_Managemet.API.csproj", "{019E74F7-9188-4300-92D6-E587F217358E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe_Inventory_Management.UI", "Cafe_Inventory_Management\Cafe_Inventory_Management.UI.csproj", "{92FA8AC5-5EE0-4517-80C7-DB06EF7E76B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe_Inventory_Management.Domain", "Cafe_Inventory_Management.Domain\Cafe_Inventory_Management.Domain.csproj", "{661723F4-8458-45AC-A909-B2B6AE45C230}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{019E74F7-9188-4300-92D6-E587F217358E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{019E74F7-9188-4300-92D6-E587F217358E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{019E74F7-9188-4300-92D6-E587F217358E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{019E74F7-9188-4300-92D6-E587F217358E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92FA8AC5-5EE0-4517-80C7-DB06EF7E76B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92FA8AC5-5EE0-4517-80C7-DB06EF7E76B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92FA8AC5-5EE0-4517-80C7-DB06EF7E76B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92FA8AC5-5EE0-4517-80C7-DB06EF7E76B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{661723F4-8458-45AC-A909-B2B6AE45C230}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{661723F4-8458-45AC-A909-B2B6AE45C230}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{661723F4-8458-45AC-A909-B2B6AE45C230}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{661723F4-8458-45AC-A909-B2B6AE45C230}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5B71FE5B-7955-4300-8C74-00A2859CB6C2}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,6 @@
+@Cafe_Inventory_Managemet.API_HostAddress = http://localhost:5209
+
+GET {{Cafe_Inventory_Managemet.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

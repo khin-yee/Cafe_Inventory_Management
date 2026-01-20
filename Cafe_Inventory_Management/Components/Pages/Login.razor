@@ -1,0 +1,115 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+
+<style>
+    .login-page-bg {
+        background: #0f172a;
+        background: radial-gradient(circle at top right, #1e293b, #0f172a);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .glass-card {
+        background: rgba(30, 41, 59, 0.7) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px !important;
+        width: 100%;
+        max-width: 420px;
+    }
+    /* Fix for overlapping labels and white text */
+    .white-text-input .mud-input-root {
+        color: white !important;
+    }
+
+    .white-text-input .mud-label {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .white-text-input .mud-input-filled-shrink .mud-label {
+        color: var(--mud-palette-primary) !important;
+    }
+</style>
+
+<div class="login-page-bg">
+    <MudContainer MaxWidth="MaxWidth.ExtraSmall">
+        <MudPaper Elevation="25" Class="pa-8 glass-card">
+
+            <MudStack AlignItems="AlignItems.Center" Spacing="1" Class="mb-8">
+                <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Color="Color.Primary" Size="Size.Large" />
+                <MudText Typo="Typo.h4" Style="color:white; font-weight: 800; letter-spacing: 1px;">
+                    @(IsSignUp ? "SIGN UP" : "CHANOHOLIC")
+                </MudText>
+                <MudText Style="color: rgba(255,255,255,0.5)">
+                    @(IsSignUp ? "Create your account" : "Inventory Management System")
+                </MudText>
+            </MudStack>
+
+            @if (!string.IsNullOrEmpty(Error))
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Dense="true" Class="mb-4 rounded-lg">
+                    @Error
+                </MudAlert>
+            }
+
+            <MudTextField @bind-Value="Username"
+                          Label="Email"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Email"
+                          AdornmentColor="Color.Primary"
+                          Class="mb-2 white-text-input" />
+
+            <MudTextField @bind-Value="Password"
+                          Label="Password"
+                          Variant="Variant.Outlined"
+
+                          InputType="InputType.Password"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Lock"
+                          AdornmentColor="Color.Primary"
+                          Class="mb-6 white-text-input" />
+
+            <MudButton OnClick="HandleSubmit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Disabled="@IsLoading"
+                       Style="height: 52px; border-radius: 12px; font-weight: 700; text-transform: none; font-size: 1rem;">
+                @if (IsLoading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                    <span>Processing...</span>
+                }
+                else
+                {
+                    <span>@(IsSignUp ? "Create Account" : "Login")</span>
+                }
+            </MudButton>
+
+            
+            <MudButton Variant="Variant.Outlined"
+                       FullWidth="true"
+                       Class="mt-2"
+                       StartIcon="@Icons.Custom.Brands.Google"
+                       OnClick="@(() => Navigation.NavigateTo("auth/login", forceLoad: true))"
+                       Style="color: white; border-color: rgba(255,255,255,0.2); height: 50px; border-radius: 12px; text-transform: none;">
+                Continue with Auth0
+            </MudButton>
+
+            <MudStack Row="true" Justify="Justify.Center" Class="mt-8">
+                <MudText Style="color: rgba(255,255,255,0.6)">
+                    @(IsSignUp ? "Already have an account?" : "New here?")
+                </MudText>
+                <MudLink OnClick="ToggleMode" Underline="Underline.None" Color="Color.Primary" Style="font-weight: 700; cursor:pointer;">
+                    @(IsSignUp ? "Log In" : "Sign Up")
+                </MudLink>
+            </MudStack>
+
+        </MudPaper>
+    </MudContainer>
+</div>
