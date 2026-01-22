@@ -5,6 +5,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Cafe_Inventory_Management.UI.Services;
 using Cafe_Inventory_Management.Domain;
+using System.Net.Http.Headers;
+using System.Text;
 namespace Cafe_Inventory_Management.UI.Components.Pages;
 
 public partial class Login : ComponentBase
@@ -14,6 +16,8 @@ public partial class Login : ComponentBase
     [Inject] public IConfiguration Configuration { get; set; }
 
     private string Username;
+    private string Name;
+
     private string Password;
     private string Error;
     private bool IsLoading;
@@ -27,8 +31,7 @@ public partial class Login : ComponentBase
 
     private async Task HandleSubmit()
     {
-        if (IsSignUp) await HandleSignUp();
-        else await HandleLogin();
+         await HandleLogin();
     }
 
     private async Task HandleLogin()
@@ -80,44 +83,6 @@ public partial class Login : ComponentBase
         finally { IsLoading = false; }
     }
 
-    private async Task HandleSignUp()
-    {
-        if (!ValidateInputs()) return;
-
-        try
-        {
-            IsLoading = true;
-            Error = null;
-
-            var payload = new
-            {
-                client_id = Configuration["Auth0:ClientId"],
-                email = Username,
-                password = Password,
-                connection = "Username-Password-Authentication"
-            };
-
-            var url = $"https://{Configuration["Auth0:Domain"]}/dbconnections/signup";
-            var apirequest = new ApiRequest(HttpMethod.Post, url, payload);
-            var response = await _apiService.APICall(apirequest);
-
-            if (response != null && response.ErrorCode == "00")
-            {
-                // Transition to login after successful signup
-                IsSignUp = false;
-                await HandleLogin();
-            }
-            else
-            {
-                Error = "Signup failed. The user may already exist or password is too weak.";
-            }
-        }
-        catch (Exception)
-        {
-            Error = "Could not complete registration.";
-        }
-        finally { IsLoading = false; }
-    }
 
     private bool ValidateInputs()
     {
@@ -128,5 +93,89 @@ public partial class Login : ComponentBase
         }
         return true;
     }
+
+    private async Task<string?> GetManagementToken()
+    {
+        var payload = new Dictionary<string, string>
+    {
+        { "grant_type", "client_credentials" },
+        { "client_id", Configuration["Auth0:ClientId"] },
+        { "client_secret", Configuration["Auth0:ClientSecret"] },
+        { "audience", $"https://{Configuration["Auth0:Domain"]}/api/v2/" }
+    };
+
+        var url = $"https://{Configuration["Auth0:Domain"]}/oauth/token";
+
+        var request = new ApiRequest(HttpMethod.Post, url, payload, "aa");
+        var response = await _apiService.APICall(request);
+
+        if (response != null && response.ErrorCode == "00")
+        {
+            var result = JsonConvert.DeserializeObject<Auth0TokenResponse>(response.Detail!);
+            return result?.access_token;
+        }
+
+        return null;
+    }
+
+    private async Task<bool> CreateUser(string email, string password, string name)
+    {
+        try
+        {
+            var token = await GetManagementToken();
+
+            if (string.IsNullOrEmpty(token))
+                return false;
+
+            var url = $"https://{Configuration["Auth0:Domain"]}/api/v2/users";
+
+            var body = new
+            {
+                email = email,
+                password = password,
+                username = name,
+                connection = "Username-Password-Authentication"
+            };
+
+            var json = JsonConvert.SerializeObject(body);
+
+            var request = new HttpRequestMessage(HttpMethod.Post, url);
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var client = new HttpClient();
+            var response = await client.SendAsync(request);
+            var error = await response.Content.ReadAsStringAsync();
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+
+
+    }
+
+    private async Task HandleRegister()
+    {
+        IsLoading = true;
+        Error = null;
+
+        var success = await CreateUser(Username, Password, Name);
+
+        if (success)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            Error = "Registration failed. Try again.";
+        }
+
+        IsLoading = false;
+    }
+
 }
 

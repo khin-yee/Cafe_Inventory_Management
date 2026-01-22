@@ -20,4 +20,9 @@
     <ProjectReference Include="..\Cafe_Inventory_Management.Domain\Cafe_Inventory_Management.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\Pages\UserMan\" />
+    <Folder Include="Components\Pages\Products\" />
+  </ItemGroup>
+
 </Project>
