@@ -1,6 +1,8 @@
 ﻿using Cafe_Inventory_Management.Domain;
 using Cafe_Inventory_Management.UI.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+using MudBlazor;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 
@@ -10,30 +12,70 @@ public partial class UserList : ComponentBase
 
     [Inject] public AuthServices _authService { get; set; }
 
+
+
     List<Auth0User> Users = new();
-    string SearchText = "";
+
+    string Search = "";
 
     protected override async Task OnInitializedAsync()
     {
         Users = await _authService.GetUsers();
     }
 
-    List<Auth0User> FilteredUsers =>
+
+    IEnumerable<Auth0User> FilteredUsers =>
         Users.Where(u =>
-            string.IsNullOrEmpty(SearchText) ||
-            u.email.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
-            u.name.Contains(SearchText, StringComparison.OrdinalIgnoreCase)
-        ).ToList();
+            string.IsNullOrWhiteSpace(Search) ||
+            u.email.Contains(Search, StringComparison.OrdinalIgnoreCase) ||
+            u.name.Contains(Search, StringComparison.OrdinalIgnoreCase)
+        );
 
-    void CreateUser()
+
+    // ---------------- DIALOGS ----------------
+
+    async Task OpenCreate()
     {
-        Nav.NavigateTo("/users/create");
+        var dialog = DialogService.Show<UserDialog>("Create ");
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await Reload();
+        }
     }
 
-    void EditUser(string id)
+
+    async Task OpenEdit(Auth0User user)
     {
-        Nav.NavigateTo($"/users/edit/{id}");
+        var param = new DialogParameters
+        {
+            ["User"] = user,
+            ["IsEdit"] = true
+        };
+
+        var dialog = DialogService.Show<UserDialog>("Edit User", param);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await Reload();
+        }
     }
+
+
+    async Task Reload()
+    {
+        Users = await _authService.GetUsers();
+        StateHasChanged();
+
+        Snackbar.Add("User list updated", Severity.Success);
+    }
+
+
+
 }
 
 

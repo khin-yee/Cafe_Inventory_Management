@@ -1,0 +1,105 @@
+﻿@using Cafe_Inventory_Management.Domain
+@using Cafe_Inventory_Management.UI.Services
+
+@using MudBlazor
+@inject AuthServices AuthService
+
+<MudDialog>
+
+    <DialogContent>
+
+        <MudStack Spacing="2">
+
+          
+
+            <MudTextField Label="Email"
+                          @bind-Value="Email"
+                          Required="true" />
+
+            <MudTextField Label="Name"
+                          @bind-Value="Name"
+                          Required="true" />
+
+            @if (!IsEdit)
+            {
+                <MudTextField Label="Password"
+                              @bind-Value="Password"
+                              InputType="InputType.Password"
+                              Required="true" />
+            }
+
+        </MudStack>
+
+    </DialogContent>
+
+
+    <DialogActions>
+
+        <MudButton Color="Color.Default"
+                   OnClick="Cancel">
+            Cancel
+        </MudButton>
+
+        <MudButton Color="Color.Primary"
+                   OnClick="Save">
+
+            @(IsEdit ? "Update" : "Create")
+
+        </MudButton>
+
+    </DialogActions>
+
+</MudDialog>
+
+
+@code {
+
+    [CascadingParameter]
+    public IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Auth0User? User { get; set; }
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+
+    string Email = "";
+    string Name = "";
+    string Password = "";
+
+
+    protected override void OnInitialized()
+    {
+        if (IsEdit && User != null)
+        {
+            Email = User.email;
+            Name = User.name;
+        }
+    }
+
+
+    async Task Save()
+    {
+        if (string.IsNullOrWhiteSpace(Email) ||
+            string.IsNullOrWhiteSpace(Name))
+            return;
+
+        if (IsEdit)
+        {
+            await AuthService.UpdateUser(User!.user_id, Email, Name);
+        }
+        else
+        {
+            await AuthService.CreateUser(Email, Password, Name);
+        }
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+
+    void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

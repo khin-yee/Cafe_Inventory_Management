@@ -1,52 +1,61 @@
 ﻿@page "/users"
-@inject NavigationManager Nav
 
-<h3>User Management</h3>
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
-<div class="mb-3 d-flex gap-2">
+<MudText Typo="Typo.h4" Class="mb-4">
+    User Management
+</MudText>
 
-    <input class="form-control w-25"
-           placeholder="Search..."
-           @bind="SearchText" />
+<MudStack Row="true" Spacing="2" Class="mb-4">
 
-    <button class="btn btn-primary"
-            @onclick="CreateUser">
-        + Create User
-    </button>
+    <MudTextField @bind-Value="Search"
+                  Placeholder="Search..."
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search" />
 
-</div>
+    <MudButton Color="Color.Primary"
+               Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.Add"
+               OnClick="OpenCreate">
 
-<table class="table table-bordered table-striped">
+        Create User
 
-    <thead>
-        <tr>
-            <th>Email</th>
-            <th>Name</th>
-            <th>Verified</th>
-            <th>Created</th>
-            <th>Action</th>
-        </tr>
-    </thead>
+    </MudButton>
 
-    <tbody>
+</MudStack>
 
-        @foreach (var user in FilteredUsers)
-        {
-            <tr>
-                <td>@user.email</td>
-                <td>@user.name</td>
-                <td>@user.email_verified</td>
-                <td>@user.created_at.ToShortDateString()</td>
 
-                <td>
-                    <button class="btn btn-sm btn-warning"
-                            @onclick="() => EditUser(user.user_id)">
-                        Edit
-                    </button>
-                </td>
-            </tr>
-        }
+<MudTable Items="FilteredUsers"
+          Hover="true"
+          Striped="true"
+          Dense="true">
 
-    </tbody>
+    <HeaderContent>
 
-</table>
+        <MudTh>Email</MudTh>
+        <MudTh>Name</MudTh>
+        <MudTh>Verified</MudTh>
+        <MudTh>Action</MudTh>
+
+    </HeaderContent>
+
+    <RowTemplate>
+
+        <MudTd>@context.email</MudTd>
+        <MudTd>@context.name</MudTd>
+        <MudTd>@context.email_verified</MudTd>
+
+        <MudTd>
+
+            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                           Color="Color.Warning"
+                           OnClick="() => OpenEdit(context)" />
+
+        </MudTd>
+
+    </RowTemplate>
+
+</MudTable>
+
+
