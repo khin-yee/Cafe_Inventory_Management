@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Components\Pages\UserMan\" />
     <Folder Include="Components\Pages\Products\" />
   </ItemGroup>
 

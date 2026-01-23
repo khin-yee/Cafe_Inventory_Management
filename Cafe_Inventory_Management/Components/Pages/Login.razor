@@ -14,7 +14,7 @@
     }
 
     .glass-card {
-        background: rgba(30, 41, 59, 0.7) !important;
+        background: #FAFAFA;
        /*background-color: aliceblue;*/
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -42,8 +42,8 @@
 
             <MudStack AlignItems="AlignItems.Center" Spacing="1" Class="mb-8">
                 <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Color="Color.Primary" Size="Size.Large" />
-                <MudText Typo="Typo.h4" Style="color:white; font-weight: 800; letter-spacing: 1px;">
-                     CHANOHOLIC
+                <MudText Typo="Typo.h4" Style="color:#0f172a; font-weight: 800; letter-spacing: 1px;">
+                    CHANOHOLIC
                 </MudText>
                
             </MudStack>
@@ -61,7 +61,7 @@
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Email"
                           AdornmentColor="Color.Dark"
-                          Class="mb-2 white-text-input" />
+                          Class="mb-2" />
 
             <MudTextField @bind-Value="Password"
                           Label="Password"
@@ -71,17 +71,18 @@
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Lock"
                           AdornmentColor="Color.Dark"
-                          Class="mb-6 white-text-input" />
+                          Class="mb-6" />
           
 
            
 
             
             <MudButton Variant="Variant.Outlined"
+            
                        FullWidth="true"
                        Class="mt-2"
                        OnClick="HandleLogin"
-                       Style="color: white; border-color: rgba(255,255,255,0.2); height: 50px; border-radius: 12px; text-transform: none;">
+                       Style="color: white;background-color:#0f172a; border-color: rgba(255,255,255,0.2); height: 50px; border-radius: 12px; text-transform: none;">
                 @if (IsLoading)
                 {
                     <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />

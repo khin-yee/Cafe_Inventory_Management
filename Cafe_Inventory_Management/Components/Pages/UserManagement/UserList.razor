@@ -1,0 +1,52 @@
+﻿@page "/users"
+@inject NavigationManager Nav
+
+<h3>User Management</h3>
+
+<div class="mb-3 d-flex gap-2">
+
+    <input class="form-control w-25"
+           placeholder="Search..."
+           @bind="SearchText" />
+
+    <button class="btn btn-primary"
+            @onclick="CreateUser">
+        + Create User
+    </button>
+
+</div>
+
+<table class="table table-bordered table-striped">
+
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Verified</th>
+            <th>Created</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var user in FilteredUsers)
+        {
+            <tr>
+                <td>@user.email</td>
+                <td>@user.name</td>
+                <td>@user.email_verified</td>
+                <td>@user.created_at.ToShortDateString()</td>
+
+                <td>
+                    <button class="btn btn-sm btn-warning"
+                            @onclick="() => EditUser(user.user_id)">
+                        Edit
+                    </button>
+                </td>
+            </tr>
+        }
+
+    </tbody>
+
+</table>

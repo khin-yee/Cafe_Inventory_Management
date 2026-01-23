@@ -13,6 +13,9 @@ public partial class Login : ComponentBase
 {
     [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; }
     [Inject] public IApiCallService _apiService { get; set; }
+
+    [Inject] public AuthServices _authService { get; set; }
+
     [Inject] public IConfiguration Configuration { get; set; }
 
     private string Username;
@@ -94,88 +97,27 @@ public partial class Login : ComponentBase
         return true;
     }
 
-    private async Task<string?> GetManagementToken()
-    {
-        var payload = new Dictionary<string, string>
-    {
-        { "grant_type", "client_credentials" },
-        { "client_id", Configuration["Auth0:ClientId"] },
-        { "client_secret", Configuration["Auth0:ClientSecret"] },
-        { "audience", $"https://{Configuration["Auth0:Domain"]}/api/v2/" }
-    };
+  
 
-        var url = $"https://{Configuration["Auth0:Domain"]}/oauth/token";
+   
+    //private async Task HandleRegister()
+    //{
+    //    IsLoading = true;
+    //    Error = null;
 
-        var request = new ApiRequest(HttpMethod.Post, url, payload, "aa");
-        var response = await _apiService.APICall(request);
+    //    var success = await CreateUser(Username, Password, Name);
 
-        if (response != null && response.ErrorCode == "00")
-        {
-            var result = JsonConvert.DeserializeObject<Auth0TokenResponse>(response.Detail!);
-            return result?.access_token;
-        }
+    //    if (success)
+    //    {
+    //        Navigation.NavigateTo("/");
+    //    }
+    //    else
+    //    {
+    //        Error = "Registration failed. Try again.";
+    //    }
 
-        return null;
-    }
-
-    private async Task<bool> CreateUser(string email, string password, string name)
-    {
-        try
-        {
-            var token = await GetManagementToken();
-
-            if (string.IsNullOrEmpty(token))
-                return false;
-
-            var url = $"https://{Configuration["Auth0:Domain"]}/api/v2/users";
-
-            var body = new
-            {
-                email = email,
-                password = password,
-                username = name,
-                connection = "Username-Password-Authentication"
-            };
-
-            var json = JsonConvert.SerializeObject(body);
-
-            var request = new HttpRequestMessage(HttpMethod.Post, url);
-            request.Headers.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
-
-            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var client = new HttpClient();
-            var response = await client.SendAsync(request);
-            var error = await response.Content.ReadAsStringAsync();
-            return response.IsSuccessStatusCode;
-        }
-        catch
-        {
-            return false;
-        }
-
-
-    }
-
-    private async Task HandleRegister()
-    {
-        IsLoading = true;
-        Error = null;
-
-        var success = await CreateUser(Username, Password, Name);
-
-        if (success)
-        {
-            Navigation.NavigateTo("/");
-        }
-        else
-        {
-            Error = "Registration failed. Try again.";
-        }
-
-        IsLoading = false;
-    }
+    //    IsLoading = false;
+    //}
 
 }
 

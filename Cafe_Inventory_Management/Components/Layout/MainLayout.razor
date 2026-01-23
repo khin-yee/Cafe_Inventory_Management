@@ -14,22 +14,35 @@
         @if (!IsLoginPage)
         {
             @* Fixed App Bar for Dashboard *@
-            <MudAppBar Elevation="1" Dense= "true" Style="background-color: white; border-bottom: 1px solid #eee; z-index: 1300;" Fixed="true">
-                <MudText Typo="Typo.h6" Style="font-weight:900; color:#1B1212; letter-spacing: 1px;">
+            <MudAppBar Elevation="1" Dense="true" Fixed="true"
+                       Style="background-color: white; border-bottom: 1px solid #eee; z-index: 1300;">
+
+                <MudText Typo="Typo.h6"
+                         Style="font-weight:900; color:#1B1212; letter-spacing: 1px;">
                     CHANOHOLIC
                 </MudText>
+
                 <MudSpacer />
+
                 <AuthorizeView>
-                    <Authorized>
+                    <Authorized Context="auth">
+
                         <MudText Typo="Typo.body1" Class="mr-3" Style="color: #666;">
-                            Welcome, <b>@context.User.FindFirst(c => c.Type == "name")?.Value</b>
+                            Welcome, <b>@auth.User.FindFirst(c => c.Type == "name")?.Value</b>
                         </MudText>
-                        <MudButton OnClick="Logout" Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Logout">
+
+                        <MudButton OnClick="Logout"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Dark"
+                                   StartIcon="@Icons.Material.Filled.Logout">
                             Logout
                         </MudButton>
+
                     </Authorized>
                 </AuthorizeView>
+
             </MudAppBar>
+
 
             <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
                 <NavMenu />

@@ -1,0 +1,19 @@
+﻿<h3>CreateUser</h3>
+
+@code {
+
+}
+@page "/users/create"
+@inject NavigationManager Nav
+
+<h3>Create User</h3>
+
+<input class="form-control mb-2" placeholder="Email" @bind="Email" />
+<input class="form-control mb-2" placeholder="Name" @bind="Name" />
+<input type="password" class="form-control mb-2" placeholder="Password" @bind="Password" />
+
+<button class="btn btn-success" @onclick="Save">
+    Create
+</button>
+
+
