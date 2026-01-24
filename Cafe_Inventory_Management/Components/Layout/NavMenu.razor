@@ -13,12 +13,18 @@
 
     <MudDivider Class="my-2" />
 
+        <AuthorizeView Roles="Admin">
+                    <Authorized>
     <div class="pa-4">
         <MudText Typo="Typo.overline" Style="color: #967E76; font-weight: 700;">Administration</MudText>
     </div>
+
+
     <MudNavLink Href="/createuser" Icon="@Icons.Material.Filled.Assessment">User Management</MudNavLink>
 
     <MudNavLink Href="/reports" Icon="@Icons.Material.Filled.Assessment">Business Reports</MudNavLink>
 
     <MudNavLink Href="/users" Icon="@Icons.Material.Filled.People">Staff Management</MudNavLink>
+    </Authorized>
+    </AuthorizeView>
 </MudNavMenu>

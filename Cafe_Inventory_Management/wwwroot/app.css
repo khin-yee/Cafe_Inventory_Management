@@ -1,7 +1,9 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-
+.custom-textfield .mud-input-root {
+    min-height: 30px; /* reduce the overall height */
+}
 a, .btn-link {
     color: #006bb7;
 }

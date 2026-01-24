@@ -10,10 +10,7 @@ public partial class CreateUser:ComponentBase
 
     async Task Save()
     {
-        var ok = await _authService.CreateUser(Email, Password, Name);
 
-        if (ok)
-            Nav.NavigateTo("/users");
     }
 
 }

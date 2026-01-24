@@ -13,5 +13,7 @@ public class Auth0User
     public string name { get; set; }
     public bool email_verified { get; set; }
     public DateTime created_at { get; set; }
+
+    public List<string> roles { get; set; }
 }
 

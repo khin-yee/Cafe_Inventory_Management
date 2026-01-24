@@ -66,6 +66,21 @@ public partial class Login : ComponentBase
                 var handler = new JwtSecurityTokenHandler();
                 var jwt = handler.ReadJwtToken(result.id_token);
                 var claims = jwt.Claims.ToList();
+                var roleClaim = claims.FirstOrDefault(c => c.Type == "https://coffeeapp.com/roles");
+
+                if (roleClaim != null)
+                {
+                    var roles = roleClaim.Value
+                        .Replace("[", "")
+                        .Replace("]", "")
+                        .Replace("\"", "")
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var role in roles)
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, role.Trim()));
+                    }
+                }
 
                 if (AuthenticationStateProvider is CustomAuthStateProvider customAuthStateProvider)
                 {

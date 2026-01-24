@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject IDialogService Dialog
 @using Cafe_Inventory_Management.UI.Services
 @using MudBlazor
 @inject NavigationManager Navigation
@@ -37,6 +38,7 @@
                                    StartIcon="@Icons.Material.Filled.Logout">
                             Logout
                         </MudButton>
+
 
                     </Authorized>
                 </AuthorizeView>
@@ -78,5 +80,19 @@ else
                                 Navigation.ToBaseRelativePath(Navigation.Uri).ToLower().Contains("signin") ||
                                 Navigation.ToBaseRelativePath(Navigation.Uri).ToLower().Contains("login");
 
-    void Logout() => Navigation.NavigateTo("/auth/logout", true);
+    private async Task Logout()
+    {
+        bool? result = await Dialog.ShowMessageBox(
+            "Confirm Logout",
+            "Are you sure you want to logout?",
+            yesText: "Logout",
+            noText: "Cancel",
+            options: new DialogOptions() { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true }
+        );
+
+        if (result == true)
+        {
+            Navigation.NavigateTo("/", true); // perform logout
+        }
+    }
 }

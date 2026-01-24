@@ -1,61 +1,112 @@
 ﻿@page "/users"
+@using Microsoft.AspNetCore.Authorization
 
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@attribute [Authorize(Roles = "Admin")]
+<MudPaper Elevation="3" Class="pa-6 rounded-xl">
 
-<MudText Typo="Typo.h4" Class="mb-4">
-    User Management
-</MudText>
+    <!-- Header -->
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
 
-<MudStack Row="true" Spacing="2" Class="mb-4">
+        <MudText Typo="Typo.h5" FontWeight="700">
+            User Management
+        </MudText>
+        <MudButton Variant="Variant.Outlined"
+                   Size="Size.Medium"
+                   Color="Color.Dark" Class="rounded-lg"
+                   OnClick="OpenCreate">
+            New User
+        </MudButton>
+       
 
-    <MudTextField @bind-Value="Search"
-                  Placeholder="Search..."
-                  Adornment="Adornment.Start"
-                  AdornmentIcon="@Icons.Material.Filled.Search" />
+    </MudStack>
 
-    <MudButton Color="Color.Primary"
-               Variant="Variant.Filled"
-               StartIcon="@Icons.Material.Filled.Add"
-               OnClick="OpenCreate">
+    <!-- Toolbar -->
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
 
-        Create User
+        <MudTextField @bind-Value="Search"
+                      Placeholder="Search users..."
+                      Variant="Variant.Outlined"
+                      Adornment="Adornment.Start"
+                      Margin="Margin.Dense"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Class="rounded-lg"
+                       />
 
-    </MudButton>
+       
 
-</MudStack>
+        
 
-
-<MudTable Items="FilteredUsers"
-          Hover="true"
-          Striped="true"
-          Dense="true">
-
-    <HeaderContent>
-
-        <MudTh>Email</MudTh>
-        <MudTh>Name</MudTh>
-        <MudTh>Verified</MudTh>
-        <MudTh>Action</MudTh>
-
-    </HeaderContent>
-
-    <RowTemplate>
-
-        <MudTd>@context.email</MudTd>
-        <MudTd>@context.name</MudTd>
-        <MudTd>@context.email_verified</MudTd>
-
-        <MudTd>
-
-            <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                           Color="Color.Warning"
-                           OnClick="() => OpenEdit(context)" />
-
-        </MudTd>
-
-    </RowTemplate>
-
-</MudTable>
+    </MudStack>
 
 
+    <!-- Table -->
+    <MudTable Items="FilteredUsers"
+              Hover="true"
+              Dense="false"
+              Bordered="false"
+              Elevation="0"
+              Class="rounded-lg">
+
+        <HeaderContent>
+
+            <MudTh>Email</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh Align="Right">Action</MudTh>
+
+        </HeaderContent>
+
+        <RowTemplate>
+
+            <MudTd>
+                <MudText Typo="Typo.subtitle2">@context.email</MudText>
+            </MudTd>
+
+            <MudTd>
+                <MudText>@context.name</MudText>
+            </MudTd>
+
+            <MudTd>
+
+                @if (context.email_verified)
+                {
+                    <MudChip T="String" Color="Color.Success"
+                             Variant="Variant.Filled"
+                             Size="Size.Small">
+
+                        Verified
+                    </MudChip>
+                }
+                else
+                {
+                    <MudChip T="String" Color="Color.Warning"
+                             Variant="Variant.Outlined"
+                             Size="Size.Small">
+
+                        Pending
+                    </MudChip>
+                }
+
+            </MudTd>
+
+            <MudTd Align="Right">
+
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               Class="me-1"
+                               OnClick="() => OpenEdit(context)" />
+
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small" />
+
+            </MudTd>
+
+        </RowTemplate>
+
+    </MudTable>
+
+</MudPaper>

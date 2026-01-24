@@ -25,11 +25,7 @@ public partial class UserList : ComponentBase
 
 
     IEnumerable<Auth0User> FilteredUsers =>
-        Users.Where(u =>
-            string.IsNullOrWhiteSpace(Search) ||
-            u.email.Contains(Search, StringComparison.OrdinalIgnoreCase) ||
-            u.name.Contains(Search, StringComparison.OrdinalIgnoreCase)
-        );
+        Users;
 
 
     // ---------------- DIALOGS ----------------
