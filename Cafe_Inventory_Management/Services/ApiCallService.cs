@@ -29,7 +29,10 @@ public class ApiCallService : IApiCallService
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.token);
             }
-            var response = await httpClient.SendAsync(request);
+            try
+            {
+                var response = await httpClient.SendAsync(request);
+            
             if (response.IsSuccessStatusCode)
             {
                 responseModel.ErrorCode = "00";
@@ -41,6 +44,11 @@ public class ApiCallService : IApiCallService
                 responseModel.ErrorCode = "01";
                 responseModel.ErrorMessage = "System Error";
                 responseModel.Detail = await response.Content.ReadAsStringAsync();
+            }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
         catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
