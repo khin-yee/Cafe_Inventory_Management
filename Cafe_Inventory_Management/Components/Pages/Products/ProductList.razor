@@ -1,121 +1,103 @@
 ﻿@page "/product"
-<style>
-    .button-container {
-        display: flex;
-        justify-content: flex-end;
-        margin-right: 20px;
-        margin-bottom: 10px; /* Optional: adds space between the button and the table */
-    }
-    h3{
-        justify-content: flex-end;
-    }
-    .filterbtnz:hover {
-        background-color: grey;
-    }
-    MudTh{
-       text-align: center;
-    }
+@using Cafe_Inventory_Management.Domain.Model
 
-    th {
-        color:white;
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-5">
+    @* Header Section *@
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+        <MudText Typo="Typo.h4" Style="font-weight: 700; display: flex; align-items: center;">
+            <MudImage Src="/Images/cf1.png" Width="40" Height="40" Alt="Product" Class="mr-3" />
+            Product List
+        </MudText>
+        <MudStack Row="true" Spacing="2">
+            @* Add Product Button *@
+            <MudButton Variant="Variant.Filled"
+            Color="Color.Dark"
+            StartIcon="@Icons.Material.Filled.Add"
+            Href="/AddProduct"
+            Class="rounded-lg px-4">
+                Add Product
+            </MudButton>
+
+            @* Modern Filter Toggle Button *@
+            <MudTooltip Text="@(_showSearch ? "Hide Search" : "Show Search")">
+                <MudIconButton Icon="@(_showSearch ? Icons.Material.Filled.FilterListOff : Icons.Material.Filled.FilterList)"
+                Color="@(_showSearch ? Color.Primary : Color.Default)"
+                Variant="Variant.Outlined"
+                OnClick="@(() => _showSearch = !_showSearch)"
+                Class="rounded-lg" />
+            </MudTooltip>
+        </MudStack>
+    </MudStack>
+    @if (_showSearch)
+    {
+            <MudGrid Spacing="2" Justify="Justify.Center" Style="align-items: stretch;" Class="mb-2">
+                @* Search Box Container *@
+                <MudItem xs="12" sm="10" Class="d-flex align-center">
+                    <MudTextField @bind-Value="_searchText"
+                                  Placeholder="Search by product name..."
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Immediate="true"
+                                  OnKeyUp="HandleKeyUp"
+                                  FullWidth="true"
+                                  Class="bg-white rounded-lg" />
+                </MudItem>
+
+                @* Search Button Container *@
+                <MudItem xs="12" sm="2" Class="d-flex align-center">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Dark"
+                               FullWidth="true"
+                               OnClick="SearchProduct"
+                               Style="height: 40px; text-transform: uppercase; font-weight: 600;"
+                               >
+                        Search
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
     }
+    @* Table Section *@
+    <MudTable T="Product"
+              @ref="@_table"
+              ServerData="ServerReload"
+              Loading="@_isLoading"
+              LoadingProgressColor="Color.Info"
+              Dense="true"
+              Hover="true"
+              Elevation="25"
+              Class="rounded-lg overflow-hidden">
+        <HeaderContent>
+            <MudTh Style="background-color: var(--mud-palette-dark); color: white; text-align: center;">No</MudTh>
+            <MudTh Style="background-color: var(--mud-palette-dark); color: white; ">Name</MudTh>
+            <MudTh Style="background-color: var(--mud-palette-dark); color: white; ">Quantity</MudTh>
+            <MudTh Style="background-color: var(--mud-palette-dark); color: white; ">Amount</MudTh>
 
-    /* Target the table data cells */
-    td {
-        text-align: center;
-    }
-
-    .mud-dark-table th,
-    .mud-dark-table td {
-        color: white;
-    }
-    /* .product-table th, .product-table td {
-        text-align: center;
-    } */
-</style>
-<h3 style="justify-content:right">Product List <img src="/Images/cf1.png" alt="Product" width="30" height="30" style="margin-right: 10px;" /></h3>
-<div class="button-container">
-    <NavLink class="btn btn-dark filterbtnz" href="/AddProduct">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="black">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M2.667 2a.667.667 0 0 1 .667-.667h10a.667.667 0 1 1 0 1.334h-.453l-1.066 6.087a1.333 1.333 0 0 1-1.314 1.079H5.5a1.333 1.333 0 0 1-1.314-1.079L3.12 5.16h-1.12a.667.667 0 0 1 0-1.334h.667L4 7.087h6.666L11.76 2H3.334A.667.667 0 0 1 2.667 2zm5.333 10.667A1.333 1.333 0 1 1 8 14.667a1.333 1.333 0 0 1 0-2.666zm5.333 0A1.333 1.333 0 1 1 13.333 14.667a1.333 1.333 0 0 1 0-2.666z" fill="white" />
-        </svg>
-
-        <span>Add Product</span>
-    </NavLink>
-</div>
-@* <MudDataGrid Items="@product" Striped="true" Hover="true" Style="border: 1px solid grey; border-radius: 5px; padding: 10px;">
-    <Columns>
-        <PropertyColumn Property="x => x.Name" Title="Name" />
-        <PropertyColumn Property="x => x.Amount" Title="Amount" />
-        <PropertyColumn Property="x => x.Quantity" Title="Quantity" />
-        <PropertyColumn Property="x => x.Category" Title="Category" />
-
-        <TemplateColumn Title="Action">
-            <CellTemplate Context="cellContext">
-                @{
-                    var deleteUrl = $"/DeleteProduct/{cellContext.Item.Name}"; // Construct the URL here
+            <MudTh Style="background-color: var(--mud-palette-dark); color: white;text-align: right; ">Action</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="No" Style="text-align: center;">
+                @if (product != null)
+                {
+                    @((_table.CurrentPage * _table.RowsPerPage) + (product.IndexOf(context) + 1))
                 }
-
-                <NavLink href="@deleteUrl">
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="delete" />
-                </NavLink>
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
-</MudDataGrid>
- *@
-<MudPaper Elevation="2" Class="pa-4 mb-4">
-
-    <div style="display:flex; gap:10px; align-items:center;">
-
-        <!-- Search Box -->
-        <MudTextField @bind-Value="_searchText"
-                      Placeholder="Search product name..."
-                      Variant="Variant.Outlined"
-                      Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Search"
-                      Class="flex-grow-1" />
-
-        <!-- Search Button -->
-        <MudButton Color="Color.Dark"
-                   Variant="Variant.Filled"
-                   StartIcon="@Icons.Material.Filled.Search"
-                   OnClick="SearchProduct">
-
-            Search
-        </MudButton>
-
-        <!-- Clear Button -->
-       
-
-    </div>
-
-</MudPaper>
-
-<MudTable @ref="@_table" Items="@product" Dense="true" Striped="true" RowsPerPage="5" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
-    <HeaderContent>
-        <MudTh>Name</MudTh>
-        <MudTh>Amount</MudTh>
-        <MudTh>Quantity</MudTh>
-        <MudTh>Action</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="Nr">@context.Name</MudTd>
-        <MudTd DataLabel="Sign">@context.Quatity</MudTd>
-        <MudTd DataLabel="Name">@context.Amount</MudTd>
-        <MudTd DataLabel="Action">
-
-
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(() => ConfirmDeleteProduct(context.Name))" />
-
-        </MudTd>
-    </RowTemplate>
-    <PagerContent>
-        <div style="display: flex; justify-content: safe center;">
-            <MudPagination SelectedChanged="PageChanged"
-                           Count="@((_table.GetFilteredItemsCount() + _table.RowsPerPage - 1) / _table.RowsPerPage)"
-                           Class="pa-4"
-                           Color="Color.Dark" />
-        </div>
-    </PagerContent>
-</MudTable>
+            </MudTd>
+            <MudTd DataLabel="Name" Style=" font-weight: 500;">@context.Name</MudTd>
+            <MudTd DataLabel="Quantity" >
+                <MudChip T="string" Color="Color.Dark" Size="Size.Small" Variant="Variant.Text">@context.Quatity</MudChip>
+            </MudTd>
+            <MudTd DataLabel="Amount" Style="font-weight: 600;">$@context.Amount</MudTd>
+            <MudTd DataLabel="Action" Style="text-align: right;">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Default" Size="Size.Small" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => ConfirmDeleteProduct(context.Name))" />
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
+        </PagerContent>
+    </MudTable>
+</MudContainer>

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Cafe_Inventory_Management.Repository.Repositories;
 public class ProductRepository:IProductRepo
@@ -28,5 +29,20 @@ public class ProductRepository:IProductRepo
             throw;
         }
     }
+
+    public async Task<List<Product>> GetProductByName(string name)
+    {
+        try
+        {
+            var res = await _context.Product.Where(x=>x.Name==name ).ToListAsync();
+            return res;
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+    }
+
+  
 }
 

@@ -9,5 +9,6 @@ namespace Cafe_Inventory_Management.Domain.IRepository;
 public interface IProductRepo
 {
     Task<List<Product>> GetProducts();
+
 }
 
