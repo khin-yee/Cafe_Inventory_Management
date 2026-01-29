@@ -7,8 +7,8 @@
 <MudDialog FullWidth="true" Class="rounded-xl p-3" Style="max-width: 500px;">
     <DialogContent>
         <MudStack Spacing="3">
-            @* Product Name *@
-            <MudTextField Label="Product Name"
+            @* Ingredients Name *@
+            <MudTextField Label="Ingredients Name"
                           Margin="Margin.Dense"
                           Variant="Variant.Outlined"
                           Adornment="Adornment.Start"
@@ -16,21 +16,19 @@
                           @bind-Value="Model.Name"
                           Required />
 
-            <MudItem xs="6">
-                <MudNumericField Label="Code"
-                                 Variant="Variant.Outlined"
-                                 Margin="Margin.Dense"
-                                 Adornment="Adornment.Start"
-                                 AdornmentText="$"
-                                 @bind-Value="Model.Code"
-                                 Required />
-            </MudItem>
+            <MudTextField Label="Ingredients Code"
+                          Margin="Margin.Dense"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Inventory"
+                          @bind-Value="Model.Code"
+                          Required />
             @* Category Dropdown *@
             <MudSelect T="string"
                        Label="Category"
                        Variant="Variant.Outlined"
                        Margin="Margin.Dense"
-                       @bind-Value="Model.Category"
+                       @bind-Value="Model.Unit"
                        AdornmentIcon="@Icons.Material.Filled.Category"
                        Required>
                 @if (_categories != null)
@@ -43,16 +41,15 @@
             </MudSelect>
 
             <MudGrid>
+                
                 <MudItem xs="6">
-                    @* Quantity *@
-                    <MudNumericField Label="Quantity"
+                    <MudNumericField Label="Quatity"
                                      Variant="Variant.Outlined"
                                      Margin="Margin.Dense"
+                                     Min=1
                                      @bind-Value="Model.Quatity"
-                                     Min="1"
                                      Required />
                 </MudItem>
-
                 <MudItem xs="6">
                     <MudNumericField Label="Amount"
                                      Variant="Variant.Outlined"
@@ -64,7 +61,7 @@
                 </MudItem>
             </MudGrid>
             <MudPaper Elevation="0" Class="pa-2 d-flex align-center justify-space-between" Style="background: transparent; border: 1px solid #e0e0e0; border-radius: 8px;">
-                <MudText Typo="Typo.body1">Product Availability</MudText>
+                <MudText Typo="Typo.body1">Ingredients Availability</MudText>
                 <MudSwitch @bind-Value="Model.IsActive"
                            Color="Color.Success"
                            UnCheckedColor="Color.Error"
@@ -84,7 +81,7 @@
                    Size="Size.Small"
                    Color="Color.Primary"
                    OnClick="Save">
-            @(IsEdit ? "Update Product" : "Create Product")
+            @(IsEdit ? "Update Ingredients" : "Create Ingredients")
         </MudButton>
     </DialogActions>
 </MudDialog>
@@ -92,7 +89,7 @@
 @code {
     [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
 
-    [Parameter] public Product Model { get; set; } = new();
+    [Parameter] public Ingredients Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
     [Inject] private ISnackbar Snackbar { get; set; }
     private List<string> _categories = new();
@@ -104,14 +101,14 @@
 
         if (!IsEdit)
         {
-            Model = new Product(); // Ensure fresh object for new entry
+            Model = new Ingredients(); // Ensure fresh object for new entry
         }
     }
 
     private async Task LoadCategories()
     {
 
-        _categories = new List<string> { "Coffee", "Juice", "Snack", "Bakery" };
+        _categories = new List<string> { "Kg", "g", "Pack", "Liter" };
 
         // try
         // {
@@ -133,7 +130,7 @@
         // }
     }
 
-    // Inside ProductDialog.razor @code block
+    // Inside IngredientsDialog.razor @code block
     private bool _isSaving = false;
 
     async Task Save()
@@ -144,19 +141,19 @@
         try
         {
             var method = IsEdit ? HttpMethod.Put : HttpMethod.Post;
-            var url = IsEdit ? $"/UpdateProduct" : "/CreateProduct";
+            var url = IsEdit ? $"/UpdateIngredients" : "/CreateIngredients";
 
             var request = new ApiRequest(method, url, Model, "");
             var response = await ApiService.APICall(request);
 
             if (response.ErrorCode == "00")
             {
-                string message = IsEdit ? "Product updated successfully!" : "Product created successfully!";
+                string message = IsEdit ? "Ingredients updated successfully!" : "Ingredients created successfully!";
                 Snackbar.Add(message, Severity.Success);
 
                 MudDialog.Close(DialogResult.Ok(true));
             }
-           
+
             else
             {
                 Snackbar.Add(response.ErrorMessage, Severity.Error);

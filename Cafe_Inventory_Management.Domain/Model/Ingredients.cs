@@ -9,7 +9,7 @@ public class Ingredients:BaseEntity
 {
     public string Name { get; set; }
     public string Code { get; set; }
-    public string Quality { get; set; }
+    public int Quatity { get; set; }
     public string Unit { get; set; }
     public decimal Amount { get; set; }
 }

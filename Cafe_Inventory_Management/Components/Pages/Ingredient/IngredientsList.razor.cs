@@ -1,22 +1,21 @@
-﻿using Cafe_Inventory_Management.Domain;
-using Cafe_Inventory_Management.Domain.Model;
+﻿using Cafe_Inventory_Management.Domain.Model;
+using Cafe_Inventory_Management.Domain;
+using Cafe_Inventory_Management.UI.Components.Pages.Ingredient;
 using Cafe_Inventory_Management.UI.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using MudBlazor;
 using Newtonsoft.Json;
-using System.Text.Json;
 
-namespace Cafe_Inventory_Management.UI.Components.Pages.Products;
-
-public partial class ProductList : ComponentBase
+namespace Cafe_Inventory_Management.UI.Components.Pages.Ingredient;
+public partial class IngredientsList : ComponentBase
 {
-    private MudTable<Product> _table;
+    private MudTable<Ingredients> _table;
     private string _searchText = "";
     private bool _showSearch = false;
     private bool _isInitialized = false;
-    private List<Product> product = new();
+    private List<Ingredients> Ingredients = new();
     [Inject] public IApiCallService _apiService { get; set; }
     [Inject] IJSRuntime jsRuntime { get; set; }
     [Inject] NavigationManager navigationManager { get; set; }
@@ -25,25 +24,25 @@ public partial class ProductList : ComponentBase
 
     private bool _isLoading;
 
-    private async Task<TableData<Product>> ServerReload(TableState state, CancellationToken token)
+    private async Task<TableData<Ingredients>> ServerReload(TableState state, CancellationToken token)
     {
         _isLoading = true; // Start loading state
         StateHasChanged(); // Trigger UI update to show progress bar
 
         try
         {
-            var url = $"/Product?pageNumber={state.Page + 1}&pageSize={state.PageSize}&search={_searchText}";
+            var url = $"/Ingredients?pageNumber={state.Page + 1}&pageSize={state.PageSize}&search={_searchText}";
             var request = new ApiRequest(HttpMethod.Get, url, "", "");
 
             var response = await _apiService.APICall(request);
 
             if (response != null && response.ErrorCode == "00")
             {
-                var data = JsonConvert.DeserializeObject<PagedResult<Product>>(response.Detail);
-                product = data.Items;
-                return new TableData<Product>()
+                var data = JsonConvert.DeserializeObject<PagedResult<Ingredients>>(response.Detail);
+                Ingredients = data.Items;
+                return new TableData<Ingredients>()
                 {
-                    TotalItems = data.TotalCount ,
+                    TotalItems = data.TotalCount,
                     Items = data.Items
                 };
             }
@@ -62,9 +61,9 @@ public partial class ProductList : ComponentBase
             StateHasChanged();
         }
 
-        return new TableData<Product>() { TotalItems = 0, Items = new List<Product>() };
+        return new TableData<Ingredients>() { TotalItems = 0, Items = new List<Ingredients>() };
     }
-    private void SearchProduct()
+    private void SearchIngredients()
     {
         // Calling ReloadServerData triggers the ServerReload method automatically
         _table.ReloadServerData();
@@ -74,23 +73,23 @@ public partial class ProductList : ComponentBase
     {
         if (e.Key == "Enter")
         {
-            SearchProduct();
+            SearchIngredients();
         }
     }
-    private async Task ConfirmDeleteProduct(int productId)
+    private async Task ConfirmDeleteIngredients(int IngredientsId)
     {
         var options = new DialogOptions
         {
             MaxWidth = MaxWidth.ExtraSmall,
             FullWidth = true,
             CloseButton = true,
-            
+
         };
         bool? result = await DialogService.ShowMessageBox(
          new MessageBoxOptions
          {
              Title = "Warning",
-             MarkupMessage = new MarkupString("Are you sure you want to delete this product? <br/><b>This action cannot be undone!</b>"),
+             MarkupMessage = new MarkupString("Are you sure you want to delete this Ingredients? <br/><b>This action cannot be undone!</b>"),
              YesText = "Delete",
              CancelText = "Cancel",
          },
@@ -99,21 +98,21 @@ public partial class ProductList : ComponentBase
 
         if (result == true)
         {
-            await DeleteProduct(productId);
+            await DeleteIngredients(IngredientsId);
         }
     }
-    
 
-    private async Task DeleteProduct(int productId)
+
+    private async Task DeleteIngredients(int IngredientsId)
     {
         try
         {
-            var request = new ApiRequest(HttpMethod.Delete, $"/DeleteProduct",productId, "");
+            var request = new ApiRequest(HttpMethod.Delete, $"/DeleteIngredients", IngredientsId, "");
             var response = await _apiService.APICall(request);
 
             if (response.ErrorCode == "00")
             {
-                Snackbar.Add("Product deleted successfully!", Severity.Success);
+                Snackbar.Add("Ingredients deleted successfully!", Severity.Success);
                 await _table.ReloadServerData();
             }
             else
@@ -130,13 +129,13 @@ public partial class ProductList : ComponentBase
     private async Task OpenCreateDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small };
-        var parameters = new DialogParameters<ProductDialog>
+        var parameters = new DialogParameters<IngredientsDialog>
     {
         { x => x.IsEdit, false },
-        { x => x.Model, new Product() }
+        { x => x.Model, new Ingredients() }
     };
 
-        var dialog = await DialogService.ShowAsync<ProductDialog>("Add New Product", parameters, options);
+        var dialog = await DialogService.ShowAsync<IngredientsDialog>("Add New Ingredients", parameters, options);
         var result = await dialog.Result;
 
         if (!result.Canceled)
@@ -145,23 +144,23 @@ public partial class ProductList : ComponentBase
         }
     }
 
-    private async Task OpenEditDialog(Product productToEdit)
+    private async Task OpenEditDialog(Ingredients IngredientsToEdit)
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
 
-        // Create a copy of the product to avoid modifying the table row before saving
-        var parameters = new DialogParameters<ProductDialog>
+        // Create a copy of the Ingredients to avoid modifying the table row before saving
+        var parameters = new DialogParameters<IngredientsDialog>
     {
         { x => x.IsEdit, true },
-        { x => x.Model, productToEdit}
+        { x => x.Model, IngredientsToEdit}
     };
 
-        var dialog = await DialogService.ShowAsync<ProductDialog>("Edit Product", parameters, options);
+        var dialog = await DialogService.ShowAsync<IngredientsDialog>("Edit Ingredients", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled && result.Data is Product updatedModel)
+        if (!result.Canceled && result.Data is Ingredients updatedModel)
         {
-            //await UpdateProductInApi(updatedModel);
+            //await UpdateIngredientsInApi(updatedModel);
         }
     }
 

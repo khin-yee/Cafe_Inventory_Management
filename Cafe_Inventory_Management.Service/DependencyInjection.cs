@@ -13,6 +13,8 @@ public static class DependencyInjection
     public static IServiceCollection AddService(this IServiceCollection services)
     {
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IIngredientsService, IngredientsService>();
+
         return services;
     }
 }
