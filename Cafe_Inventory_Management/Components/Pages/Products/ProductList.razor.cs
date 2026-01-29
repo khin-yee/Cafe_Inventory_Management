@@ -20,11 +20,8 @@ public partial class ProductList : ComponentBase
     [Inject] public IApiCallService _apiService { get; set; }
     [Inject] IJSRuntime jsRuntime { get; set; }
     [Inject] NavigationManager navigationManager { get; set; }
+    [Inject] IDialogService DialogService { get; set; }
 
-    /// <summary>
-    /// This method is called by MudTable whenever it needs data (on load, page change, or sort).
-    /// </summary>
-    // In your ProductList.razor.cs
 
     private bool _isLoading;
 
@@ -35,23 +32,19 @@ public partial class ProductList : ComponentBase
 
         try
         {
-            // 1. Prepare pagination and search params
-            var query = $"?pageNumber={state.Page + 1}&pageSize={state.PageSize}&searchTerm={_searchText}";
+            var url = $"/Product?pageNumber={state.Page + 1}&pageSize={state.PageSize}&search={_searchText}";
+            var request = new ApiRequest(HttpMethod.Get, url, "", "");
 
-            // 2. Pass the 'token' to your API service if it supports it
-            var request = new ApiRequest(HttpMethod.Get, $"/Product", "", "");
-
-            // Simulating the call - make sure your APICall method is as lean as possible
             var response = await _apiService.APICall(request);
 
             if (response != null && response.ErrorCode == "00")
             {
-                var data = JsonConvert.DeserializeObject<List<Product>>(response.Detail);
-                product = data;
+                var data = JsonConvert.DeserializeObject<PagedResult<Product>>(response.Detail);
+                product = data.Items;
                 return new TableData<Product>()
                 {
-                    TotalItems = data.Count, // API should ideally return total count separately
-                    Items = data
+                    TotalItems = data.TotalCount ,
+                    Items = data.Items
                 };
             }
         }
@@ -84,31 +77,39 @@ public partial class ProductList : ComponentBase
             SearchProduct();
         }
     }
-
-    private async Task ConfirmDeleteProduct(string productName)
+    private async Task ConfirmDeleteProduct(int productId)
     {
         var result = await jsRuntime.InvokeAsync<JsonElement>("Swal.fire", new
         {
             title = "Are you sure?",
-            text = "This action cannot be undone!",
+            text = "Confirm deletion.", 
             icon = "warning",
+            width = "300px", 
+            height= "100px",
+            padding = "1em", 
             showCancelButton = true,
-            confirmButtonColor = "grey",
-            cancelButtonColor = "dark",
-            confirmButtonText = "Delete"
+            confirmButtonColor = "#6e7881",
+            cancelButtonColor = "#212121", 
+            confirmButtonText = "Delete",
+            customClass = new
+            {
+                title = "small-swal-title", 
+                content = "small-swal-text"
+            }
         });
 
         if (result.GetProperty("isConfirmed").GetBoolean())
         {
-            await DeleteProduct(productName);
+            await DeleteProduct(productId);
         }
     }
+    
 
-    private async Task DeleteProduct(string productName)
+    private async Task DeleteProduct(int productId)
     {
         try
         {
-            var request = new ApiRequest(HttpMethod.Delete, $"/Product/{productName}", "", "");
+            var request = new ApiRequest(HttpMethod.Delete, $"/DeleteProduct",productId, "");
             var response = await _apiService.APICall(request);
 
             if (response.ErrorCode == "00")
@@ -122,4 +123,48 @@ public partial class ProductList : ComponentBase
             Console.WriteLine($"Error deleting product: {ex.Message}");
         }
     }
+
+    private async Task OpenCreateDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small };
+        var parameters = new DialogParameters<ProductDialog>
+    {
+        { x => x.IsEdit, false },
+        { x => x.Model, new Product() }
+    };
+
+        var dialog = await DialogService.ShowAsync<ProductDialog>("Add New Product", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await _table.ReloadServerData();
+        }
+    }
+
+    private async Task OpenEditDialog(Product productToEdit)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+
+        // Create a copy of the product to avoid modifying the table row before saving
+        var parameters = new DialogParameters<ProductDialog>
+    {
+        { x => x.IsEdit, true },
+        { x => x.Model, new Product {
+            Name = productToEdit.Name,
+            Quatity = productToEdit.Quatity,
+            Amount = productToEdit.Amount,
+            Category = productToEdit.Category
+        }}
+    };
+
+        var dialog = await DialogService.ShowAsync<ProductDialog>("Edit Product", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is Product updatedModel)
+        {
+            //await UpdateProductInApi(updatedModel);
+        }
+    }
+
 }

@@ -12,8 +12,8 @@
             @* Add Product Button *@
             <MudButton Variant="Variant.Filled"
             Color="Color.Dark"
-            StartIcon="@Icons.Material.Filled.Add"
-            Href="/AddProduct"
+                       OnClick="OpenCreateDialog"
+            StartIcon="@Icons.Material.Filled.Add"           
             Class="rounded-lg px-4">
                 Add Product
             </MudButton>
@@ -71,6 +71,7 @@
         <HeaderContent>
             <MudTh Style="background-color: var(--mud-palette-dark); color: white; text-align: center;">No</MudTh>
             <MudTh Style="background-color: var(--mud-palette-dark); color: white; ">Name</MudTh>
+            <MudTh Style="background-color: var(--mud-palette-dark); color: white; ">Category</MudTh>
             <MudTh Style="background-color: var(--mud-palette-dark); color: white; ">Quantity</MudTh>
             <MudTh Style="background-color: var(--mud-palette-dark); color: white; ">Amount</MudTh>
 
@@ -84,16 +85,17 @@
                 }
             </MudTd>
             <MudTd DataLabel="Name" Style=" font-weight: 500;">@context.Name</MudTd>
+            <MudTd DataLabel="Name" Style=" font-weight: 500;">@context.Category</MudTd>
             <MudTd DataLabel="Quantity" >
                 <MudChip T="string" Color="Color.Dark" Size="Size.Small" Variant="Variant.Text">@context.Quatity</MudChip>
             </MudTd>
             <MudTd DataLabel="Amount" Style="font-weight: 600;">$@context.Amount</MudTd>
             <MudTd DataLabel="Action" Style="text-align: right;">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Default" Size="Size.Small" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Default" Size="Size.Small" OnClick="@(() => OpenEditDialog(context))" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                Color="Color.Error"
                                Size="Size.Small"
-                               OnClick="@(() => ConfirmDeleteProduct(context.Name))" />
+                               OnClick="@(() => ConfirmDeleteProduct(context.Id))" />
             </MudTd>
         </RowTemplate>
         <PagerContent>

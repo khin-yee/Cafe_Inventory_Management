@@ -1,4 +1,5 @@
-﻿using Cafe_Inventory_Management.Domain.IRepository;
+﻿using Cafe_Inventory_Management.Domain;
+using Cafe_Inventory_Management.Domain.IRepository;
 using Cafe_Inventory_Management.Domain.IServices;
 using Cafe_Inventory_Management.Domain.Model;
 using System;
@@ -22,6 +23,39 @@ public class ProductService:IProductService
         return await _repo.GetProducts();
     }
 
+    public async Task<PagedResult<Product>> GetPagedProducts(int pageNumber, int pageSize, string? searchTerm)
+    {
+        return  await _repo.GetPagedProducts(pageNumber, pageSize, searchTerm);
+    }
 
+    public async  Task<string> CreateProduct(Product product)
+    {
+        var result = await _repo.CreateProduct(product);
+        if (result != 1) 
+            return "fail";
+        
+        else
+            return "success";
+    }
+
+    public async Task<string> UpdateProduct(Product product)
+    {
+        var result = await _repo.UpdatePrduct(product);
+        if (result != 1)
+            return "fail";
+
+        else
+            return "success";
+    }
+
+    public async Task<string> DeleteProduct(int id)
+    {
+        var result = await _repo.DeleteProduct(id);
+        if (result != 1)
+            return "fail";
+
+        else
+            return "success";
+    }
 }
 

@@ -1,0 +1,167 @@
+﻿@using Cafe_Inventory_Management.Domain
+@using Cafe_Inventory_Management.Domain.Model
+@using Cafe_Inventory_Management.UI.Services
+@using MudBlazor
+@inject IApiCallService ApiService
+
+<MudDialog FullWidth="true" Class="rounded-xl p-3" Style="max-width: 500px;">
+    <DialogContent>
+        <MudStack Spacing="3">
+            @* Product Name *@
+            <MudTextField Label="Product Name"
+                          Margin="Margin.Dense"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Inventory"
+                          @bind-Value="Model.Name"
+                          Required />
+
+            <MudItem xs="6">
+                <MudNumericField Label="Code"
+                                 Variant="Variant.Outlined"
+                                 Margin="Margin.Dense"
+                                 Adornment="Adornment.Start"
+                                 AdornmentText="$"
+                                 @bind-Value="Model.Code"
+                                 Required />
+            </MudItem>
+            @* Category Dropdown *@
+            <MudSelect T="string"
+                       Label="Category"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       @bind-Value="Model.Category"
+                       AdornmentIcon="@Icons.Material.Filled.Category"
+                       Required>
+                @if (_categories != null)
+                {
+                    @foreach (var cat in _categories)
+                    {
+                        <MudSelectItem Value="@cat">@cat</MudSelectItem>
+                    }
+                }
+            </MudSelect>
+
+            <MudGrid>
+                <MudItem xs="6">
+                    @* Quantity *@
+                    <MudNumericField Label="Quantity"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     @bind-Value="Model.Quatity"
+                                     Min="1"
+                                     Required />
+                </MudItem>
+
+                <MudItem xs="6">
+                    <MudNumericField Label="Amount"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     Adornment="Adornment.Start"
+                                     AdornmentText="$"
+                                     @bind-Value="Model.Amount"
+                                     Required />
+                </MudItem>
+            </MudGrid>
+
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined"
+                   Size="Size.Small"
+                   Color="Color.Dark"
+                   OnClick="Cancel">
+            Cancel
+        </MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Size="Size.Small"
+                   Color="Color.Primary"
+                   OnClick="Save">
+            @(IsEdit ? "Update Product" : "Create Product")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public Product Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    private List<string> _categories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch categories from API to populate the dropdown
+        await LoadCategories();
+
+        if (!IsEdit)
+        {
+            Model = new Product(); // Ensure fresh object for new entry
+        }
+    }
+
+    private async Task LoadCategories()
+    {
+
+        _categories = new List<string> { "Coffee", "Juice", "Snack", "Bakery" };
+
+        // try
+        // {
+        //     // Update this URL to your actual Category endpoint
+        //     var request = new ApiRequest(HttpMethod.Get, "/Category", "", "");
+        //     var response = await ApiService.APICall(request);
+
+        //     if (response.ErrorCode == "00")
+        //     {
+        //         // Assuming your category API returns a list of names or objects
+        //         _categories = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(response.Detail);
+        //     }
+        // }
+        // catch (Exception ex)
+        // {
+        //     Console.WriteLine($"Error loading categories: {ex.Message}");
+        //     // Fallback static categories if API fails
+        //     _categories = new List<string> { "Coffee", "Juice", "Snack", "Bakery" };
+        // }
+    }
+
+    // Inside ProductDialog.razor @code block
+    private bool _isSaving = false;
+
+    async Task Save()
+    {
+        if (string.IsNullOrWhiteSpace(Model.Name)) return;
+
+        _isSaving = true;
+        try
+        {
+            var method = IsEdit ? HttpMethod.Put : HttpMethod.Post;
+            var url = IsEdit ? $"/UpdateProduct" : "/CreateProduct";
+
+            var request = new ApiRequest(method, url, Model, "");
+            var response = await ApiService.APICall(request);
+
+            if (response.ErrorCode == "00")
+            {
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                // Show error message (e.g., using Snackbar)
+                Console.WriteLine(response.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    void Cancel() => MudDialog.Cancel();
+}
