@@ -73,6 +73,7 @@ namespace Cafe_Inventory_Management.UI.Components.Pages.Orders
                 _cart.Add(new CartItem
                 {
                     ProductId = product.Id,
+                    ProductCode = product.Code,
                     ProductName = product.Name,
                     Price = product.Amount,
                     Quantity = 1
@@ -110,9 +111,18 @@ namespace Cafe_Inventory_Management.UI.Components.Pages.Orders
 
                 if (response.ErrorCode == "00")
                 {
-                    Snackbar.Add("Order Placed Successfully!", Severity.Success);
-                    _cart.Clear();
-                    await LoadProducts(); // Reload to reflect any inventory changes
+                    var apires = JsonConvert.DeserializeObject<ApiResponse>(response.Detail);
+                    if (apires.ErrorCode == "00")
+                    {
+                        Snackbar.Add("Order Placed Successfully!", Severity.Success);
+                        _cart.Clear();
+                        await LoadProducts();
+                    }
+                    else
+                    {
+                        Snackbar.Add(apires.ErrorMessage, Severity.Error);
+
+                    }// Reload to reflect any inventory changes
                 }
                 else
                 {

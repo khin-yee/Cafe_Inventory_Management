@@ -8,6 +8,6 @@ using System.Threading.Tasks;
 namespace Cafe_Inventory_Management.Domain.IServices;
 public interface IOrderService
 {
-    Task<string> CreateOrder(OrderRequestDto order);
+    Task<ApiResponse> CreateOrder(OrderRequestDto order);
 }
 

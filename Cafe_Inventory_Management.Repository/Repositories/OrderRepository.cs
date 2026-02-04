@@ -3,6 +3,7 @@ using Cafe_Inventory_Management.Domain.IRepository;
 using Cafe_Inventory_Management.Domain.Model;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,12 +26,14 @@ public class OrderRepository: IOrderRepo
         return result;
     }
 
-    public async Task<int> SaveOrder(OrderRequestDto request)
+    public async Task<ApiResponse> SaveOrder(OrderRequestDto request)
     {
+        var response = new ApiResponse();
         using var transaction = await _context.Database.BeginTransactionAsync();
 
         try
         {
+            
             Random random = new Random();
             string code = "";
             for (int i = 0; i < 5; i++)
@@ -52,6 +55,29 @@ public class OrderRepository: IOrderRepo
 
             foreach (var item in request.Items)
             {
+                var res = await _context.ProductIngredients.Where(x => x.ProductCode== item.ProductCode).ToListAsync();
+                foreach (var ingre in res)
+                {
+                    var ingredient = await _context.Ingredients.Where(x => x.Code==ingre.IngredientCode).FirstOrDefaultAsync();
+
+                    if (ingredient == null)
+                    {
+                        response.ErrorCode = "01";
+                        response.ErrorMessage = $"Ingredient with ID {ingre.IngredientCode} not found.";
+                        return response;
+                    }
+                    decimal totalDeduction = item.Quantity  * (ingre.RequiredAmount);
+
+                    if (ingredient.Quatity < totalDeduction)
+                    {
+                        response.ErrorCode = "01";
+                        response.ErrorMessage = $"Stock too low for {ingredient.Name}. Needed: {totalDeduction}";
+                        return response;
+                    }
+
+                    ingredient.Quatity -= totalDeduction;
+                    _context.Ingredients.Update(ingredient);
+                }
                 var orderitems = new OrderItems
                 {
                     OrderId = newOrder.OrderId,
@@ -68,12 +94,12 @@ public class OrderRepository: IOrderRepo
 
             // 4. Save to Database
             _context.Orders.Add(newOrder);
-            var result = await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             // 5. Commit Transaction
             await transaction.CommitAsync();
 
-            return result;
+            return response;
         }
 
         catch (Exception ex)

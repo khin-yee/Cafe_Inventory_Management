@@ -1,4 +1,5 @@
-﻿using Cafe_Inventory_Management.Domain.IServices;
+﻿using Cafe_Inventory_Management.Domain;
+using Cafe_Inventory_Management.Domain.IServices;
 using Cafe_Inventory_Management.Domain.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -27,9 +28,9 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost("/CreateProduct")]
-    public async Task<IActionResult> CreateProduct([FromBody] Product product)
+    public async Task<ApiResponse> CreateProduct([FromBody] Product product)
     {
-        return Ok(await _productService.CreateProduct(product));
+        return await _productService.CreateProduct(product);
     }
 
     [HttpPut("/UpdateProduct")]

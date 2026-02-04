@@ -10,8 +10,9 @@ public  class Product:BaseEntity
     public string Name { get; set; }
     public string Code { get; set; }
     public string Category { get; set; }
-    public int Quatity { get; set; }
+    public int? Quatity { get; set; }
     public decimal Amount { get; set; }
+    public bool IsRecipe { get; set; }
 
 }
 

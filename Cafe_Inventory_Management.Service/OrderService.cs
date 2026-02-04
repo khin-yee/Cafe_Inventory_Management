@@ -1,4 +1,5 @@
-﻿using Cafe_Inventory_Management.Domain.IRepository;
+﻿using Cafe_Inventory_Management.Domain;
+using Cafe_Inventory_Management.Domain.IRepository;
 using Cafe_Inventory_Management.Domain.IServices;
 using Cafe_Inventory_Management.Domain.Model;
 using System;
@@ -17,13 +18,8 @@ public class OrderService:IOrderService
         _repo = repo;
     }
 
-    public async Task<string> CreateOrder(OrderRequestDto order)
+    public async Task<ApiResponse> CreateOrder(OrderRequestDto order)
     {
-        var result = await _repo.SaveOrder(order);
-        if (result != 1)
-            return "fail";
-
-        else
-            return "success";
+         return await _repo.SaveOrder(order);     
     }
 }

@@ -1,0 +1,54 @@
+﻿@page "/ingredient-import"
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="m-3">
+    <MudText Typo="Typo.h4" Style="font-weight: 700;">Excel Import Review</MudText>
+
+    <MudStack Row="true">
+        <MudButton HtmlTag="label" Variant="Variant.Filled" Color="Color.Dark"
+                   StartIcon="@Icons.Custom.FileFormats.FileExcel" for="excelInput">
+            Select Excel File
+        </MudButton>
+        <InputFile id="excelInput" OnChange="HandleFileSelected" style="display:none" />
+
+        <MudButton Variant="Variant.Filled" Color="Color.Success"
+                   Disabled="@(!_previewData.Any())" OnClick="SubmitToDatabase"
+                   StartIcon="@Icons.Material.Filled.CloudUpload">
+            Confirm & Save to DB
+        </MudButton>
+    </MudStack>
+</MudStack>
+
+@* Table to show uploaded data (Read Only) *@
+<MudTable Items="@_previewData"           
+              LoadingProgressColor="Color.Info"
+              Dense="true"
+              Hover="true"
+              Elevation="10"
+          RowsPerPage="10"
+              Class="rounded-lg overflow-hidden m-2">
+
+    <HeaderContent>
+        <MudTh Style="font-weight:bold">Ingredient Name</MudTh>
+        <MudTh Style="font-weight:bold">Code</MudTh>
+        <MudTh Style="font-weight:bold">Unit</MudTh>
+        <MudTh Style="font-weight:bold">Quantity</MudTh>
+        <MudTh Style="font-weight:bold">Amount</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="Code">@context.Code</MudTd>
+        <MudTd DataLabel="Unit">@context.Unit</MudTd>
+        <MudTd DataLabel="Quantity">@context.Quatity</MudTd>
+        <MudTd DataLabel="Amount">
+            <MudText Color="Color.Dark" >
+                $@context.Amount.ToString("N2")
+            </MudText>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[]{5, 10, 25, 50}" />
+    </PagerContent>
+    <NoRecordsContent>
+        <MudText Typo="Typo.body2" Class="pa-4">No data uploaded yet. Please select an Excel file.</MudText>
+    </NoRecordsContent>
+</MudTable>

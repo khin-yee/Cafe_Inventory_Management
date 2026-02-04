@@ -15,6 +15,7 @@ namespace Cafe_Inventory_Management.Domain.Model
 
     public class CartItem
     {
+        public string ProductCode { get; set; }
         public int ProductId { get; set; }
         public string ProductName { get; set; }
         public decimal Price { get; set; }

@@ -2,6 +2,7 @@
 @using Cafe_Inventory_Management.Domain.Model
 @using Cafe_Inventory_Management.UI.Services
 @using MudBlazor
+@using Newtonsoft.Json
 @inject IApiCallService ApiService
 
 <MudDialog FullWidth="true" Class="rounded-xl p-3" Style="max-width: 500px;">
@@ -9,30 +10,28 @@
         <MudStack Spacing="3">
             @* Product Name *@
             <MudTextField Label="Product Name"
-                          Margin="Margin.Dense"
-                          Variant="Variant.Outlined"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Inventory"
-                          @bind-Value="Model.Name"
-                          Required />
+            Margin="Margin.Dense"
+            Variant="Variant.Outlined"
+            Adornment="Adornment.Start"
+            AdornmentIcon="@Icons.Material.Filled.Inventory"
+            @bind-Value="Model.Name"
+            Required />
+            <MudTextField Label="Product Code"
+            Margin="Margin.Dense"
+            Variant="Variant.Outlined"
+            Adornment="Adornment.Start"
+            AdornmentIcon="@Icons.Material.Filled.Inventory"
+            @bind-Value="Model.Code"
+            Required />
 
-            <MudItem xs="6">
-                <MudNumericField Label="Code"
-                                 Variant="Variant.Outlined"
-                                 Margin="Margin.Dense"
-                                 Adornment="Adornment.Start"
-                                 AdornmentText="$"
-                                 @bind-Value="Model.Code"
-                                 Required />
-            </MudItem>
             @* Category Dropdown *@
             <MudSelect T="string"
-                       Label="Category"
-                       Variant="Variant.Outlined"
-                       Margin="Margin.Dense"
-                       @bind-Value="Model.Category"
-                       AdornmentIcon="@Icons.Material.Filled.Category"
-                       Required>
+            Label="Category"
+            Variant="Variant.Outlined"
+            Margin="Margin.Dense"
+            @bind-Value="Model.Category"
+            AdornmentIcon="@Icons.Material.Filled.Category"
+            Required>
                 @if (_categories != null)
                 {
                     @foreach (var cat in _categories)
@@ -46,50 +45,60 @@
                 <MudItem xs="6">
                     @* Quantity *@
                     <MudNumericField Label="Quantity"
-                                     Variant="Variant.Outlined"
-                                     Margin="Margin.Dense"
-                                     @bind-Value="Model.Quatity"
-                                     Min="1"
-                                     Required />
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    @bind-Value="Model.Quatity"
+                    Min="1"
+                    Required />
                 </MudItem>
 
                 <MudItem xs="6">
                     <MudNumericField Label="Amount"
-                                     Variant="Variant.Outlined"
-                                     Margin="Margin.Dense"
-                                     Adornment="Adornment.Start"
-                                     AdornmentText="$"
-                                     @bind-Value="Model.Amount"
-                                     Required />
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    Adornment="Adornment.Start"
+                    AdornmentText="$"
+                    @bind-Value="Model.Amount"
+                    Required />
                 </MudItem>
             </MudGrid>
             <MudPaper Elevation="0" Class="pa-2 d-flex align-center justify-space-between" Style="background: transparent; border: 1px solid #e0e0e0; border-radius: 8px;">
                 <MudText Typo="Typo.body1">Product Availability</MudText>
+                <MudSwitch @bind-Value="Model.IsRecipe"
+                Color="Color.Success"
+                UnCheckedColor="Color.Error"
+                Label="@(Model.IsRecipe ? "Recipe" : "NotRecipe")" />
+            </MudPaper>
+            <MudPaper Elevation="0" Class="pa-2 d-flex align-center justify-space-between" Style="background: transparent; border: 1px solid #e0e0e0; border-radius: 8px;">
+                <MudText Typo="Typo.body1">Product Availability</MudText>
                 <MudSwitch @bind-Value="Model.IsActive"
-                           Color="Color.Success"
-                           UnCheckedColor="Color.Error"
-                           Label="@(Model.IsActive ? "Active" : "Inactive")" />
+                Color="Color.Success"
+                UnCheckedColor="Color.Error"
+                Label="@(Model.IsActive ? "Active" : "Inactive")" />
             </MudPaper>
         </MudStack>
     </DialogContent>
 
     <DialogActions>
         <MudButton Variant="Variant.Outlined"
-                   Size="Size.Small"
-                   Color="Color.Dark"
-                   OnClick="Cancel">
+        Size="Size.Small"
+        Color="Color.Dark"
+        OnClick="Cancel">
             Cancel
         </MudButton>
         <MudButton Variant="Variant.Filled"
-                   Size="Size.Small"
-                   Color="Color.Primary"
-                   OnClick="Save">
+        Size="Size.Small"
+        Color="Color.Primary"
+        OnClick="Save">
             @(IsEdit ? "Update Product" : "Create Product")
         </MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
+
+
+
     [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
 
     [Parameter] public Product Model { get; set; } = new();
@@ -151,9 +160,22 @@
 
             if (response.ErrorCode == "00")
             {
-                string message = IsEdit ? "Product updated successfully!" : "Product created successfully!";
-                Snackbar.Add(message, Severity.Success);
 
+                var apires = JsonConvert.DeserializeObject<ApiResponse>(response.Detail);
+
+                if (apires.ErrorCode == "00")
+                {
+
+                    string message = IsEdit ? "Product updated successfully!" : "Product created successfully!";
+
+                    Snackbar.Add(message, Severity.Success);
+
+                }
+                else
+                {
+                    Snackbar.Add(apires.ErrorMessage, Severity.Error);
+
+                }
                 MudDialog.Close(DialogResult.Ok(true));
             }
            

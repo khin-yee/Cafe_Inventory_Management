@@ -71,11 +71,40 @@ public class ProductRepository:IProductRepo
         };
     }
 
-    public async Task<int> CreateProduct(Product product)
+    public async Task<ApiResponse> CreateProduct(Product product)
     {
+        var response = new ApiResponse();
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        if (product.IsRecipe == false)
+        {
+            var res = await _context.ProductIngredients.Where(x => x.ProductCode==product.Code).ToListAsync();
+            foreach(var item in res)
+            {
+                var ingredient = await _context.Ingredients.Where(x=>x.Code==item.IngredientCode).FirstOrDefaultAsync();
+
+                if (ingredient == null)
+                {
+                    response.ErrorCode = "01";
+                    response.ErrorMessage = $"Ingredient with ID {item.IngredientCode} not found.";
+                    return response;
+                }
+                decimal totalDeduction = (product.Quatity ?? 0) * (item.RequiredAmount );
+
+                if (ingredient.Quatity < totalDeduction)
+                {
+                    response.ErrorCode = "01";
+                    response.ErrorMessage = $"Stock too low for {ingredient.Name}. Needed: {totalDeduction}";
+                    return response;
+                }
+
+                ingredient.Quatity -= totalDeduction;
+                _context.Ingredients.Update(ingredient);
+            }
+        }
         await _context.Product.AddAsync(product);
-        var result =_context.SaveChanges();
-        return result;
+        _context.SaveChanges();
+        await transaction.CommitAsync();
+        return response;
     }
 
     public async Task<int>UpdatePrduct(Product updateProduct)

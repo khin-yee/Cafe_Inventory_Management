@@ -28,14 +28,10 @@ public class ProductService:IProductService
         return  await _repo.GetPagedProducts(pageNumber, pageSize, searchTerm);
     }
 
-    public async  Task<string> CreateProduct(Product product)
+    public async  Task<ApiResponse> CreateProduct(Product product)
     {
-        var result = await _repo.CreateProduct(product);
-        if (result != 1)    
-            return "fail";
+        return await _repo.CreateProduct(product);
         
-        else
-            return "success";
     }
 
     public async Task<string> UpdateProduct(Product product)

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Cafe_Inventory_Management.Domain.IRepository;
 public interface IOrderRepo
 {
-    Task<int> SaveOrder(OrderRequestDto request);
+    Task<ApiResponse> SaveOrder(OrderRequestDto request);
 
 }
 

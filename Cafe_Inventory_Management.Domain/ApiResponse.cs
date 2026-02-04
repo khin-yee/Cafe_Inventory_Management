@@ -8,8 +8,8 @@ namespace Cafe_Inventory_Management.Domain
 {
     public class ApiResponse
     {
-        public string ErrorCode { get; set; }
-        public string ErrorMessage { get; set; }
+        public string ErrorCode { get; set; } = "00";
+        public string ErrorMessage { get; set; } = "No Error";
         public string? Detail { get; set; }
 
     }
