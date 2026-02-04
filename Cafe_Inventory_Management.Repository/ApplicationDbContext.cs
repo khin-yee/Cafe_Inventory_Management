@@ -17,7 +17,8 @@ namespace Cafe_Inventory_Management.Repository
         }
 
         public DbSet<Product> Product { get; set; }
-
         public DbSet<Ingredients> Ingredients { get; set; }
+        public DbSet<Orders> Orders { get; set; }
+        public DbSet<OrderItems> OrderItems { get; set; }
     }
 }

@@ -57,5 +57,15 @@ public class IngredientsService : IIngredientsService
         else
             return "success";
     }
+
+    public async Task<string> CreateIngredientsList(List<Ingredients> ingredients)
+    {
+        var result = await _repo.CreateIngredientsList(ingredients);
+        if (result != 1)
+            return "fail";
+
+        else
+            return "success";
+    }
 }
 

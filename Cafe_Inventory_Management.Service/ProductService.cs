@@ -31,7 +31,7 @@ public class ProductService:IProductService
     public async  Task<string> CreateProduct(Product product)
     {
         var result = await _repo.CreateProduct(product);
-        if (result != 1) 
+        if (result != 1)    
             return "fail";
         
         else

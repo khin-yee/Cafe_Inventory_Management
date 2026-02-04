@@ -13,5 +13,6 @@ public interface IIngredientsService
     Task<string> CreateIngredients(Ingredients ingredients);
     Task<string> UpdateIngredients(Ingredients ingredients);
     Task<string> DeleteIngredients(int id);
+    Task<string> CreateIngredientsList(List<Ingredients> ingredients);
 }
 

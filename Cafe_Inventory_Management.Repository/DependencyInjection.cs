@@ -17,7 +17,7 @@ namespace Cafe_Inventory_Management.Repository
         {
             services.AddScoped<IProductRepo, ProductRepository>();
             services.AddScoped<IIngredientRepo, IngredientRepository>();
-
+            services.AddScoped<IOrderRepo, OrderRepository>();
             return services;
         }
     }

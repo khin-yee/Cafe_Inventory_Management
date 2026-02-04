@@ -17,6 +17,18 @@
                 Add Ingredients
             </MudButton>
 
+            <MudButton HtmlTag="label"
+                       Variant="Variant.Filled"
+                       Color="Color.Dark"
+                       StartIcon="@Icons.Custom.FileFormats.FileExcel"
+                       Class="rounded-lg px-4"
+                       for="excelUploadInput">
+                Excel Upload
+            </MudButton>
+
+            @* This hidden input handles the actual file selection *@
+            <InputFile id="excelUploadInput" OnChange="UploadExcel" style="display:none" />
+
             @* Modern Filter Toggle Button *@
             <MudTooltip Text="@(_showSearch ? "Hide Search" : "Show Search")">
                 <MudIconButton Icon="@(_showSearch ? Icons.Material.Filled.FilterListOff : Icons.Material.Filled.FilterList)"
@@ -26,7 +38,8 @@
                                Class="rounded-lg" />
             </MudTooltip>
         </MudStack>
-    </MudStack>
+
+        </MudStack>
     @if (_showSearch)
     {
         <MudGrid Spacing="2" Justify="Justify.Center" Style="align-items: stretch;" Class="mb-2">

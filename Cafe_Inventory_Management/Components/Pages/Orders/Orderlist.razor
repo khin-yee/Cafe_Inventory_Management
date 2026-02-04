@@ -1,0 +1,94 @@
+﻿@page "/orders"
+@using Cafe_Inventory_Management.Domain
+@using Cafe_Inventory_Management.Domain.Model
+
+<MudText Typo="Typo.h4" Class="m-3" Style="font-weight:700">Create Order</MudText>
+
+<MudGrid Class="ps-3">
+    <MudItem xs="12" md="8">
+        <MudTable Items="@_products" Hover="true" FixedHeader="true" Loading="@_loading" 
+                  Dense="true" Class="rounded-lg shadow-sm">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Product Catalog</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="_searchString" Placeholder="Search products..." 
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+                              IconSize="Size.Medium" Class="mt-0" Immediate="true" />
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Price</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh Style="text-align:right">Action</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Price">$@context.Amount</MudTd>
+                <MudTd DataLabel="Status">
+                    @* Only allow active products to be ordered *@
+                    <MudChip  T="String" Color="@(context.IsActive ? Color.Success : Color.Error)" Size="Size.Small">
+                        @(context.IsActive ? "Available" : "Unavailable")
+                    </MudChip>
+                </MudTd>
+                <MudTd Style="text-align:right">
+                    <MudButton Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small"
+                               Disabled="@(!context.IsActive)"
+                               OnClick="@(() => AddToCart(context))">Add to Cart</MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudItem>
+
+    @* Right Side: Cart Summary *@
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4 rounded-lg shadow-sm" Elevation="3">
+            <MudText Typo="Typo.h6" Class="mb-3">Current Order</MudText>
+            @if (_cart.Count == 0)
+            {
+                <MudAlert Severity="Severity.Info" Class="mt-4">Your cart is empty.</MudAlert>
+            }
+            else
+            {
+                <MudSimpleTable Style="overflow-x: auto;">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in _cart)
+                        {
+                            <tr>
+                                <td>@item.ProductName</td>
+                                <td>
+                                    <MudNumericField @bind-Value="item.Quantity" Min="1" Margin="Margin.Dense" Style="width:60px" />
+                                </td>
+                                <td>$@(item.Price * item.Quantity)</td>
+                                <td>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" 
+                                                   OnClick="@(() => RemoveFromCart(item))" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+                
+                <MudDivider Class="my-4" />
+                <div class="d-flex justify-space-between align-center px-2">
+                    <MudText Typo="Typo.h6">Grand Total:</MudText>
+                    <MudText Typo="Typo.h5" Color="Color.Default" Style="font-weight:800">$@_cart.Sum(x => x.Price * x.Quantity)</MudText>
+                </div>
+
+                <MudButton Variant="Variant.Outlined" Color="Color.Dark" FullWidth="true" 
+                           Class="mt-4 py-2 rounded-lg" OnClick="PlaceOrder" 
+                          
+                           StartIcon="@Icons.Material.Filled.ShoppingCartCheckout">
+                    Place Order
+                </MudButton>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>

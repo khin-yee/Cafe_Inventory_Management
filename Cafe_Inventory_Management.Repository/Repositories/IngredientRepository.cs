@@ -98,4 +98,11 @@ public class IngredientRepository : IIngredientRepo
         return result;
     }
 
+    public async Task<int> CreateIngredientsList(List<Ingredients> ingredients)
+    {
+        await _context.Ingredients.AddRangeAsync(ingredients);
+        var result = await _context.SaveChangesAsync();
+        return result;
+    }
+
 }

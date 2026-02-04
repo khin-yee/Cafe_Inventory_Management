@@ -13,5 +13,7 @@ public interface IIngredientRepo
     Task<PagedResult<Ingredients>> GetPagedIngredients(int pageNumber, int pageSize, string? searchTerm);
     Task<int> UpdateIngredients(Ingredients updateIngredients);
     Task<int> DeleteIngredients(int id);
+    Task<int> CreateIngredientsList(List<Ingredients> ingredients);
+
 
 }

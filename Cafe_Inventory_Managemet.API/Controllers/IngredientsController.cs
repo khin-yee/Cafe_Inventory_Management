@@ -44,5 +44,11 @@ namespace Cafe_Inventory_Managemet.API.Controllers
         {
             return Ok(await _IngredientsService.DeleteIngredients(id));
         }
+
+        [HttpPost("BulkUpload")]
+        public async Task<IActionResult> BulkUpload([FromBody] List<Ingredients> ingredients)
+        {           
+            return Ok(await _IngredientsService.CreateIngredientsList(ingredients));
+        }
     }
 }

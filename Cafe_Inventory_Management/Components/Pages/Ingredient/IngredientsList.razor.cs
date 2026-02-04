@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using MudBlazor;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace Cafe_Inventory_Management.UI.Components.Pages.Ingredient;
 public partial class IngredientsList : ComponentBase
@@ -161,6 +162,50 @@ public partial class IngredientsList : ComponentBase
         if (!result.Canceled && result.Data is Ingredients updatedModel)
         {
             //await UpdateIngredientsInApi(updatedModel);
+        }
+    }
+
+
+    private async Task UploadExcel(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+
+        try
+        {
+            using var stream = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(stream);
+
+            using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+            var worksheet = workbook.Worksheet(1); // Read the first sheet
+            var rows = worksheet.RangeUsed().RowsUsed().Skip(1); // Skip Header row
+
+            var ingredientsToUpload = new List<Ingredients>();
+
+            foreach (var row in rows)
+            {
+                ingredientsToUpload.Add(new Ingredients
+                {
+                    Name = row.Cell(1).GetValue<string>(),
+                    Code = row.Cell(2).GetValue<string>(),
+                    Quatity = row.Cell(3).GetValue<int>(),
+                    Unit = row.Cell(4).GetValue<string>(),
+                    IsActive = true
+                });
+            }
+
+            var request = new ApiRequest(HttpMethod.Post, "/Ingredients/BulkUpload", ingredientsToUpload, "");
+            var response = await _apiService.APICall(request);
+
+            if (response.ErrorCode == "00")
+            {
+                Snackbar.Add("Excel uploaded and ingredients added!", Severity.Success);
+                await _table.ReloadServerData();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error parsing Excel: {ex.Message}", Severity.Error);
         }
     }
 
