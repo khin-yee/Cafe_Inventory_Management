@@ -127,5 +127,12 @@ public class ProductRepository:IProductRepo
         return result;
     }
 
+    public async Task<int> CreateProductList(List<Product> products)
+    {
+        await _context.Product.AddRangeAsync(products);
+        var result = await _context.SaveChangesAsync();
+        return result;
+    }
+
 }
 

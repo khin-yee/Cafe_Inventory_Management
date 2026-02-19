@@ -13,6 +13,7 @@ public interface IProductRepo
     Task<PagedResult<Product>> GetPagedProducts(int pageNumber, int pageSize, string? searchTerm);
     Task<int> UpdatePrduct(Product updateProduct);
     Task<int> DeleteProduct(int id);
+    Task<int> CreateProductList(List<Product> products);
 
 }
 

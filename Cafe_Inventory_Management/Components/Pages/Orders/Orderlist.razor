@@ -26,14 +26,14 @@
                 <MudTd DataLabel="Price">$@context.Amount</MudTd>
                 <MudTd DataLabel="Status">
                     @* Only allow active products to be ordered *@
-                    <MudChip  T="String" Color="@(context.IsActive ? Color.Success : Color.Error)" Size="Size.Small">
+                    <MudChip  T="String" Variant="Variant.Outlined" Color="@(context.IsActive ? Color.Success : Color.Error)" Size="Size.Small">
                         @(context.IsActive ? "Available" : "Unavailable")
                     </MudChip>
                 </MudTd>
                 <MudTd Style="text-align:right">
                     <MudButton Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small"
                                Disabled="@(!context.IsActive)"
-                               OnClick="@(() => AddToCart(context))">Add to Cart</MudButton>
+                               OnClick="@(() => AddToCart(context))">Add</MudButton>
                 </MudTd>
             </RowTemplate>
         </MudTable>

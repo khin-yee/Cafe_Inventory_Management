@@ -53,5 +53,16 @@ public class ProductService:IProductService
         else
             return "success";
     }
+
+    public async Task<string> CreateProductList(List<Product> products)
+    {
+        var result = await _repo.CreateProductList(products);
+        if (result != 1)
+            return "fail";
+        else
+            return "success";
+
+    }
+
 }
 

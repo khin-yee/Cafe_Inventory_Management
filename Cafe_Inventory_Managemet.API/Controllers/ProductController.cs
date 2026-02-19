@@ -1,6 +1,7 @@
 ﻿using Cafe_Inventory_Management.Domain;
 using Cafe_Inventory_Management.Domain.IServices;
 using Cafe_Inventory_Management.Domain.Model;
+using Cafe_Inventory_Management.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,6 +44,12 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> DeleteProduct([FromBody] int id)
     {
         return Ok(await _productService.DeleteProduct(id));
+    }
+
+    [HttpPost("/ProductBulkUpload")]
+    public async Task<IActionResult> BulkUpload([FromBody] List<Product>? products)
+    {
+        return Ok(await _productService.CreateProductList(products));
     }
 }
 

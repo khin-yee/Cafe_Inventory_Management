@@ -79,7 +79,7 @@ namespace Cafe_Inventory_Management.UI.Components.Pages.Orders
                     Quantity = 1
                 });
             }
-            Snackbar.Add($"{product.Name} added to cart", Severity.Info);
+            Snackbar.Add($"{product.Name} added to cart", Severity.Success);
         }
 
         private void RemoveFromCart(CartItem item)
