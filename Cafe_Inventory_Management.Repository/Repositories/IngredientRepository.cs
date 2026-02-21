@@ -105,4 +105,10 @@ public class IngredientRepository : IIngredientRepo
         return result;
     }
 
+    public async Task<List<Ingredients>> GetLowStockIngredientsAsync()
+    {
+        return await _context.Ingredients
+            .Where(i => i.Quatity <= i.MinStockLevel)
+            .ToListAsync();
+    }
 }

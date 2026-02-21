@@ -1,0 +1,136 @@
+﻿@using Cafe_Inventory_Management.Domain
+@using Cafe_Inventory_Management.Domain.Model
+@using Cafe_Inventory_Management.UI.Services
+@using Newtonsoft.Json
+@implements IDisposable
+@inject InventoryStateService StateService
+<MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopCenter" Dense="true">
+    <ActivatorContent>
+        <MudBadge Content="@_lowStockItems.Count"
+                  Visible="@(_lowStockItems.Any())"
+                  Color="Color.Error"
+                  Overlap="true"
+                  Class="mx-4 notification-compact bottom-badge alert-pulse">
+
+            <MudIconButton Icon="@Icons.Material.Filled.Notifications"
+                           Color="Color.Dark"
+                           Title="Stock Alerts"
+                           Size="Size.Small"
+                           Edge="Edge.End"
+                           Class="pa-1 compact-icon" />
+
+        </MudBadge>
+    </ActivatorContent>
+    <ChildContent>
+        <MudPaper Width="300px" MaxHeight="400px" Class="overflow-y-auto">
+            <MudList T="string">
+                <MudListSubheader>
+                    <MudText Typo="Typo.subtitle2"><b>Inventory Alerts</b></MudText>
+                </MudListSubheader>
+
+                @if (!_lowStockItems.Any())
+                {
+                    <MudListItem>
+                        <MudText Typo="Typo.body2" Align="Align.Center">All stock levels are healthy</MudText>
+                    </MudListItem>
+                }
+                else
+                {
+                    @foreach (var item in _lowStockItems)
+                    {
+                        <MudListItem Icon="@Icons.Material.Filled.Warning" IconColor="Color.Error">
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.body2" FontWeight="600">@item.Name</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Error">
+                                    Only @item.Quatity @item.Unit left
+                                </MudText>
+                            </MudStack>
+                        </MudListItem>
+                    }
+                    <MudDivider />
+                    <MudListItem OnClick="NavigateToInventory" Icon="@Icons.Material.Filled.ArrowForward" IconColor="Color.Primary">
+                        <MudText Typo="Typo.caption" Color="Color.Primary">View Full Inventory</MudText>
+                    </MudListItem>
+                }
+            </MudList>
+        </MudPaper>
+    </ChildContent>
+</MudMenu>
+
+<style>
+    /* Small subtle pulse on the red badge dot */
+    .pulse-badge .mud-badge {
+        animation: critical-pulse 2s infinite;
+        transform-origin: center;
+    }
+
+    @@keyframes pulse-red {
+    0% {
+    box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7);
+    }
+
+    70% {
+    box-shadow: 0 0 0 6px rgba(244, 67, 54, 0);
+    }
+
+    100% {
+    box-shadow: 0 0 0 0 rgba(244, 67, 54, 0);
+    }
+    }
+</style>
+
+@code {
+
+    private List<Ingredients> _lowStockItems = new();
+    [Inject] public IApiCallService _apiService { get; set; }
+    [Inject] public NavigationManager Nav { get; set; }
+    [Inject] private ISnackbar Snackbar { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        StateService.OnStockChanged += HandleStockChanged;
+        await LoadAlerts();    }
+
+    private async Task LoadAlerts()
+    {
+        var url = $"/StockALert";
+        var request = new ApiRequest(HttpMethod.Get, url, "", "");
+        var response = await _apiService.APICall(request);
+
+        if (response != null && response.ErrorCode == "00")
+        {
+            _lowStockItems = JsonConvert.DeserializeObject<List<Ingredients>>(response.Detail) ?? new();
+        }
+    }
+
+    private void NavigateToInventory() => Nav.NavigateTo("/ingredients");
+
+    private void Dismiss() => _lowStockItems.Clear();
+
+    private async void HandleStockChanged()
+    {
+        // This runs the moment StateService.NotifyStockChanged() is called anywhere
+        await InvokeAsync(async () =>
+        {
+            var oldBadgeCount = _lowStockItems.Count;
+            await LoadAlerts(); // Refresh the list from API
+
+            // Only show the popup message if the count actually increased
+            if (_lowStockItems.Count > oldBadgeCount)
+            {
+                Snackbar.Add("Warning: An ingredient just reached low level!", Severity.Error, config =>
+                {
+                    config.DuplicatesBehavior = SnackbarDuplicatesBehavior.Allow;
+                });
+            }
+
+            StateHasChanged(); // Force the UI to re-render the "3" and start pulsing
+        });
+    }
+
+    public void Dispose()
+    {
+        // Important: Unsubscribe when leaving the page to prevent memory leaks
+        StateService.OnStockChanged -= HandleStockChanged;
+    }
+}

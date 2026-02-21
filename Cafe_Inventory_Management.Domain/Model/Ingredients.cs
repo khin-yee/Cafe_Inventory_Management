@@ -12,6 +12,7 @@ public class Ingredients:BaseEntity
     public decimal Quatity { get; set; }
     public string Unit { get; set; }
     public decimal Amount { get; set; }
+    public int MinStockLevel { get; set; }
 }
 
 

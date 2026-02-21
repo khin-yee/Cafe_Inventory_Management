@@ -14,5 +14,7 @@ public interface IIngredientsService
     Task<string> UpdateIngredients(Ingredients ingredients);
     Task<string> DeleteIngredients(int id);
     Task<string> CreateIngredientsList(List<Ingredients> ingredients);
+    Task<List<Ingredients>> GetLowStockIngredientsAsync();
+
 }
 

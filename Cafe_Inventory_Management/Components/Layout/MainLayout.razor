@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject IDialogService Dialog
+@using Cafe_Inventory_Management.UI.Components.Pages
 @using Cafe_Inventory_Management.UI.Services
 @using MudBlazor
 @inject NavigationManager Navigation
@@ -28,9 +29,10 @@
 
                 <AuthorizeView>
                     <Authorized Context="auth">
+                        <StockAlertBanner />
 
                         <MudText Typo="Typo.body1" Class="mr-3" Style="color: #666;">
-                            Welcome, <b>@auth.User.FindFirst(c => c.Type == "name")?.Value</b>
+                             <b>@auth.User.FindFirst(c => c.Type == "name")?.Value</b>
                         </MudText>
 
                         <MudButton OnClick="Logout"

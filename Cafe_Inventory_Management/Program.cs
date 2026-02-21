@@ -7,6 +7,7 @@ using MudBlazor;
 using MudBlazor.Services;
 using Cafe_Inventory_Management.UI.Components;
 using Cafe_Inventory_Management.UI.Services;
+using Cafe_Inventory_Management.UI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +29,7 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.PreventDuplicates = false;
     config.SnackbarConfiguration.NewestOnTop = false;
     config.SnackbarConfiguration.ShowCloseIcon = true;
-    config.SnackbarConfiguration.VisibleStateDuration = 1000;
+    config.SnackbarConfiguration.VisibleStateDuration = 5000;
     config.SnackbarConfiguration.HideTransitionDuration = 500;
     config.SnackbarConfiguration.ShowTransitionDuration = 500;
     config.SnackbarConfiguration.SnackbarVariant = Variant.Outlined;
@@ -49,6 +50,7 @@ builder.Services.AddScoped<AuthServices>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<InventoryStateService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

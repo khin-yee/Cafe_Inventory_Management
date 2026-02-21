@@ -50,5 +50,12 @@ namespace Cafe_Inventory_Managemet.API.Controllers
         {           
             return Ok(await _IngredientsService.CreateIngredientsList(ingredients));
         }
+
+        [HttpGet("/StockALert")]
+        public async Task<IActionResult> GetStockAlert()
+        {
+            return Ok(await _IngredientsService.GetLowStockIngredientsAsync());
+        }
+
     }
 }

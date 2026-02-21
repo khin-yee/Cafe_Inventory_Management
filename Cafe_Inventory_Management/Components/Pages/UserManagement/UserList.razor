@@ -33,18 +33,13 @@
                       AdornmentIcon="@Icons.Material.Filled.Search"
                       Class="rounded-lg"
                        />
-
-       
-
-        
-
     </MudStack>
 
 
     <!-- Table -->
     <MudTable Items="FilteredUsers"
               Hover="true"
-              Dense="false"
+              Dense="true"
               Bordered="false"
               Elevation="0"
               Class="rounded-lg">
@@ -106,7 +101,9 @@
             </MudTd>
 
         </RowTemplate>
-
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
+        </PagerContent>
     </MudTable>
 
 </MudPaper>

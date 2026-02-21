@@ -17,6 +17,8 @@ public partial class ProductList : ComponentBase
     private bool _showSearch = false;
     private bool _isInitialized = false;
     private List<Product> product = new();
+
+
     [Inject] public IApiCallService _apiService { get; set; }
     [Inject] IJSRuntime jsRuntime { get; set; }
     [Inject] NavigationManager navigationManager { get; set; }

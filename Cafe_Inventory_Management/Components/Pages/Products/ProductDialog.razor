@@ -96,6 +96,7 @@
 </MudDialog>
 
 @code {
+    [Inject] InventoryStateService StateService { get; set; }
 
 
 
@@ -170,6 +171,7 @@
 
                     Snackbar.Add(message, Severity.Success);
 
+                    StateService.NotifyStockChanged();
                 }
                 else
                 {

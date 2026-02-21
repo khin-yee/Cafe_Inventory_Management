@@ -67,5 +67,11 @@ public class IngredientsService : IIngredientsService
         else
             return "success";
     }
+
+    public async Task<List<Ingredients>> GetLowStockIngredientsAsync()
+    {
+        return await _repo.GetLowStockIngredientsAsync();
+    }
+
 }
 

@@ -14,6 +14,8 @@ public interface IIngredientRepo
     Task<int> UpdateIngredients(Ingredients updateIngredients);
     Task<int> DeleteIngredients(int id);
     Task<int> CreateIngredientsList(List<Ingredients> ingredients);
+    Task<List<Ingredients>> GetLowStockIngredientsAsync();
+
 
 
 }
