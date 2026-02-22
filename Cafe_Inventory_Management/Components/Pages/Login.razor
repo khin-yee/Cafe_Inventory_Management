@@ -3,54 +3,205 @@
 @inject NavigationManager Navigation
 
 <style>
-    .login-page-bg {
-        background: #0f172a;
-        background: radial-gradient(circle at top right, #1e293b, #0f172a);
+    /* FULL SCREEN WRAPPER */
+    .login-wrapper {
         min-height: 100vh;
+        display: flex;
+        background: linear-gradient(135deg, #ffe0d6, #ffb3a7);
+        font-family: 'Segoe UI', sans-serif;
+        overflow: hidden;
+    }
+
+    /* LEFT PANEL ANIMATION */
+    .left-panel {
+        flex: 1;
+        padding: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        opacity: 0;
+        transform: translateX(-50px);
+        animation: slideInLeft 1s forwards 0.3s;
+    }
+
+    @@keyframes slideInLeft {
+        to
+
+    {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    }
+
+    /* BRAND BADGE */
+    .brand-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.9);
+        backdrop-filter: blur(8px);
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        width: fit-content;
+        margin-bottom: 30px;
+    }
+
+    /* LEFT SIDE TEXT */
+    .left-title {
+        font-size: 48px;
+        font-weight: 800;
+        color: #4b2e2b;
+        line-height: 1.2;
+        margin-bottom: 20px;
+    }
+
+    .left-sub {
+        font-size: 18px;
+        color: #4b2e2b;
+        max-width: 500px;
+    }
+
+    /* FEATURE TAGS */
+    .feature-tags {
+        margin-top: 30px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .feature-tag {
+        background: rgba(255,255,255,0.7);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        backdrop-filter: blur(5px);
+    }
+
+    /* RIGHT PANEL ANIMATION */
+    .right-panel {
+        flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
     }
 
-    .glass-card {
-        background: #FAFAFA;
-       /*background-color: aliceblue;*/
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px !important;
+    /* GLASS LOGIN CARD */
+    /* GLASS LOGIN CARD - WHITE GLASS VERSION */
+    .login-card {
         width: 100%;
         max-width: 420px;
+        padding: 40px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 1s forwards 0.6s;
     }
-    /* Fix for overlapping labels and white text */
-    .white-text-input .mud-input-root {
+
+    /* LOGIN CARD ANIMATION */
+    @@keyframes fadeInUp {
+        to
+
+    {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .signin-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #4b2e2b;
+    }
+
+    .signin-sub {
+        color: #4b2e2b;
+        margin-bottom: 30px;
+        font-size: 14px;
+    }
+
+    .login-btn {
+        height: 50px;
+        border-radius: 12px;
+        background-color: #4b2e2b !important;
         color: white !important;
+        text-transform: none;
+        font-weight: 600;
+        transition: transform 0.2s;
     }
 
-    .white-text-input .mud-label {
-        color: rgba(255, 255, 255, 0.7) !important;
+        .login-btn:hover {
+            transform: scale(1.03);
+        }
+
+    /* RESPONSIVE */
+    @@media(max-width: 900px)
+
+    {
+        .login-wrapper
+
+    {
+        flex-direction: column;
     }
 
-    .white-text-input .mud-input-filled-shrink .mud-label {
-        color: var(--mud-palette-primary) !important;
+    .left-panel {
+        padding: 40px;
+        text-align: center;
     }
-</style>
 
-<div class="login-page-bg">
-    <MudContainer MaxWidth="MaxWidth.ExtraSmall">
-        <MudPaper Elevation="25" Class="pa-8 glass-card">
+    .right-panel {
+        padding: 40px 20px;
+    }
 
-            <MudStack AlignItems="AlignItems.Center" Spacing="1" Class="mb-8">
-                <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Color="Color.Primary" Size="Size.Large" />
-                <MudText Typo="Typo.h4" Style="color:#0f172a; font-weight: 800; letter-spacing: 1px;">
-                    CHANOHOLIC
-                </MudText>
-               
-            </MudStack>
+    }</style>
+
+<div class="login-wrapper">
+
+    <!-- LEFT SIDE -->
+    <div class="left-panel">
+
+        <div class="brand-badge">
+            <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Size="Size.Small" />
+            CHANOHOLIC SYSTEM
+        </div>
+
+        <div class="left-title">
+            Welcome back to your <br /> inventory dashboard.
+        </div>
+
+        <div class="left-sub">
+            Manage products, track stock levels, and control your cafe operations from one central place.
+        </div>
+
+        <div class="feature-tags">
+            <div class="feature-tag">Secure Access</div>
+            <div class="feature-tag">Role-based Control</div>
+            <div class="feature-tag">Realtime Tracking</div>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="right-panel">
+
+        <MudPaper Elevation="0" Class="login-card">
+
+            <div class="signin-title">Sign In</div>
+            <div class="signin-sub">
+                Use your account credentials to continue.
+            </div>
 
             @if (!string.IsNullOrEmpty(Error))
             {
-                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Dense="true" Class="mb-4 rounded-lg">
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Dense="true" Class="mb-4">
                     @Error
                 </MudAlert>
             }
@@ -58,44 +209,35 @@
             <MudTextField @bind-Value="Username"
                           Label="Email"
                           Variant="Variant.Outlined"
-                          Placeholder=""
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Email"
-                          AdornmentColor="Color.Dark"
-                          Class="mb-2" />
+                          Class="mb-4" />
 
             <MudTextField @bind-Value="Password"
                           Label="Password"
                           Variant="Variant.Outlined"
                           InputType="InputType.Password"
-                          Adornment="Adornment.Start"                          
+                          Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Lock"
-                          AdornmentColor="Color.Dark"
                           Class="mb-6" />
-          
 
-           
+            <MudButton FullWidth="true"
+                       Class="login-btn"
+                       OnClick="HandleLogin">
 
-            
-            <MudButton Variant="Variant.Outlined"
-            
-                       FullWidth="true"
-                       Class="mt-2"
-                       OnClick="HandleLogin"
-                       Style="color: white;background-color:#0f172a; border-color: rgba(255,255,255,0.2); height: 50px; border-radius: 12px; text-transform: none;">
                 @if (IsLoading)
                 {
                     <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-                    <span>Processing...</span>
+                    <span>Signing in...</span>
                 }
                 else
                 {
-                    <span>Login</span>
+                    <span>Sign In</span>
                 }
+
             </MudButton>
 
-            
-
         </MudPaper>
-    </MudContainer>
+    </div>
+
 </div>
