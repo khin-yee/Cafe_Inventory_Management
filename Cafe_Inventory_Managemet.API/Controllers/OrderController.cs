@@ -22,5 +22,24 @@ public class OrderController : ControllerBase
         return Ok(await _service.CreateOrder(order));
     }
 
+    [HttpPut("/UpdateOrder")]
+    public async Task<IActionResult> UpdateOrder([FromBody] OrderViewModel order)
+    {
+        return Ok(await _service.UpdateOrder(order));
+    }
+
+    [HttpPut("/UpdateOrderStatus")]
+    public async Task<IActionResult> UpdateOrderStatus([FromBody] OrderViewModel order)
+    {
+        return Ok(await _service.UpdateOrderStatus(order));
+    }
+
+    [HttpGet("/GetOrders")]
+    public async Task<IActionResult> GetOrders()
+    {
+        return Ok(await _service.GetOrders());
+    }
+
+
 }
 

@@ -1,12 +1,15 @@
 ﻿@page "/orders"
 @using Cafe_Inventory_Management.Domain
 @using Cafe_Inventory_Management.Domain.Model
+@inject NavigationManager Nav
 
 <MudText Typo="Typo.h4" Class="m-3" Style="font-weight:700">Create Order</MudText>
 
 <MudGrid Class="ps-3">
     <MudItem xs="12" md="8">
-        <MudTable Items="@_products" Hover="true" FixedHeader="true" Loading="@_loading" 
+        <MudTable T="Product"
+                  @ref="@_table"
+                  ServerData="ServerReload" Hover="true" FixedHeader="true" Loading="@_loading"
                   Dense="true" Class="rounded-lg shadow-sm">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Product Catalog</MudText>
@@ -36,6 +39,9 @@
                                OnClick="@(() => AddToCart(context))">Add</MudButton>
                 </MudTd>
             </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
+            </PagerContent>
         </MudTable>
     </MudItem>
 

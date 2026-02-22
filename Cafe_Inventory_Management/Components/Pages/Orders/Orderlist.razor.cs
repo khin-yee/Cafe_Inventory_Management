@@ -17,14 +17,60 @@ namespace Cafe_Inventory_Management.UI.Components.Pages.Orders
         [Inject] AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
 
         private List<Product> _products = new();
+
+        private MudTable<Product> _table;
+
         private List<CartItem> _cart = new();
         private string _searchString = "";
         private bool _loading = true;
+        private string _searchText = "";
+        private bool _isLoading;
+
         [Inject] public IApiCallService _apiService { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
             await LoadProducts();
+        }
+
+        private async Task<TableData<Product>> ServerReload(TableState state, CancellationToken token)
+        {
+            _isLoading = true; // Start loading state
+            StateHasChanged(); // Trigger UI update to show progress bar
+
+            try
+            {
+                var url = $"/Product?pageNumber={state.Page + 1}&pageSize={state.PageSize}&search={_searchText}";
+                var request = new ApiRequest(HttpMethod.Get, url, "", "");
+
+                var response = await _apiService.APICall(request);
+
+                if (response != null && response.ErrorCode == "00")
+                {
+                    var data = JsonConvert.DeserializeObject<PagedResult<Product>>(response.Detail);
+                    _products = data.Items;
+                    return new TableData<Product>()
+                    {
+                        TotalItems = data.TotalCount,
+                        Items = data.Items
+                    };
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // Ignore cancellations when user types fast
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fetch error: {ex.Message}");
+            }
+            finally
+            {
+                _isLoading = false; // Stop loading state
+                StateHasChanged();
+            }
+
+            return new TableData<Product>() { TotalItems = 0, Items = new List<Product>() };
         }
 
         private async Task LoadProducts()
@@ -116,7 +162,7 @@ namespace Cafe_Inventory_Management.UI.Components.Pages.Orders
                     {
                         Snackbar.Add("Order Placed Successfully!", Severity.Success);
                         _cart.Clear();
-                        await LoadProducts();
+                        Nav.NavigateTo("/ordersList");
                     }
                     else
                     {
@@ -127,6 +173,8 @@ namespace Cafe_Inventory_Management.UI.Components.Pages.Orders
                 else
                 {
                     Snackbar.Add("Error placing order. Check inventory levels.", Severity.Error);
+                    Nav.NavigateTo("/orderlist");
+                    
                 }
             }
         }

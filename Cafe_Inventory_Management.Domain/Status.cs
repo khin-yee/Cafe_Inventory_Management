@@ -8,7 +8,7 @@ namespace Cafe_Inventory_Management.Domain;
 
 public static class Status
 {
-    public const string Success = "Success";
+    public const string Preparing = "Preparing";
     public const string Pending = "Pending";
-    public const string Cancel = "Cancel";
+    public const string Success = "Completed";
 }

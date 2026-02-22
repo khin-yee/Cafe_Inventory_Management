@@ -9,6 +9,10 @@ namespace Cafe_Inventory_Management.Domain.IRepository;
 public interface IOrderRepo
 {
     Task<ApiResponse> SaveOrder(OrderRequestDto request);
+    Task<ApiResponse> UpdateOrder(OrderViewModel updatedOrder);
+    Task<List<OrderViewModel>> GetOrders();
+    Task<ApiResponse> UpdateOrderStatus(OrderViewModel updatedOrder);
+
 
 }
 

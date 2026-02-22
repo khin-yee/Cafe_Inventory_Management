@@ -2,6 +2,7 @@
 using Cafe_Inventory_Management.Domain.IRepository;
 using Cafe_Inventory_Management.Domain.IServices;
 using Cafe_Inventory_Management.Domain.Model;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,4 +23,24 @@ public class OrderService:IOrderService
     {
          return await _repo.SaveOrder(order);     
     }
+
+    public async Task<ApiResponse> UpdateOrder(OrderViewModel updatedOrder)
+    {
+        return  await _repo.UpdateOrder(updatedOrder);
+       
+    }
+
+    public async Task<List<OrderViewModel>> GetOrders()
+    {
+        var result = await _repo.GetOrders();
+    
+        return result;
+    }
+
+    public async Task<ApiResponse> UpdateOrderStatus(OrderViewModel updatedOrder)
+    {
+        var result = await _repo.UpdateOrderStatus(updatedOrder);
+        return result;
+    }
+
 }

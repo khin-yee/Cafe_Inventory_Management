@@ -9,5 +9,9 @@ namespace Cafe_Inventory_Management.Domain.IServices;
 public interface IOrderService
 {
     Task<ApiResponse> CreateOrder(OrderRequestDto order);
+    Task<ApiResponse> UpdateOrder(OrderViewModel updatedOrder);
+    Task<List<OrderViewModel>> GetOrders();
+
+    Task<ApiResponse> UpdateOrderStatus(OrderViewModel updatedOrder);
 }
 

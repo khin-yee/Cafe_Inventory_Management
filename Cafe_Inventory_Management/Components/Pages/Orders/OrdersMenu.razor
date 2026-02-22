@@ -1,0 +1,113 @@
+﻿@page "/ordersList"
+@using Cafe_Inventory_Management.Domain
+@using Cafe_Inventory_Management.Domain.Model
+@using Cafe_Inventory_Management.UI.Services
+@using Newtonsoft.Json
+@inject InventoryStateService StateService
+@inject IApiCallService _apiService
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+    @inject IDialogService DialogService
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-6">
+    <MudPaper Elevation="3" Class="pa-6 rounded-xl">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.h5" FontWeight="700">Staff Order Queue</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">Manage and track live customer preparations</MudText>
+            </MudStack>
+            <MudChip T="string" Icon="@Icons.Material.Filled.FiberManualRecord" Color="Color.Success" Variant="Variant.Text">
+                Live Updates Active
+            </MudChip>
+        </MudStack>
+
+        <MudTable Items="_ordersForUI"
+                  Hover="true"
+                  Elevation="0"
+                  Dense = "true"
+                  Breakpoint="Breakpoint.Sm"
+                  LoadingProgressColor="Color.Info"
+                  RowsPerPage="10"
+                  Class="border rounded-lg">
+            <HeaderContent>
+                <MudTh>Order ID</MudTh>
+                <MudTh>Order Time</MudTh>
+                <MudTh>Items to Prepare</MudTh>
+                <MudTh>Total Price</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh Align="Right">Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Order ID">
+                    <MudText Typo="Typo.body1" FontWeight="600">@context.OrderId</MudText>
+                    </MudTd>
+                    <MudTd>
+                    <MudText Typo="Typo.caption" >@context.CreatedAt.ToShortTimeString()</MudText>
+                </MudTd>
+                <MudTd DataLabel="Items">
+                    <MudStack Spacing="1">
+                        @foreach (var item in context.Items)
+                        {
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.Label" Size="Size.Small" Class="mr-2 mud-text-secondary" />
+                                <MudText Typo="Typo.body2">
+                                    <b>@item.Quatity x</b> @item.ProductCode
+                                </MudText>
+                            </div>
+                        }
+                    </MudStack>
+                </MudTd>
+                <MudTd DataLabel="Total Price">
+                    <MudText Typo="Typo.body1">@context.TotalPrice.ToString("N0") MMK</MudText>
+                </MudTd>
+                <MudTd DataLabel="Status">
+                    <MudChip T="string"
+                             Color="@GetStatusColor(context.Status)"
+                             Variant="Variant.Filled"
+                             Size="Size.Small"
+                             Class="px-4">
+                        @context.Status
+                    </MudChip>
+                </MudTd>
+                <MudTd Align="Right">
+                    @if (context.Status == Status.Pending)
+                    {
+                        @* EDIT BUTTON *@
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Default"
+                                       Size="Size.Small"
+                                       OnClick="@(() => OpenEditDialog(context))"
+                                       Class="mr-2" />
+
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Secondary"
+                                   Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.PlayArrow"
+                                   OnClick="@(() => UpdateStatus(context, Status.Preparing))">
+                            Prepare
+                        </MudButton>
+                    }
+                    else if (context.Status == Status.Preparing)
+                    {
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Success"
+                                   Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Check"
+                                   OnClick="@(() => UpdateStatus(context, Status.Success))">
+                            Done
+                        </MudButton>
+                    }
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[]{5, 10, 25, 50}" />
+            </PagerContent>
+            <NoRecordsContent>
+                <div class="pa-8 d-flex flex-column align-center">
+                    <MudIcon Icon="@Icons.Material.Filled.Coffee" Size="Size.Large" Class="mb-2 mud-text-secondary" />
+                    <MudText Typo="Typo.h6">No Active Orders</MudText>
+                </div>
+            </NoRecordsContent>
+        </MudTable>
+    </MudPaper>
+</MudContainer>

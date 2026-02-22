@@ -1,0 +1,44 @@
+﻿@using Cafe_Inventory_Management.Domain
+@using Cafe_Inventory_Management.Domain.Model
+@using Cafe_Inventory_Management.UI.Services
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Edit Order #@Order.OrderId</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="4">
+            @foreach (var item in Order.Items)
+            {
+                <MudPaper Class="pa-3 border" Elevation="0">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText>@item.ProductCode</MudText>
+                        <MudNumericField @bind-Value="item.Quatity" Label="Quantity" Min="1" Variant="Variant.Outlined" Margin="Margin.Dense" Style="width: 80px;" />
+                    </MudStack>
+                </MudPaper>
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">Save Changes</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public OrderViewModel Order { get; set; }
+    [Inject] IApiCallService _apiService { get; set; }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Save()
+    {
+        // Call your API to update the items in the DB
+        var response = await _apiService.APICall(new ApiRequest(HttpMethod.Put, "/UpdateOrder", Order, ""));
+
+        if (response != null && response.ErrorCode == "00")
+        {
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+}
