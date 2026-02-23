@@ -32,6 +32,11 @@ namespace Cafe_Inventory_Management.UI.Components.Pages.Orders
         {
             await LoadProducts();
         }
+        private Task OnSearch(string text)
+        {
+            _searchText = text;
+            return _table.ReloadServerData(); // This forces ServerReload to run again
+        }
 
         private async Task<TableData<Product>> ServerReload(TableState state, CancellationToken token)
         {

@@ -2,8 +2,10 @@
 using Cafe_Inventory_Management.Domain.IRepository;
 using Cafe_Inventory_Management.Domain.Model;
 using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -225,4 +227,35 @@ public class OrderRepository : IOrderRepo
         return viewModelList!;
     }
 
+    public async Task<PagedResult<OrderViewModel>> GetAllSuccessOrders(int page, int pageSize, string? search, DateTime? start,DateTime? end)
+    {
+        var query = _context.Orders.Where(o => o.Status == "Success" || o.Status == "Completed");
+
+        if (!string.IsNullOrEmpty(search))
+            query = query.Where(o => o.OrderId.Contains(search));
+
+        if (start.HasValue) query = query.Where(o => o.CreatedAt >= start.Value);
+        if (end.HasValue) query = query.Where(o => o.CreatedAt < end.Value.AddDays(1));
+
+        int totalCount = await query.CountAsync();
+
+        var orders = await query
+            .OrderByDescending(o => o.CreatedAt)
+            .Skip(page * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var result = new PagedResult<OrderViewModel>
+        {
+            TotalCount = totalCount,
+            Items = orders.Select(o => new OrderViewModel
+            {
+                OrderId = o.OrderId,
+                TotalPrice = o.TotalPrice,
+                Status = o.Status,
+                CreatedAt = o.CreatedAt
+            }).ToList()
+        };
+        return result;
+    }
 }

@@ -40,6 +40,12 @@ public class OrderController : ControllerBase
         return Ok(await _service.GetOrders());
     }
 
+    [HttpGet("/GetOrderSummary")]
+    public async Task<IActionResult> GetOrdersSummary([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? search, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+    {
+        return Ok(await _service.GetAllSuccessOrders(page,pageSize,search,startDate,endDate));
+    }
+
 
 }
 

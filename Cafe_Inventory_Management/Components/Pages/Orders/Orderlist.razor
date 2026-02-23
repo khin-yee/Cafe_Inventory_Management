@@ -14,9 +14,14 @@
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Product Catalog</MudText>
                 <MudSpacer />
-                <MudTextField @bind-Value="_searchString" Placeholder="Search products..." 
-                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
-                              IconSize="Size.Medium" Class="mt-0" Immediate="true" />
+                <MudTextField T="string"
+                              ValueChanged="@(s => OnSearch(s))"
+                              Placeholder="Search products..."
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              IconSize="Size.Medium"
+                              Class="mt-0"
+                              Immediate="true" />
             </ToolBarContent>
             <HeaderContent>
                 <MudTh>Name</MudTh>

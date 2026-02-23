@@ -43,4 +43,10 @@ public class OrderService:IOrderService
         return result;
     }
 
+    public async Task<PagedResult<OrderViewModel>> GetAllSuccessOrders(int page, int pageSize, string? search, DateTime? start, DateTime? end)
+    {
+        var result = await _repo.GetAllSuccessOrders(page,pageSize,search,start,end);
+        return result;
+    }
+
 }

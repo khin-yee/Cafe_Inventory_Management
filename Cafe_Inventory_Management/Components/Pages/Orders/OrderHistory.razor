@@ -1,0 +1,79 @@
+﻿@page "/order-history"
+@using Cafe_Inventory_Management.Domain.Model
+@using Cafe_Inventory_Management.UI.Services
+@using Newtonsoft.Json
+@inject IApiCallService _apiService
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-6">
+    <MudPaper Elevation="3" Class="pa-6 rounded-xl">
+        <MudGrid Items="AlignItems.Center" Class="mb-4">
+            <MudItem xs="12" sm="4">
+                <MudStack Row="true" AlignItems="AlignItems.Center">
+                    <MudIcon Icon="@Icons.Material.Filled.History" Size="Size.Large" Color="Color.Primary" />
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.h5" FontWeight="700">Order History</MudText>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">Manual Search Mode</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudItem>
+
+            <MudItem xs="12" sm="8">
+                <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
+                    <MudDateRangePicker Label="Date Range"
+                                        @bind-DateRange="_dateRange"
+                                        Margin="Margin.Dense"
+                                        Variant="Variant.Outlined"
+                                        Clearable="true" />
+
+                    <MudTextField @bind-Value="_searchString"
+                                  Placeholder="Order ID..."
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Style="width: 180px;" />
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="PerformSearch"
+                               StartIcon="@Icons.Material.Filled.Search"
+                               Style="height: 40px;">
+                        SEARCH
+                    </MudButton>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+
+        <MudTable T="OrderViewModel"
+                  @ref="_table"
+                  ServerData="ServerReload"
+                  Hover="true"
+                  Dense = "true"
+                  FixedHeader="true"
+                  RowsPerPage="10"
+                  Class="border rounded-lg shadow-none">
+            <HeaderContent>
+                <MudTh>Date & Time</MudTh>
+                <MudTh>Order ID</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh Align="Right">Total Amount</MudTh>
+                <MudTh Align="Right">Action</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Date">@context.CreatedAt.ToString("dd/MM/yyyy hh:mm tt")</MudTd>
+                <MudTd DataLabel="Order ID"><b>#@context.OrderId</b></MudTd>
+                <MudTd DataLabel="Status">
+                    <MudChip T="string" Color="Color.Success" Size="Size.Small" Variant="Variant.Text">@context.Status</MudChip>
+                </MudTd>
+                <MudTd DataLabel="Total" Align="Right"><b>@context.TotalPrice.ToString("N0") MMK</b></MudTd>
+                <MudTd Align="Right">
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Info" OnClick="@(() => ViewDetails(context))" />
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[]{10, 25, 50}" />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
