@@ -9,6 +9,7 @@ public class OrderItems:BaseEntity
 {
     public string OrderId { get; set; }
     public string ProductCode { get; set; }
+    public string ProductName { get; set; }
     public int Quatity { get; set; }
     public  decimal Amount { get; set; }
 }

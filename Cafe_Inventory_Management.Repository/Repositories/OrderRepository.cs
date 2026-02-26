@@ -1,13 +1,15 @@
 ﻿using Cafe_Inventory_Management.Domain;
 using Cafe_Inventory_Management.Domain.IRepository;
 using Cafe_Inventory_Management.Domain.Model;
-using DocumentFormat.OpenXml.Drawing.Charts;
+using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,11 +59,12 @@ public class OrderRepository : IOrderRepo
 
             foreach (var item in request.Items)
             {
-                
+
                 var orderitems = new OrderItems
                 {
                     OrderId = newOrder.OrderId,
                     ProductCode = item.ProductCode,
+                    ProductName = item.ProductName,
                     Quatity = item.Quantity,
                     Amount = item.Price,
                     CreatedBy = request.UserName,
@@ -122,6 +125,7 @@ public class OrderRepository : IOrderRepo
                 {
                     OrderId = updatedOrder.OrderId,
                     ProductCode = item.ProductCode,
+                    ProductName = item.ProductName,
                     Quatity = item.Quatity, // Matches your DB typo
                     Amount = item.Amount,
                     CreatedAt = DateTime.Now,
@@ -156,14 +160,14 @@ public class OrderRepository : IOrderRepo
     {
         var order = await _context.Orders.Where(x => x.OrderId == updatedOrder.OrderId).FirstOrDefaultAsync();
         order.Status = updatedOrder.Status;
-        if(updatedOrder.Status == Status.Preparing)
+        if (updatedOrder.Status == Status.Preparing)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             {
                 foreach (var item in updatedOrder.Items)
                 {
-                    var product =await _context.Product.Where(x => x.Code == item.ProductCode).FirstOrDefaultAsync();
-             
+                    var product = await _context.Product.Where(x => x.Code == item.ProductCode).FirstOrDefaultAsync();
+
                     var response = new ApiResponse();
                     if (product!.IsRecipe == true)
                     {
@@ -192,7 +196,7 @@ public class OrderRepository : IOrderRepo
                         }
                     }
                 }
-                 _context.Orders.Update(order);
+                _context.Orders.Update(order);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
             }
@@ -222,12 +226,12 @@ public class OrderRepository : IOrderRepo
             Status = o.Status,
             CreatedAt = o.CreatedAt,
             Items = allItems.Where(i => i.OrderId == o.OrderId).ToList()
-        }).OrderByDescending(x=>x.CreatedAt).ToList();
+        }).OrderByDescending(x => x.CreatedAt).ToList();
 
         return viewModelList!;
     }
 
-    public async Task<PagedResult<OrderViewModel>> GetAllSuccessOrders(int page, int pageSize, string? search, DateTime? start,DateTime? end)
+    public async Task<PagedResult<OrderViewModel>> GetAllSuccessOrders(int page, int pageSize, string? search, DateTime? start, DateTime? end)
     {
         var query = _context.Orders.Where(o => o.Status == "Success" || o.Status == "Completed");
 
@@ -257,5 +261,214 @@ public class OrderRepository : IOrderRepo
             }).ToList()
         };
         return result;
+    }
+
+    public async Task<List<OrderViewModel>> ExportHistory(string? search, DateTime? start, DateTime? end)
+    {
+        var query = _context.Orders
+            .Where(o => o.Status == "Success" || o.Status == "Completed");
+
+        if (!string.IsNullOrEmpty(search)) query = query.Where(o => o.OrderId.Contains(search));
+        if (start.HasValue) query = query.Where(o => o.CreatedAt >= start.Value);
+        if (end.HasValue) query = query.Where(o => o.CreatedAt < end.Value.AddDays(1));
+
+        var data = await query
+            .OrderByDescending(o => o.CreatedAt)
+            .Select(o => new OrderViewModel
+            {
+                OrderId = o.OrderId,
+                TotalPrice = o.TotalPrice,
+                Status = o.Status,
+                CreatedAt = o.CreatedAt,
+                Items = _context.OrderItems.Where(i => i.OrderId == o.OrderId).ToList()
+            })
+            .ToListAsync();
+
+        return data;
+
+    }
+
+    public async Task<DashboardData> GetStats(string range)
+    {
+        var today = DateTime.Now.Date;
+        DateTime startDate = range switch
+        {
+            "month" => new DateTime(today.Year, today.Month, 1),
+            "year" => new DateTime(today.Year, 1, 1),
+            _ => today.AddDays(-6)
+        };
+
+        var orders = await _context.Orders
+            .Where(o => (o.Status == "Success" || o.Status == "Completed") && o.CreatedAt >= startDate)
+            .ToListAsync();
+
+        var itemDetails = await (from item in _context.OrderItems
+                                 join prod in _context.Product on item.ProductCode equals prod.Code
+                                 join ord in _context.Orders on item.OrderId equals ord.OrderId
+                                 where (ord.Status == "Success" || ord.Status == "Completed") && ord.CreatedAt >= startDate
+                                 select new
+                                 {
+                                     item.ProductCode,
+                                     prod.Name,
+                                     prod.Category,
+                                     item.Quatity,
+                                     item.Amount,
+                                     ord.CreatedAt
+                                 }).ToListAsync();
+
+        // 3. Category Distribution (Pie Chart)
+        var categoryData = itemDetails
+            .GroupBy(x => x.Category ?? "Other")
+            .Select(g => new CategoryStat
+            {
+                CategoryName = g.Key,
+                TotalRevenue = (double)g.Sum(x => x.Quatity * x.Amount)
+            }).ToList();
+
+        // 4. Top 5 Products
+        var topProducts = itemDetails
+            .GroupBy(x => new { x.ProductCode, x.Name })
+            .Select(g => new ProductStat
+            {
+                ProductName = g.Key.Name,
+                TotalQty = g.Sum(x => x.Quatity)
+            })
+            .OrderByDescending(x => x.TotalQty)
+            .Take(5)
+            .ToList();
+
+        // 5. Chart Data (Bar/Line Chart)
+        var labels = new List<string>();
+        var dataPoints = new List<double>();
+
+        if (range == "year")
+        {
+            for (int i = 1; i <= 12; i++)
+            {
+                labels.Add(new DateTime(today.Year, i, 1).ToString("MMM"));
+                dataPoints.Add((double)orders.Where(o => o.CreatedAt.Month == i).Sum(o => o.TotalPrice));
+            }
+        }
+        if (range == "month")
+        {
+            var daysInMonth = (today - startDate).Days;
+            for (int i = 0; i <= daysInMonth; i++)
+            {
+                var date = startDate.AddDays(i);
+                if (i == 0 || i % 5 == 0 || date == today)
+                {
+                    labels.Add(date.ToString("dd MMM"));
+                }
+                else
+                {
+                    labels.Add("");
+                }
+
+                dataPoints.Add((double)orders.Where(o => o.CreatedAt.Date == date).Sum(o => o.TotalPrice));
+            }
+        }
+        else
+        {
+            for (var date = startDate; date <= today; date = date.AddDays(1))
+            {
+                labels.Add(date.ToString("dd MMM"));
+                dataPoints.Add((double)orders.Where(o => o.CreatedAt.Date == date).Sum(o => o.TotalPrice));
+            }
+        }
+
+        var stats = new DashboardData
+        {
+            TotalSales = orders.Sum(o => o.TotalPrice),
+            TotalOrders = orders.Count,
+            TodaySales = orders.Where(o => o.CreatedAt >= today).Sum(o => o.TotalPrice),
+            AvgOrderValue = orders.Count > 0 ? orders.Average(o => o.TotalPrice) : 0,
+            ChartLabels = labels.ToArray(),
+            ChartData = dataPoints.ToArray(),
+            CategoryDistribution = categoryData,
+            TopProducts = topProducts
+        };
+        return stats;
+    }
+
+    public async Task<List<StaffResponseDto>> GetStaffPerformance(string range)
+    {
+        var today = DateTime.Now.Date;
+        DateTime startDate = range switch
+        {
+            "today" => today,
+            "month" => new DateTime(today.Year, today.Month, 1),
+            _ => today.AddDays(-6)
+        };
+
+        var staffStats = await _context.Orders.Where(o => (o.Status == "Success" || o.Status == "Completed") && o.CreatedAt >= startDate)
+            .GroupBy(o => o.CreatedBy)
+            .Select(g => new StaffResponseDto
+            {
+                StaffName = g.Key ?? "Unknown Staff",
+                TotalOrdersHandled = g.Count(),
+                TotalRevenueGenerated = g.Sum(o => o.TotalPrice)
+            })
+            .OrderByDescending(x => x.TotalOrdersHandled)
+            .ToListAsync();
+
+        return staffStats;
+    }
+
+    public async Task<AdminDashboardData> GetAdminStatus()
+    {
+        var lowStock = await _context.Product.Where(p => p.Quatity <= 10)
+            .Select(p => new LowStockProduct
+            {
+                Name = p.Name,
+                CurrentStock = (double)p.Quatity,
+                Category = p.Category
+            })
+            .ToListAsync();
+
+        var activity = await _context.Orders.OrderByDescending(o => o.CreatedAt)
+            .Take(10)
+            .Select(o => new UserActivity
+            {
+                User = o.CreatedBy,
+                Action = $"Placed order {o.OrderId}",
+                Time = o.CreatedAt
+            })
+            .ToListAsync();
+
+        var result = new AdminDashboardData
+        {
+            LowStockItems = lowStock,
+            RecentActivities = activity
+        };
+
+        return result;
+    }
+
+    public async Task<OrderViewModel> GetOrderDetails(string orderId)
+    {
+        var order = await _context.Orders
+           .Where(o => o.OrderId == orderId)
+           .Select(o => new OrderViewModel
+           {
+               OrderId = o.OrderId,
+               TotalPrice = o.TotalPrice,
+               Status = o.Status,
+               CreatedAt = o.CreatedAt,
+               CreatedBy = o.CreatedBy,
+           }).FirstOrDefaultAsync();
+
+        if (order == null) return order!;
+
+        try
+        {
+            order.Items = await _context.OrderItems
+                .Where(i => i.OrderId == orderId)
+                .ToListAsync();
+        }
+        catch(Exception ex)
+        {
+
+        }
+        return order;
     }
 }

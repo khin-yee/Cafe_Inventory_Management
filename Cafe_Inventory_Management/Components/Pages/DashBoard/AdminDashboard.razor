@@ -1,0 +1,103 @@
+﻿@page "/admin-dashboard"
+@using Cafe_Inventory_Management.UI.Services
+@using Newtonsoft.Json
+@inject IApiCallService _apiService
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-6">
+        <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Size="Size.Large" Color="Color.Primary" />
+        <MudText Typo="Typo.h4" FontWeight="700">Admin Operations</MudText>
+    </MudStack>
+
+    <MudGrid>
+        <MudItem xs="12" md="7">
+            <MudPaper Class="pa-6 rounded-xl shadow-sm border-t-4 border-error" Elevation="3">
+                <MudStack Row="true" Class="mb-4">
+                    <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Error" />
+                    <MudText Typo="Typo.h6">Low Stock Alerts</MudText>
+                </MudStack>
+                <MudTable Items="_adminData.LowStockItems" Dense="true" Hover="true" Elevation="0">
+                    <HeaderContent>
+                        <MudTh>Product</MudTh>
+                        <MudTh>Category</MudTh>
+                        <MudTh>Stock</MudTh>
+                        <MudTh>Action</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>@context.Category</MudTd>
+                        <MudTd>
+                            <MudText Color="Color.Error" FontWeight="700">@context.CurrentStock</MudText>
+                        </MudTd>
+                        <MudTd>
+                            <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small">Restock</MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="5">
+            <MudPaper Class="pa-6 rounded-xl shadow-sm" Elevation="3">
+                <MudText Typo="Typo.h6" Class="mb-4">System Activity</MudText>
+                <MudTimeline TimelinePosition="TimelinePosition.Start">
+                    @foreach (var activity in _adminData.RecentActivities)
+                    {
+                        <MudTimelineItem Color="Color.Info" Size="Size.Small">
+                            <MudText Typo="Typo.body2"><b>@activity.User</b> @activity.Action</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">@activity.Time.ToString("g")</MudText>
+                        </MudTimelineItem>
+                    }
+                </MudTimeline>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudPaper Class="pa-6 rounded-xl shadow-sm" Elevation="3">
+                <div class="d-flex justify-space-between align-center mb-6">
+                    <MudStack Row="true">
+                        <MudIcon Icon="@Icons.Material.Filled.Badge" Color="Color.Primary" />
+                        <MudText Typo="Typo.h6">Staff Order Response</MudText>
+                    </MudStack>
+
+                    <MudToggleGroup T="string" Value="@_staffRange" ValueChanged="OnStaffRangeChanged"
+                                    Outline="true" Delimiters="true" Dense="true" CheckMark="false" Color="Color.Primary">
+                        <MudToggleItem Value="@("today")">Today</MudToggleItem>
+                        <MudToggleItem Value="@("7d")">This Week</MudToggleItem>
+                        <MudToggleItem Value="@("month")">This Month</MudToggleItem>
+                    </MudToggleGroup>
+                </div>
+
+                @if (_isStaffLoading)
+                {
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+                }
+                else
+                {
+                    <MudGrid>
+                        @foreach (var staff in _staffPerformance)
+                        {
+                            <MudItem xs="12" md="4">
+                                <MudPaper Class="pa-4 border-2 rounded-lg" Elevation="0">
+                                    <div class="d-flex align-center">
+                                        <MudAvatar Color="Color.Secondary" Variant="Variant.Filled" Class="mr-3">
+                                            @staff.StaffName[0].ToString().ToUpper()
+                                        </MudAvatar>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-space-between">
+                                                <MudText Typo="Typo.body1"><b>@staff.StaffName</b></MudText>
+                                                <MudText Typo="Typo.body2" Color="Color.Success">@staff.TotalRevenueGenerated.ToString("N0")</MudText>
+                                            </div>
+                                            <MudProgressLinear Color="Color.Primary" Value="@CalculateProgress(staff.TotalOrdersHandled)" Class="my-2" />
+                                            <MudText Typo="Typo.caption">@staff.TotalOrdersHandled Orders processed</MudText>
+                                        </div>
+                                    </div>
+                                </MudPaper>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>

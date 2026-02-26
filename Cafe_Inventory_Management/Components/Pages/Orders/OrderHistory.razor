@@ -2,13 +2,14 @@
 @using Cafe_Inventory_Management.Domain.Model
 @using Cafe_Inventory_Management.UI.Services
 @using Newtonsoft.Json
+@using Cafe_Inventory_Management.UI.Components
 @inject IApiCallService _apiService
 @inject ISnackbar Snackbar
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-6">
     <MudPaper Elevation="3" Class="pa-6 rounded-xl">
         <MudGrid Items="AlignItems.Center" Class="mb-4">
-            <MudItem xs="12" sm="4">
+            <MudItem xs="12" sm="3">
                 <MudStack Row="true" AlignItems="AlignItems.Center">
                     <MudIcon Icon="@Icons.Material.Filled.History" Size="Size.Large" Color="Color.Primary" />
                     <MudStack Spacing="0">
@@ -18,7 +19,7 @@
                 </MudStack>
             </MudItem>
 
-            <MudItem xs="12" sm="8">
+            <MudItem xs="12" sm="9">
                 <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
                     <MudDateRangePicker Label="Date Range"
                                         @bind-DateRange="_dateRange"
@@ -34,17 +35,33 @@
                                   AdornmentIcon="@Icons.Material.Filled.Search"
                                   Style="width: 180px;" />
 
+                  
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Primary"
                                OnClick="PerformSearch"
                                StartIcon="@Icons.Material.Filled.Search"
+                               Style="height: 40px;"/>
+                       
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Tertiary"
+                               OnClick="PrepareExcel"
+                               Disabled="_isProcessing"
+                               StartIcon="@Icons.Material.Filled.Download"
                                Style="height: 40px;">
-                        SEARCH
+                        @(_isProcessing ? "PREPARING..." : "EXPORT")
                     </MudButton>
                 </MudStack>
             </MudItem>
         </MudGrid>
-
+        @if (!string.IsNullOrEmpty(_excelDataUrl))
+        {
+            <MudAlert Severity="Severity.Success" Variant="Variant.Filled" Dense="true" Class="mb-4">
+                Report Ready!
+                <a href="@_excelDataUrl" download="@_fileName" style="color:white; font-weight:bold; text-decoration:underline; margin-left:10px;">
+                    Click here to save file
+                </a>
+            </MudAlert>
+        }
         <MudTable T="OrderViewModel"
                   @ref="_table"
                   ServerData="ServerReload"
