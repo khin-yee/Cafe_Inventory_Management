@@ -3,101 +3,129 @@
 @using Newtonsoft.Json
 @inject IApiCallService _apiService
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
-    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-6">
-        <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Size="Size.Large" Color="Color.Primary" />
-        <MudText Typo="Typo.h4" FontWeight="700">Admin Operations</MudText>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4 px-8">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.End" Class="mb-8">
+        <MudStack Spacing="0">
+            <MudText Typo="Typo.h4" FontWeight="900" Style="letter-spacing: -1px; color: #1A1C1E;">Intelligence Center</MudText>
+            <MudText Typo="Typo.body2" Style="color: #6D7175;">System Health • @DateTime.Now.ToString("dddd, MMMM dd")</MudText>
+        </MudStack>
+
+        <MudPaper Elevation="0" Class="pa-1 rounded-pill border border-solid mud-border-lines-default" Style="background: #F1F2F4;">
+            <MudToggleGroup T="string" Value="@_staffRange" ValueChanged="OnStaffRangeChanged"
+                            Outline="false" Delimiters="false" Dense="true" CheckMark="false" Color="Color.Primary">
+                <MudToggleItem Value="@("today")" Class="rounded-pill px-6">Day</MudToggleItem>
+                <MudToggleItem Value="@("7d")" Class="rounded-pill px-6">Week</MudToggleItem>
+                <MudToggleItem Value="@("month")" Class="rounded-pill px-6">Month</MudToggleItem>
+            </MudToggleGroup>
+        </MudPaper>
     </MudStack>
 
-    <MudGrid>
-        <MudItem xs="12" md="7">
-            <MudPaper Class="pa-6 rounded-xl shadow-sm border-t-4 border-error" Elevation="3">
-                <MudStack Row="true" Class="mb-4">
-                    <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Error" />
-                    <MudText Typo="Typo.h6">Low Stock Alerts</MudText>
-                </MudStack>
-                <MudTable Items="_adminData.LowStockItems" Dense="true" Hover="true" Elevation="0">
-                    <HeaderContent>
-                        <MudTh>Product</MudTh>
-                        <MudTh>Category</MudTh>
-                        <MudTh>Stock</MudTh>
-                        <MudTh>Action</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd>@context.Name</MudTd>
-                        <MudTd>@context.Category</MudTd>
-                        <MudTd>
-                            <MudText Color="Color.Error" FontWeight="700">@context.CurrentStock</MudText>
-                        </MudTd>
-                        <MudTd>
-                            <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small">Restock</MudButton>
-                        </MudTd>
-                    </RowTemplate>
-                </MudTable>
-            </MudPaper>
-        </MudItem>
+    <MudGrid Spacing="6">
+        <MudItem xs="12" lg="9">
+            <MudStack Spacing="6">
 
-        <MudItem xs="12" md="5">
-            <MudPaper Class="pa-6 rounded-xl shadow-sm" Elevation="3">
-                <MudText Typo="Typo.h6" Class="mb-4">System Activity</MudText>
-                <MudTimeline TimelinePosition="TimelinePosition.Start">
-                    @foreach (var activity in _adminData.RecentActivities)
-                    {
-                        <MudTimelineItem Color="Color.Info" Size="Size.Small">
-                            <MudText Typo="Typo.body2"><b>@activity.User</b> @activity.Action</MudText>
-                            <MudText Typo="Typo.caption" Class="mud-text-secondary">@activity.Time.ToString("g")</MudText>
-                        </MudTimelineItem>
-                    }
-                </MudTimeline>
-            </MudPaper>
-        </MudItem>
-
-        <MudItem xs="12">
-            <MudPaper Class="pa-6 rounded-xl shadow-sm" Elevation="3">
-                <div class="d-flex justify-space-between align-center mb-6">
-                    <MudStack Row="true">
-                        <MudIcon Icon="@Icons.Material.Filled.Badge" Color="Color.Primary" />
-                        <MudText Typo="Typo.h6">Staff Order Response</MudText>
+                <MudPaper Elevation="0" Class="pa-6 rounded-xl border border-solid mud-border-lines-default" Style="background: #FFFFFF;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
+                            <div style="width: 12px; height: 12px; border-radius: 3px; background: var(--mud-palette-primary);"></div>
+                            <MudText Typo="Typo.h6" FontWeight="FontWeight.Bold">Operational Performance</MudText>
+                        </MudStack>
                     </MudStack>
 
-                    <MudToggleGroup T="string" Value="@_staffRange" ValueChanged="OnStaffRangeChanged"
-                                    Outline="true" Delimiters="true" Dense="true" CheckMark="false" Color="Color.Primary">
-                        <MudToggleItem Value="@("today")">Today</MudToggleItem>
-                        <MudToggleItem Value="@("7d")">This Week</MudToggleItem>
-                        <MudToggleItem Value="@("month")">This Month</MudToggleItem>
-                    </MudToggleGroup>
-                </div>
+                    <MudTable Items="_staffPerformance"  Hover="true" Elevation="0" Loading="_isStaffLoading" Class="custom-business-table">
+                        <HeaderContent>
+                            <MudTh Style="font-weight: 700; font-size: 0.75rem; color: #6D7175;">STAFF IDENTITY</MudTh>
+                            <MudTh Style="font-weight: 700; font-size: 0.75rem; color: #6D7175; text-align:center;">VOLUME</MudTh>
+                            <MudTh Style="font-weight: 700; font-size: 0.75rem; color: #6D7175; text-align:right;">GROSS REVENUE</MudTh>
+                            <MudTh Style="font-weight: 700; font-size: 0.75rem; color: #6D7175; text-align:right;">PERFORMANCE</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
+                                    <MudAvatar Color="Color.Primary" Variant="Variant.Text" Style="font-weight: 700;">@context.StaffName[0]</MudAvatar>
+                                    <MudText Typo="Typo.body2" FontWeight="FontWeight.Bold">@context.StaffName</MudText>
+                                </MudStack>
+                            </MudTd>
+                            <MudTd Style="text-align:center;">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Class="font-weight-bold">@context.TotalOrdersHandled Orders</MudChip>
+                            </MudTd>
+                            <MudTd Style="text-align:right;">
+                                <MudText Typo="Typo.body2" FontWeight="FontWeight.Black">@context.TotalRevenueGenerated.ToString("N0") <span style="font-size: 10px; color: #919191;">MMK</span></MudText>
+                            </MudTd>
+                            <MudTd Style="text-align:right; width: 180px;">
+                                <MudStack Spacing="1" AlignItems="AlignItems.End">
+                                    <MudProgressLinear Color="Color.Primary" Value="@CalculateProgress(context.TotalOrdersHandled)" Height="6" Class="rounded-pill" Style="width: 100px; background: #F1F2F4;" />
+                                    <MudText Typo="Typo.caption" Style="font-size: 10px;">Relative Efficiency: @CalculateProgress(context.TotalOrdersHandled).ToString("F0")%</MudText>
+                                </MudStack>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
 
-                @if (_isStaffLoading)
-                {
-                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
-                }
-                else
-                {
-                    <MudGrid>
-                        @foreach (var staff in _staffPerformance)
+                <MudPaper Elevation="0" Class="pa-6 rounded-xl border border-solid mud-border-lines-default" Style="background: #FFFFFF;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+                        <MudIcon Icon="@Icons.Material.Filled.Inventory2" Color="Color.Dark" Size="Size.Small" />
+                        <MudText Typo="Typo.subtitle1" FontWeight="FontWeight.Bold">Critical Inventory Alerts</MudText>
+                    </MudStack>
+                    <MudGrid Spacing="2">
+                        @foreach (var item in _adminData.LowStockItems)
                         {
                             <MudItem xs="12" md="4">
-                                <MudPaper Class="pa-4 border-2 rounded-lg" Elevation="0">
-                                    <div class="d-flex align-center">
-                                        <MudAvatar Color="Color.Secondary" Variant="Variant.Filled" Class="mr-3">
-                                            @staff.StaffName[0].ToString().ToUpper()
-                                        </MudAvatar>
-                                        <div class="flex-grow-1">
-                                            <div class="d-flex justify-space-between">
-                                                <MudText Typo="Typo.body1"><b>@staff.StaffName</b></MudText>
-                                                <MudText Typo="Typo.body2" Color="Color.Success">@staff.TotalRevenueGenerated.ToString("N0")</MudText>
-                                            </div>
-                                            <MudProgressLinear Color="Color.Primary" Value="@CalculateProgress(staff.TotalOrdersHandled)" Class="my-2" />
-                                            <MudText Typo="Typo.caption">@staff.TotalOrdersHandled Orders processed</MudText>
-                                        </div>
+                                <MudPaper Elevation="0" Class="pa-3 rounded-lg border border-solid mud-border-lines-default d-flex justify-space-between align-center">
+                                    <div>
+                                        <MudText Typo="Typo.caption" Class="mud-text-secondary">@item.Category</MudText>
+                                        <MudText Typo="Typo.body2" FontWeight="FontWeight.Bold">@item.Name</MudText>
+                                    </div>
+                                    <div class="text-right">
+                                        <MudText Typo="Typo.body2" Color="Color.Error" FontWeight="FontWeight.Bold">@item.CurrentStock Units</MudText>
+                                        <MudText Typo="Typo.caption" Style="text-decoration: underline; cursor: pointer; color: var(--mud-palette-primary);">Order</MudText>
                                     </div>
                                 </MudPaper>
                             </MudItem>
                         }
                     </MudGrid>
-                }
-            </MudPaper>
+                </MudPaper>
+            </MudStack>
+        </MudItem>
+
+        <MudItem xs="12" lg="3">
+            <MudStack Spacing="6">
+                <MudPaper Elevation="0" Class="pa-6 rounded-xl border border-solid border-primary" Style="background: #E8F0FE;">
+                    <MudText Typo="Typo.subtitle2" Color="Color.Primary" FontWeight="FontWeight.Bold" Class="mb-1">SYSTEM STATUS</MudText>
+                    <MudText Typo="Typo.h5" FontWeight="FontWeight.Black" Style="color: #1A73E8;">Operational</MudText>
+                    <MudText Typo="Typo.caption" Style="color: #555;">All services are reporting healthy.</MudText>
+                </MudPaper>
+
+                <MudPaper Elevation="0" Class="pa-6 rounded-xl border border-solid mud-border-lines-default" Style="background: #FFFFFF;">
+                    <MudText Typo="Typo.subtitle1" FontWeight="FontWeight.Bold" Class="mb-4">Audit Trail</MudText>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        @foreach (var activity in _adminData.RecentActivities)
+                        {
+                            <div class="mb-5 d-flex gap-3">
+                                <div style="min-width: 4px; height: 35px; border-radius: 2px; background: #D1D5DB;"></div>
+                                <div>
+                                    <MudText Typo="Typo.caption" Class="mud-text-secondary">@activity.Time.ToString("HH:mm") • @activity.User</MudText>
+                                    <MudText Typo="Typo.body2" Style="color: #374151; font-weight: 500;">@activity.Action</MudText>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </MudPaper>
+            </MudStack>
         </MudItem>
     </MudGrid>
 </MudContainer>
+
+<style>
+    .custom-business-table .mud-table-head {
+        background-color: #FAFAFA;
+    }
+
+    .custom-business-table .mud-table-container {
+        border-radius: 8px;
+    }
+
+    .mud-typography-h4 {
+        font-family: 'Inter', 'Segoe UI', sans-serif !important;
+    }
+</style>

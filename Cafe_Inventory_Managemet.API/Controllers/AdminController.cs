@@ -1,5 +1,6 @@
 ﻿using Cafe_Inventory_Management.Domain;
 using Cafe_Inventory_Management.Domain.IServices;
+using Cafe_Inventory_Management.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -11,10 +12,13 @@ namespace Cafe_Inventory_Managemet.API.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IOrderService _service;
+        private readonly EmailReportService _emailservice;
 
-        public AdminController(IOrderService service)
+
+        public AdminController(IOrderService service, EmailReportService emailservice)
         {
             _service = service;
+            _emailservice = emailservice;
         }
 
         [HttpGet("/GetStatus")]
@@ -33,6 +37,11 @@ namespace Cafe_Inventory_Managemet.API.Controllers
         public async Task<IActionResult> GetAdminStatus()
         {
             return Ok(await _service.GetAdminStatus());
+        }
+        [HttpPost("/ReportEmail")]
+        public async Task<IActionResult> ReportEmail()
+        {
+            return Ok(await _emailservice.SendReportAsync(true));
         }
 
     }

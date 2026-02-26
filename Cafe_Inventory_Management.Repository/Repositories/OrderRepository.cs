@@ -225,6 +225,7 @@ public class OrderRepository : IOrderRepo
             TotalPrice = o.TotalPrice,
             Status = o.Status,
             CreatedAt = o.CreatedAt,
+            CreatedBy = o.CreatedBy,
             Items = allItems.Where(i => i.OrderId == o.OrderId).ToList()
         }).OrderByDescending(x => x.CreatedAt).ToList();
 
