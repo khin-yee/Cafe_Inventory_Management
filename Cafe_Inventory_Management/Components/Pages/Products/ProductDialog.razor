@@ -8,7 +8,6 @@
 <MudDialog FullWidth="true" Class="rounded-xl p-3" Style="max-width: 500px;">
     <DialogContent>
         <MudStack Spacing="3">
-            @* Product Name *@
             <MudTextField Label="Product Name"
             Margin="Margin.Dense"
             Variant="Variant.Outlined"
@@ -43,7 +42,6 @@
 
             <MudGrid>
                 <MudItem xs="6">
-                    @* Quantity *@
                     <MudNumericField Label="Quantity"
                     Variant="Variant.Outlined"
                     Margin="Margin.Dense"
@@ -114,7 +112,7 @@
 
         if (!IsEdit)
         {
-            Model = new Product(); // Ensure fresh object for new entry
+            Model = new Product(); 
         }
     }
 

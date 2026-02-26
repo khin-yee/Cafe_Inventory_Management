@@ -71,7 +71,6 @@ public partial class ProductList : ComponentBase
         // Calling ReloadServerData triggers the ServerReload method automatically
         _table.ReloadServerData();
     }
-
     private void HandleKeyUp(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
@@ -104,8 +103,6 @@ public partial class ProductList : ComponentBase
             await DeleteProduct(productId);
         }
     }
-    
-
     private async Task DeleteProduct(int productId)
     {
         try
@@ -151,7 +148,6 @@ public partial class ProductList : ComponentBase
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
 
-        // Create a copy of the product to avoid modifying the table row before saving
         var parameters = new DialogParameters<ProductDialog>
     {
         { x => x.IsEdit, true },

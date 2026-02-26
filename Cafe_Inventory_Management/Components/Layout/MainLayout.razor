@@ -15,7 +15,6 @@
     <MudLayout>
         @if (!IsLoginPage)
         {
-            @* Fixed App Bar for Dashboard *@
             <MudAppBar Elevation="1" Dense="true" Fixed="true"
                        Style="background-color: white; border-bottom: 1px solid #eee; z-index: 1300;">
 
@@ -52,8 +51,6 @@
             <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
                 <NavMenu />
             </MudDrawer>
-
-            @* Dashboard Content Wrapper with Padding-Top *@
             <MudMainContent Style="background-color: #FAF9F6; min-height: 100vh;">
                 <div  >
                     @Body
@@ -62,9 +59,7 @@
         }
         else
         {
-            @* Login Content: No App Bar, No Sidebar, No Padding, No White Box *@
             <MudMainContent Style="background-color: #111827;">
-                @* Match your login background color *@
                 @Body
             </MudMainContent>
         }

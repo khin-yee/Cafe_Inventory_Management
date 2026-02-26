@@ -415,8 +415,8 @@ public class OrderRepository : IOrderRepo
     }
 
     public async Task<AdminDashboardData> GetAdminStatus()
-    {
-        var lowStock = await _context.Product.Where(p => p.Quatity <= 10)
+    {     
+        var lowStock = await _context.Product.Where(p => p.Quatity <= 1)
             .Select(p => new LowStockProduct
             {
                 Name = p.Name,
@@ -426,7 +426,7 @@ public class OrderRepository : IOrderRepo
             .ToListAsync();
 
         var activity = await _context.Orders.OrderByDescending(o => o.CreatedAt)
-            .Take(10)
+            .Take(5)
             .Select(o => new UserActivity
             {
                 User = o.CreatedBy,

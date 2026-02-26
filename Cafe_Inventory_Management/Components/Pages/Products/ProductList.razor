@@ -2,11 +2,9 @@
 @using Cafe_Inventory_Management.Domain.Model
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
-    @* Header Section *@
     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3">
         <MudText Typo="Typo.h5" FontWeight="700" Class="fw-bold">Product List</MudText>
         <MudStack Row="true" Spacing="2">
-            @* Add Product Button *@
             <MudButton Variant="Variant.Filled"
             Color="Color.Dark"
                        OnClick="OpenCreateDialog"
@@ -15,7 +13,6 @@
                 Add Product
             </MudButton>
 
-            @* Modern Filter Toggle Button *@
             <MudTooltip Text="@(_showSearch ? "Hide Search" : "Show Search")">
                 <MudIconButton Icon="@(_showSearch ? Icons.Material.Filled.FilterListOff : Icons.Material.Filled.FilterList)"
                 Color="@(_showSearch ? Color.Primary : Color.Default)"
@@ -28,7 +25,6 @@
     @if (_showSearch)
     {
             <MudGrid Spacing="2" Justify="Justify.Center" Style="align-items: stretch;" Class="mb-2">
-                @* Search Box Container *@
                 <MudItem xs="12" sm="10" Class="d-flex align-center">
                     <MudTextField @bind-Value="_searchText"
                                   Placeholder="Search by product name..."
@@ -42,7 +38,6 @@
                                   Class="bg-white rounded-lg" />
                 </MudItem>
 
-                @* Search Button Container *@
                 <MudItem xs="12" sm="2" Class="d-flex align-center">
                     <MudButton Variant="Variant.Outlined"
                                Color="Color.Dark"

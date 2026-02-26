@@ -2,111 +2,87 @@
 
 <MudDialog>
     <TitleContent>
-        <div class="d-flex justify-space-between align-center pr-4">
+        <div class="d-flex align-center justify-space-between pt-2">
             <div class="d-flex align-center">
-                <div class="pa-3 rounded-lg mr-4" style="background-color: var(--mud-palette-primary-hover);">
-                    <MudIcon Icon="@Icons.Material.Filled.ReceiptLong" Color="Color.Primary" />
+                <div class="pa-3 rounded-circle mr-4" style="background-color: var(--mud-palette-primary-hover);">
+                    <MudIcon Icon="@Icons.Material.Filled.AccessTimeFilled" Color="Color.Primary" />
                 </div>
                 <div>
-                    <MudText Typo="Typo.h5" FontWeight="FontWeight.Bold">Order Summary</MudText>
-                    <MudText Typo="Typo.caption" Class="mud-text-secondary">Transaction ID: #@Order.OrderId</MudText>
+                    <div class="d-flex align-center gap-2">
+                        <MudText Typo="Typo.h5" FontWeight="FontWeight.Bold">Order Summary</MudText>
+                        @* Status moved here, next to the title *@
+                        <MudChip T="string" Color="@GetStatusColor(Order.Status)" Variant="Variant.Text"
+                                 Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Class="ma-0 px-2 font-weight-bold">
+                            @Order.Status
+                        </MudChip>
+                    </div>
+                    <div class="d-flex align-center mt-1">
+                        <MudIcon Icon="@Icons.Material.Filled.History" Size="Size.Small" Class="mud-text-secondary mr-1" />
+                        <MudText Typo="Typo.subtitle2" Class="mud-text-secondary" Style="letter-spacing: 1px; font-weight: 700;">
+                            @Order.CreatedAt.ToString("hh:mm tt").ToUpper()
+                        </MudText>
+                        <MudDivider Vertical="true" FlexItem="true" Class="mx-2" Style="height: 12px; align-self: center;" />
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                            @Order.CreatedAt.ToString("MMM dd, yyyy")
+                        </MudText>
+                    </div>
                 </div>
             </div>
-            <MudChip T="string" Color="@GetStatusColor(Order.Status)" Variant="Variant.Filled" Size="Size.Small" Icon="@Icons.Material.Filled.CheckCircle">
-                @Order.Status
-            </MudChip>
         </div>
     </TitleContent>
 
     <DialogContent>
-        <MudContainer Style="max-height: 650px; overflow-y: auto;" Class="pa-0">
-            <div class="d-flex gap-4 mb-6">
-                <MudPaper Elevation="0" Class="pa-4 flex-grow-1 rounded-xl border border-solid" Style="border-color: var(--mud-palette-lines-inputs); background: transparent;">
-                    <MudStack Row="true" AlignItems="AlignItems.Center">
-                        <MudAvatar Color="Color.Info" Variant="Variant.Text">
-                            <MudIcon Icon="@Icons.Material.Filled.Person" />
-                        </MudAvatar>
-                        <div>
-                            <MudText Typo="Typo.caption" Class="mud-text-secondary">Cashier/Staff</MudText>
-                            <MudText Typo="Typo.body1" FontWeight="FontWeight.Bold">@Order.CreatedBy</MudText>
-                        </div>
-                    </MudStack>
-                </MudPaper>
+        <MudContainer Style="max-height: 600px; overflow-y: auto;" Class="pa-0 mt-4">
 
-                <MudPaper Elevation="0" Class="pa-4 flex-grow-1 rounded-xl border border-solid" Style="border-color: var(--mud-palette-lines-inputs); background: transparent;">
-                    <MudStack Row="true" AlignItems="AlignItems.Center">
-                        <MudAvatar Color="Color.Warning" Variant="Variant.Text">
-                            <MudIcon Icon="@Icons.Material.Filled.AccessTime" />
-                        </MudAvatar>
-                        <div>
-                            <MudText Typo="Typo.caption" Class="mud-text-secondary">Timestamp</MudText>
-                            <MudText Typo="Typo.body1" FontWeight="FontWeight.Bold">@Order.CreatedAt.ToString("MMM dd, yyyy • HH:mm")</MudText>
-                        </div>
-                    </MudStack>
-                </MudPaper>
+            <div class="pa-4 mb-6 rounded-xl d-flex align-center" style="background: var(--mud-palette-drawer-background); border: 1px solid var(--mud-palette-divider);">
+                <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Medium" Class="mr-3">
+                    @Order.CreatedBy[0].ToString().ToUpper()
+                </MudAvatar>
+                <div>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary" Style="line-height: 1;">Handled by</MudText>
+                    <MudText Typo="Typo.body1" FontWeight="FontWeight.Bold">@Order.CreatedBy</MudText>
+                </div>
+                <MudSpacer />
+                <div class="text-right">
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary" Style="line-height: 1;">Total Paid</MudText>
+                    <MudText Typo="Typo.h6" Color="Color.Primary" FontWeight="FontWeight.Black">
+                        @Order.TotalPrice.ToString("N0") <span style="font-size: 12px;">MMK</span>
+                    </MudText>
+                </div>
             </div>
 
-            <MudText Typo="Typo.subtitle2" Class="mb-2 ml-1" FontWeight="FontWeight.Bold">ORDERED ITEMS</MudText>
-            <MudTable Items="Order.Items" T="OrderItems" Hover="true" Elevation="0" Class="mb-4">
+            <MudTable Items="Order.Items" T="OrderItems" Hover="false" Elevation="0" Class="mb-4">
                 <HeaderContent>
-                    <MudTh>Product</MudTh>
-                    <MudTh Style="text-align:center">Qty</MudTh>
-                    <MudTh Style="text-align:right">Price</MudTh>
-                    <MudTh Style="text-align:right">Subtotal</MudTh>
+                    <MudTh Style="font-weight: bold; color: var(--mud-palette-text-secondary); border-bottom: 2px solid var(--mud-palette-divider);">PRODUCT</MudTh>
+                    <MudTh Style="text-align:center; font-weight: bold; color: var(--mud-palette-text-secondary); border-bottom: 2px solid var(--mud-palette-divider);">QTY</MudTh>
+                    <MudTh Style="text-align:right; font-weight: bold; color: var(--mud-palette-text-secondary); border-bottom: 2px solid var(--mud-palette-divider);">SUBTOTAL</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd DataLabel="Product">
-                        <div class="d-flex flex-column">
-                            <MudText Typo="Typo.body2" FontWeight="FontWeight.Bold">@context.ProductName</MudText>
-                            <MudText Typo="Typo.caption" Style="font-family: monospace;">@context.ProductCode</MudText>
-                        </div>
+                    <MudTd>
+                        <MudText Typo="Typo.body2" FontWeight="FontWeight.Bold">@context.ProductName</MudText>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary" Style="font-family: monospace;">@context.ProductCode</MudText>
                     </MudTd>
-                    <MudTd DataLabel="Qty" Style="text-align:center">
-                        <MudBadge Content="@context.Quatity" Color="Color.Default" Overlap="true" Bordered="true">
-                            <MudIcon Icon="@Icons.Material.Outlined.ShoppingBag" Size="Size.Small" Class="mud-text-secondary" />
-                        </MudBadge>
+                    <MudTd Style="text-align:center">
+                        <MudText Typo="Typo.body2">@context.Quatity</MudText>
                     </MudTd>
-                    <MudTd DataLabel="Price" Style="text-align:right">@context.Amount.ToString("N0")</MudTd>
-                    <MudTd DataLabel="Subtotal" Style="text-align:right">
-                        <MudText Color="Color.Primary" FontWeight="FontWeight.Bold">@((context.Quatity * context.Amount).ToString("N0"))</MudText>
+                    <MudTd Style="text-align:right">
+                        <MudText Typo="Typo.body2" FontWeight="FontWeight.Bold">@((context.Quatity * context.Amount).ToString("N0"))</MudText>
                     </MudTd>
                 </RowTemplate>
             </MudTable>
 
-            <MudPaper Elevation="0" Class="pa-6 rounded-xl" Style="background-color: var(--mud-palette-background-grey);">
-                <div class="d-flex justify-space-between mb-2">
-                    <MudText Typo="Typo.body2" Class="mud-text-secondary">Subtotal</MudText>
-                    <MudText Typo="Typo.body2" FontWeight="FontWeight.Bold">@Order.TotalPrice.ToString("N0")</MudText>
-                </div>
-                <div class="d-flex justify-space-between mb-4">
-                    <MudText Typo="Typo.body2" Class="mud-text-secondary">Tax (0%)</MudText>
-                    <MudText Typo="Typo.body2" FontWeight="FontWeight.Bold">0</MudText>
-                </div>
-                <MudDivider Class="mb-4" />
-                <div class="d-flex justify-space-between align-center">
-                    <MudText Typo="Typo.h6" FontWeight="FontWeight.Bold">Grand Total</MudText>
-                    <MudText Typo="Typo.h5" Color="Color.Primary" FontWeight="FontWeight.Black">@Order.TotalPrice.ToString("N0") MMK</MudText>
-                </div>
-            </MudPaper>
+            <div class="d-flex flex-column align-center mt-10 mb-8 mud-text-secondary">
+                <MudDivider Style="width: 40%; border-style: dashed;" Class="mb-2" />
+                <MudText Typo="Typo.caption" Style="text-transform: uppercase; letter-spacing: 1px;">End of Record</MudText>
+            </div>
+
         </MudContainer>
     </DialogContent>
-
-    <DialogActions>
-        <div class="d-flex justify-space-between w-100 pa-4 mt-2">
-            <MudButton StartIcon="@Icons.Material.Filled.Close" OnClick="Close" Variant="Variant.Text" Color="Color.Error">Dismiss</MudButton>
-            <div class="d-flex gap-2">
-                <MudButton StartIcon="@Icons.Material.Filled.Print" Variant="Variant.Outlined" Color="Color.Primary">Print</MudButton>
-                <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Filled" Color="Color.Primary" Class="px-6 rounded-lg">Export PDF</MudButton>
-            </div>
-        </div>
-    </DialogActions>
 </MudDialog>
 
 @code {
     [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
     [Parameter] public OrderViewModel Order { get; set; } = new();
-
-    private void Close() => MudDialog.Close();
 
     private Color GetStatusColor(string status) => status?.ToLower() switch
     {

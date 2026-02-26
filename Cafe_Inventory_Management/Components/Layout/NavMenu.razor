@@ -6,7 +6,9 @@
     <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Home</MudNavLink>
 
     <MudNavLink Href="/orders" Icon="@Icons.Material.Filled.ReceiptLong">Order Management</MudNavLink>
+    
     <MudNavLink Href="/ordersList" Icon="@Icons.Material.Filled.People">Order List</MudNavLink>
+
     <MudNavLink Href="/order-history" Icon="@Icons.Material.Filled.People">Order History</MudNavLink>
 
     <MudNavLink Href="/product" Icon="@Icons.Material.Filled.LocalCafe">Product List</MudNavLink>
@@ -17,24 +19,18 @@
 
     <MudNavLink Href="/product-import" Icon="@Icons.Material.Filled.Inventory">Products Import</MudNavLink>
 
-
     <MudDivider Class="my-2" />
 
-        <AuthorizeView Roles="Admin">
-                    <Authorized>
+        <AuthorizeView Roles="Admin"><Authorized>
     <div class="pa-4">
         <MudText Typo="Typo.overline" Style="color: #967E76; font-weight: 700;">Administration</MudText>
     </div>
 
-
-    <MudNavLink Href="/createuser" Icon="@Icons.Material.Filled.Assessment">User Management</MudNavLink>
-
     <MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Assessment">Business Reports</MudNavLink>
 
-            <MudNavLink Href="/admin-dashboard" Icon="@Icons.Material.Filled.People">Staff Reports</MudNavLink>
+    <MudNavLink Href="/admin-dashboard" Icon="@Icons.Material.Filled.People">Staff Reports</MudNavLink>
 
-
-    <MudNavLink Href="/users" Icon="@Icons.Material.Filled.People">Staff Management</MudNavLink>
+    <MudNavLink Href="/users" Icon="@Icons.Material.Filled.People">Staff User Management</MudNavLink>
 
     </Authorized>
     </AuthorizeView>
