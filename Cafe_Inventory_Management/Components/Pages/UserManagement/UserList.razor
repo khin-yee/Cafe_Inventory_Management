@@ -26,13 +26,14 @@
     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
 
         <MudTextField @bind-Value="Search"
-                      Placeholder="Search users..."
+                      Placeholder="Search by name or email..."
                       Variant="Variant.Outlined"
                       Adornment="Adornment.Start"
                       Margin="Margin.Dense"
                       AdornmentIcon="@Icons.Material.Filled.Search"
                       Class="rounded-lg"
-                       />
+                      Immediate="true"
+                      Clearable="true" />
     </MudStack>
 
 
@@ -70,7 +71,6 @@
                     <MudChip T="String" Color="Color.Success"
                              Variant="Variant.Filled"
                              Size="Size.Small">
-
                         Verified
                     </MudChip>
                 }
@@ -79,7 +79,6 @@
                     <MudChip T="String" Color="Color.Warning"
                              Variant="Variant.Outlined"
                              Size="Size.Small">
-
                         Pending
                     </MudChip>
                 }
@@ -87,7 +86,6 @@
             </MudTd>
 
             <MudTd Align="Right">
-
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -97,10 +95,11 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                Color="Color.Error"
                                Size="Size.Small" />
-
             </MudTd>
 
         </RowTemplate>
+
+
         <PagerContent>
             <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
         </PagerContent>

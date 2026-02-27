@@ -53,42 +53,68 @@ public class OrderController : ControllerBase
     [HttpGet("/ExportExcel")]
     public async Task<IActionResult> GetExcelExport([FromQuery] string? search, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
-        var data = await _service.ExcelExport(search, startDate, endDate);
-
-        DataTable dt = new DataTable("OrderHistory");
-        dt.Columns.AddRange(new DataColumn[] {
-                    new DataColumn("Date"),
-                    new DataColumn("Order ID"),
-                    new DataColumn("Product Code"),
-                    new DataColumn("Qty"),
-                    new DataColumn("Unit Price"),
-                    new DataColumn("Item Total"),
-                    new DataColumn("Order Grand Total")
-                });
-
-        foreach (var order in data)
-        {
-            bool firstItem = true;
-            foreach (var item in order.Items)
-            {
-                dt.Rows.Add(
-                    order.CreatedAt.ToString("g"),
-                    order.OrderId,
-                    item.ProductCode,
-                    item.Quatity, 
-                    item.Amount,
-                    (item.Quatity * item.Amount),
-                    firstItem ? order.TotalPrice : 0 
-                );
-                firstItem = false;
-            }
-        }
+        List<OrderViewModel> data = await _service.ExcelExport(search, startDate, endDate);
 
         using (var xl = new XLWorkbook())
         {
-            var ws = xl.Worksheets.Add(dt);
+            var ws = xl.Worksheets.Add("Order History");
 
-            ws.Row(1).Style.Font.Bold = true;
+            var colorHeaderBg = XLColor.FromHtml("#1A73E8"); // Corporate Blue
+            var colorOrderRowBg = XLColor.FromHtml("#E8F0FE"); // Very Light Blue
+            var colorTextSecondary = XLColor.FromHtml("#5F6368"); // Professional Gray
+
+            var headerStyle = xl.Style;
+            headerStyle.Font.Bold = true;
+            headerStyle.Fill.BackgroundColor = colorTextSecondary; 
+            headerStyle.Font.FontColor = XLColor.Black;
+
+            var orderRowStyle = xl.Style;
+            orderRowStyle.Fill.BackgroundColor = XLColor.FromHtml("#E8F0FE"); // Light Blue Highlight
+            orderRowStyle.Font.Bold = true;
+
+            string[] headers = { "Date", "Order ID", "Staff Name", "Product / Code", "Qty", "Unit Price", "Total (MMK)" };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                ws.Cell(1, i + 1).Value = headers[i];
+                ws.Cell(1, i + 1).Style = headerStyle;
+            }
+
+            int currentRow = 2;
+
+            foreach (var order in data)
+            {
+                var orderRange = ws.Range(currentRow, 1, currentRow, 7);
+                orderRange.Style = orderRowStyle;
+
+                ws.Cell(currentRow, 1).Value = order.CreatedAt.ToString("g");
+                ws.Cell(currentRow, 2).Value = order.OrderId;
+                ws.Cell(currentRow, 3).Value = order.CreatedBy; // Added Staff Name
+                ws.Cell(currentRow, 4).Value = "ORDER SUMMARY";
+                ws.Cell(currentRow, 7).Value = order.TotalPrice;
+                ws.Cell(currentRow, 7).Style.NumberFormat.Format = "#,##0 \"MMK\"";
+
+                currentRow++;
+
+                foreach (var item in order.Items)
+                {
+                    ws.Cell(currentRow, 4).Value = $"   • {item.ProductName} ({item.ProductCode})";
+                    ws.Cell(currentRow, 4).Style.Font.FontColor = XLColor.DimGray;
+
+                    ws.Cell(currentRow, 5).Value = item.Quatity;
+                    ws.Cell(currentRow, 6).Value = item.Amount;
+                    ws.Cell(currentRow, 7).Value = (item.Quatity * item.Amount);
+
+                    ws.Cell(currentRow, 6).Style.NumberFormat.Format = "#,##0";
+                    ws.Cell(currentRow, 7).Style.NumberFormat.Format = "#,##0";
+                    ws.Cell(currentRow, 7).Style.Font.FontColor = XLColor.Gray;
+
+                    currentRow++;
+                }
+
+                ws.Range(currentRow - 1, 1, currentRow - 1, 7).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+                ws.Range(currentRow - 1, 1, currentRow - 1, 7).Style.Border.BottomBorderColor = XLColor.LightGray;
+            }
+
             ws.Columns().AdjustToContents();
 
             using (MemoryStream mstream = new MemoryStream())

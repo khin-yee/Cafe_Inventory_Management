@@ -11,7 +11,7 @@ namespace Cafe_Inventory_Management.Service
     public class EmailReportService
     {
         private readonly IConfiguration _config;
-        private readonly IOrderRepo _repo; // Your DB Context
+        private readonly IOrderRepo _repo; 
 
         public EmailReportService(IConfiguration config, IOrderRepo repo)
         {
@@ -34,16 +34,13 @@ namespace Cafe_Inventory_Management.Service
 
             var orders = await _repo.GetOrders();
 
-            // 3. Create Excel Workbook
             using var workbook = new XLWorkbook();
             var ws = workbook.Worksheets.Add("Business Sales Report");
 
-            // --- Define Professional Color Palette ---
             var colorHeaderBg = XLColor.FromHtml("#1A73E8"); // Corporate Blue
             var colorOrderRowBg = XLColor.FromHtml("#E8F0FE"); // Very Light Blue
             var colorTextSecondary = XLColor.FromHtml("#5F6368"); // Professional Gray
 
-            // --- Set Headers ---
             string[] headers = { "Order ID", "Staff Name", "Date Time", "Product / Item", "Qty", "Unit Price", "Subtotal" };
             for (int i = 0; i < headers.Length; i++)
             {
@@ -59,7 +56,6 @@ namespace Cafe_Inventory_Management.Service
 
             foreach (var order in orders)
             {
-                // --- MAIN ORDER DATA ROW (The "Anchor" Row) ---
                 var orderRange = ws.Range(currentRow, 1, currentRow, 7);
                 orderRange.Style.Fill.BackgroundColor = colorOrderRowBg;
                 orderRange.Style.Font.Bold = true;
@@ -75,7 +71,6 @@ namespace Cafe_Inventory_Management.Service
 
                 currentRow++;
 
-                // --- PRODUCT ITEM ROWS ---
                 foreach (var item in order.Items)
                 {
                     ws.Cell(currentRow, 4).Value = "   • " + item.ProductName;
@@ -84,26 +79,20 @@ namespace Cafe_Inventory_Management.Service
                     ws.Cell(currentRow, 5).Value = item.Quatity;
                     ws.Cell(currentRow, 6).Value = item.Amount;
                     ws.Cell(currentRow, 6).Style.NumberFormat.Format = "#,##0";
-
                     ws.Cell(currentRow, 7).Value = item.Quatity * item.Amount;
                     ws.Cell(currentRow, 7).Style.NumberFormat.Format = "#,##0";
                     ws.Cell(currentRow, 7).Style.Font.FontColor = colorTextSecondary;
-
-                    // Alignments
                     ws.Cell(currentRow, 5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                     currentRow++;
                 }
 
-                // Add a small spacer border after the items are done
                 ws.Range(currentRow - 1, 1, currentRow - 1, 7).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
                 ws.Range(currentRow - 1, 1, currentRow - 1, 7).Style.Border.BottomBorderColor = XLColor.FromHtml("#E0E0E0");
             }
 
             ws.Columns().AdjustToContents();
-            ws.Column(4).Width = 40; // Give the product name extra width
-
-            // 4. Send the Email
+            ws.Column(4).Width = 40; 
             await ExecuteEmailSend(workbook, isMonthly, settings, startDate, endDate, orders.Count);
             return "true";
         }

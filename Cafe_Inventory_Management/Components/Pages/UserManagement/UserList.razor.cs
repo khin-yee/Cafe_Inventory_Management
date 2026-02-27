@@ -24,8 +24,16 @@ public partial class UserList : ComponentBase
     }
 
 
-    IEnumerable<Auth0User> FilteredUsers =>
-        Users;
+    // Change your existing FilteredUsers property to this:
+    IEnumerable<Auth0User> FilteredUsers => Users.Where(user =>
+    {
+        if (string.IsNullOrWhiteSpace(Search))
+            return true;
+
+        // Search by Name or Email (Case-insensitive)
+        return (user.name?.Contains(Search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+               (user.email?.Contains(Search, StringComparison.OrdinalIgnoreCase) ?? false);
+    });
 
 
     // ---------------- DIALOGS ----------------

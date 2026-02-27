@@ -5,10 +5,10 @@
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
     <div class="d-flex justify-space-between align-center mb-6">
-        <MudText Typo="Typo.h4" FontWeight="700">Business Intelligence</MudText>
+        <MudText Typo="Typo.h4"  class="me-4" FontWeight="700">Business Intelligence</MudText>
 
         <MudSelect T="string" Label="Time Range" Value="@_selectedRange" ValueChanged="OnRangeChanged"
-                   Variant="Variant.Outlined" Margin="Margin.Dense" Style="width: 250px; background: white;">
+              Variant="Variant.Outlined" Margin="Margin.Dense" Style="width: 150px; background: white;">
             <MudSelectItem Value="@("7d")">Last 7 Days</MudSelectItem>
             <MudSelectItem Value="@("month")">This Month</MudSelectItem>
             <MudSelectItem Value="@("year")">This Year</MudSelectItem>
