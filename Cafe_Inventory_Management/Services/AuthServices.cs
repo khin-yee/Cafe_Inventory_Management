@@ -64,7 +64,9 @@ public class AuthServices
 
         var json = await response.Content.ReadAsStringAsync();
 
-        return JsonConvert.DeserializeObject<List<Auth0User>>(json);
+        return JsonConvert.DeserializeObject<List<Auth0User>>(json)
+               .OrderByDescending(x => x.created_at)
+               .ToList();
     }
     public async Task<string> CreateUser(string email, string password, string userName)
     {

@@ -17,3 +17,11 @@ public class Auth0User
     public List<string> roles { get; set; }
 }
 
+
+public class Auth0Role
+{
+    public string id { get; set; }
+    public string name { get; set; }
+    public string description { get; set; }
+}
+
