@@ -49,6 +49,7 @@ public class AuthServices
 
         return null;
     }
+
     public async Task<List<Auth0User>> GetUsers()
     {
         var token = await GetManagementToken();
@@ -61,12 +62,71 @@ public class AuthServices
             new AuthenticationHeaderValue("Bearer", token);
 
         var response = await client.GetAsync(url);
-
         var json = await response.Content.ReadAsStringAsync();
 
-        return JsonConvert.DeserializeObject<List<Auth0User>>(json)
-               .OrderByDescending(x => x.created_at)
-               .ToList();
+        var users = JsonConvert.DeserializeObject<List<Auth0User>>(json)
+                    .OrderByDescending(x => x.created_at)
+                    .ToList();
+
+        var roles = await GetRoles(token);
+
+        var roleTasks = roles.Select(async role =>
+        {
+            var roleUsers = await GetUsersByRole(role.id, token);
+
+            foreach (var roleUser in roleUsers)
+            {
+                var user = users.FirstOrDefault(u => u.user_id == roleUser.user_id);
+
+                if (user != null)
+                {
+                    user.roles ??= new List<string>();
+                    user.roles.Add(role.name);
+                }
+            }
+        });
+
+        await Task.WhenAll(roleTasks);
+
+        return users;
+    }
+    public async Task DeleteUser(string userId)
+    {
+        if (string.IsNullOrEmpty(userId))
+            throw new Exception("UserId is required");
+
+        var token = await GetManagementToken();
+
+        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/users/{userId}";
+
+        var request = new ApiRequest(HttpMethod.Delete, url, null, token);
+
+        var response = await _apiService.APICall(request);
+
+        if (response == null || response.ErrorCode != "00")
+            throw new Exception($"DeleteUser failed: {response?.Detail}");
+    }
+    public async Task<List<Auth0User>> GetUsersByRole(string roleId, string token)
+    {
+        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/roles/{roleId}/users";
+
+        using var client = new HttpClient();
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync(url);
+        var json = await response.Content.ReadAsStringAsync();
+
+        return JsonConvert.DeserializeObject<List<Auth0User>>(json);
+    }
+    public async Task<List<Auth0Role>> GetRoles(string token)
+    {
+        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/roles";
+        using var client = new HttpClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var response = await client.GetAsync(url);
+        var json = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<List<Auth0Role>>(json);
     }
     public async Task<string> CreateUser(string email, string password, string userName)
     {

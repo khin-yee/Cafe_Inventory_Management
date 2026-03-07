@@ -18,7 +18,7 @@
                    OnClick="OpenCreate">
             New User
         </MudButton>
-       
+
 
     </MudStack>
 
@@ -50,6 +50,7 @@
             <MudTh>Email</MudTh>
             <MudTh>Name</MudTh>
             <MudTh>Status</MudTh>
+            <MudTh>Role</MudTh>
             <MudTh Align="Right">Action</MudTh>
 
         </HeaderContent>
@@ -69,22 +70,29 @@
                 @if (context.email_verified)
                 {
                     <MudChip T="String" Color="Color.Success"
-                             Variant="Variant.Filled"
-                             Size="Size.Small">
+                    Variant="Variant.Filled"
+                    Size="Size.Small">
                         Verified
                     </MudChip>
                 }
                 else
                 {
                     <MudChip T="String" Color="Color.Warning"
-                             Variant="Variant.Outlined"
-                             Size="Size.Small">
+                    Variant="Variant.Outlined"
+                    Size="Size.Small">
                         Pending
                     </MudChip>
                 }
 
             </MudTd>
-
+            <MudTd>
+                <MudText>
+                    @foreach (var item in context.roles)
+                    {
+                        @item 
+                    }
+                </MudText>
+            </MudTd>
             <MudTd Align="Right">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
@@ -94,6 +102,7 @@
 
                 <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                Color="Color.Error"
+                               OnClick="@(() => ConfirmDeleteUser(context.user_id))"
                                Size="Size.Small" />
             </MudTd>
 

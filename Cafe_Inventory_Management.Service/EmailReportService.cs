@@ -26,7 +26,6 @@ namespace Cafe_Inventory_Management.Service
         {
             var settings = _config.GetSection("EmailSettings");
 
-            // 1. Date Range Setup
             var startDate = isMonthly
                 ? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(-1)
                 : DateTime.Now.Date.AddDays(-1);
@@ -40,9 +39,9 @@ namespace Cafe_Inventory_Management.Service
             using var workbook = new XLWorkbook();
             var ws = workbook.Worksheets.Add("Business Sales Report");
 
-            var colorHeaderBg = XLColor.FromHtml("#1A73E8"); // Corporate Blue
-            var colorOrderRowBg = XLColor.FromHtml("#E8F0FE"); // Very Light Blue
-            var colorTextSecondary = XLColor.FromHtml("#5F6368"); // Professional Gray
+            var colorHeaderBg = XLColor.FromHtml("#1A73E8"); 
+            var colorOrderRowBg = XLColor.FromHtml("#E8F0FE");
+            var colorTextSecondary = XLColor.FromHtml("#5F6368"); 
 
             string[] headers = { "Order ID", "Staff Name", "Date Time", "Product / Item", "Qty", "Unit Price", "Subtotal" };
             for (int i = 0; i < headers.Length; i++)
@@ -109,7 +108,7 @@ namespace Cafe_Inventory_Management.Service
             if (adminEmails == null || !adminEmails.Any())
                 return;
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(settings["SenderName"], settings["SenderEmail"]));
+            message.From.Add(new MailboxAddress(settings["SenderName"], settings["SenderEmail"]!));
 
             foreach (var email in adminEmails)
             {
@@ -132,8 +131,8 @@ namespace Cafe_Inventory_Management.Service
             var payload = new Dictionary<string, string>
             {
                 { "grant_type", "client_credentials" },
-                { "client_id", _config["Auth0:ClientId"] },
-                { "client_secret", _config["Auth0:ClientSecret"] },
+                { "client_id", _config["Auth0:ClientId"]! },
+                { "client_secret", _config["Auth0:ClientSecret"]! },
                 { "audience", $"https://{_config["Auth0:Domain"]}/api/v2/" }
             };
 
@@ -176,7 +175,7 @@ namespace Cafe_Inventory_Management.Service
 
             using var client = new HttpClient();
 
-            var roleId = _config["Auth0:AdminRoleId"]; // store in appsettings
+            var roleId = _config["Auth0:AdminRoleId"];
 
             var url = $"https://{_config["Auth0:Domain"]}/api/v2/roles/{roleId}/users";
 
@@ -199,58 +198,7 @@ namespace Cafe_Inventory_Management.Service
                     .Select(u => u.email)
                     .ToList();
             }
-
             return adminEmails;
         }
-
-
-        //public async Task<List<Auth0User>> GetUsers()
-        //{
-        //    var token = await GetManagementToken();
-
-        //    var url = $"https://{_config["Auth0:Domain"]}/api/v2/users";
-
-        //    using var client = new HttpClient();
-
-        //    client.DefaultRequestHeaders.Authorization =
-        //        new AuthenticationHeaderValue("Bearer", token);
-
-        //    var response = await client.GetAsync(url);
-
-        //    var json = await response.Content.ReadAsStringAsync();
-
-        //    return JsonConvert.DeserializeObject<List<Auth0User>>(json);
-        //}
-
-        //public async Task<List<Auth0User>> GetAllUsersWithRoles()
-        //{
-        //    // 1. Get the list of all users
-        //    var users = await GetUsers(); // Your existing method
-        //    var token = await GetManagementToken();
-
-        //    if (string.IsNullOrEmpty(token)) return users;
-
-        //    using var client = new HttpClient();
-
-
-        //    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        //    // 2. For each user, fetch their roles
-        //    // Note: In a large system, you'd use app_metadata to avoid multiple calls
-        //    foreach (var user in users)
-        //    {
-        //        var roleUrl = $"https://{_config["Auth0:Domain"]}/api/v2/users/{user.user_id}/roles";
-        //        var roleResponse = await client.GetAsync(roleUrl);
-
-        //        if (roleResponse.IsSuccessStatusCode)
-        //        {
-        //            var roleJson = await roleResponse.Content.ReadAsStringAsync();
-        //            var userroles = JsonConvert.DeserializeObject<List<Auth0Role>>(roleJson) ?? new();
-        //            user.roles = 
-        //        }
-        //    }
-
-        //    return users;
-        //}
     }
 }
