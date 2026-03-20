@@ -232,6 +232,34 @@ public class OrderRepository : IOrderRepo
         return viewModelList!;
     }
 
+    public async Task<List<OrderViewModel>> GetOrdersByDate(DateTime startDate, DateTime endDate)
+    {
+
+        var orders = await _context.Orders
+  .Where(o => o.Status == "Completed" &&
+                        o.CreatedAt >= startDate &&
+                        o.CreatedAt <= endDate).OrderByDescending(o => o.CreatedAt)
+        .ToListAsync();
+
+        var orderIds = orders.Select(o => o.OrderId).ToList();
+        var allItems = await _context.OrderItems
+            .Where(i => orderIds.Contains(i.OrderId))
+            .ToListAsync();
+
+        var viewModelList = orders.Select(o => new OrderViewModel
+        {
+            OrderId = o.OrderId,
+            TotalPrice = o.TotalPrice,
+            Status = o.Status,
+            CreatedAt = o.CreatedAt,
+            CreatedBy = o.CreatedBy,
+            Items = allItems.Where(i => i.OrderId == o.OrderId).ToList()
+        }).OrderByDescending(x => x.CreatedAt).ToList();
+
+        return viewModelList!;
+
+    }
+
     public async Task<PagedResult<OrderViewModel>> GetAllSuccessOrders(int page, int pageSize, string? search, DateTime? start, DateTime? end)
     {
         var query = _context.Orders.Where(o => o.Status == "Success" || o.Status == "Completed");
@@ -344,31 +372,37 @@ public class OrderRepository : IOrderRepo
 
         if (range == "year")
         {
+            labels.Clear();
+            dataPoints.Clear();
+
             for (int i = 1; i <= 12; i++)
             {
                 labels.Add(new DateTime(today.Year, i, 1).ToString("MMM"));
-                dataPoints.Add((double)orders.Where(o => o.CreatedAt.Month == i).Sum(o => o.TotalPrice));
-            }
-        }
-        if (range == "month")
-        {
-            var daysInMonth = (today - startDate).Days;
-            for (int i = 0; i <= daysInMonth; i++)
-            {
-                var date = startDate.AddDays(i);
-                if (i == 0 || i % 5 == 0 || date == today)
-                {
-                    labels.Add(date.ToString("dd MMM"));
-                }
-                else
-                {
-                    labels.Add("");
-                }
 
-                dataPoints.Add((double)orders.Where(o => o.CreatedAt.Date == date).Sum(o => o.TotalPrice));
+                dataPoints.Add((double)orders
+                    .Where(o => o.CreatedAt.Month == i)
+                    .Sum(o => o.TotalPrice));
             }
         }
-        else
+        else if (range == "month")
+        {
+            var daysInMonth = DateTime.DaysInMonth(today.Year, today.Month);
+
+            for (int i = 1; i <= daysInMonth; i++)
+            {
+                var date = new DateTime(today.Year, today.Month, i);
+
+                if (i == 1 || i % 5 == 0)
+                    labels.Add(date.ToString("dd MMM"));
+                else
+                    labels.Add("");
+
+                dataPoints.Add((double)orders
+                    .Where(o => o.CreatedAt.Date == date.Date)
+                    .Sum(o => o.TotalPrice));
+            }
+        }
+        else 
         {
             for (var date = startDate; date <= today; date = date.AddDays(1))
             {

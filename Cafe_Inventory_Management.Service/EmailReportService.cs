@@ -34,7 +34,7 @@ namespace Cafe_Inventory_Management.Service
                 ? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59)
                 : DateTime.Now.Date.AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59);
 
-            var orders = await _repo.GetOrders();
+            var orders = await _repo.GetOrdersByDate(startDate,endDate);
 
             using var workbook = new XLWorkbook();
             var ws = workbook.Worksheets.Add("Business Sales Report");

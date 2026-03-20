@@ -14,7 +14,7 @@
                     <MudIcon Icon="@Icons.Material.Filled.History" Size="Size.Large" Color="Color.Primary" />
                     <MudStack Spacing="0">
                         <MudText Typo="Typo.h5" FontWeight="700">Order History</MudText>
-                        <MudText Typo="Typo.caption" Class="mud-text-secondary">Manual Search Mode</MudText>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">Administrative Reporting</MudText>
                     </MudStack>
                 </MudStack>
             </MudItem>
@@ -33,15 +33,24 @@
                                   Margin="Margin.Dense"
                                   Adornment="Adornment.Start"
                                   AdornmentIcon="@Icons.Material.Filled.Search"
-                                  Style="width: 180px;" />
+                                  Style="width: 150px;" />
 
-                  
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Primary"
                                OnClick="PerformSearch"
                                StartIcon="@Icons.Material.Filled.Search"
-                               Style="height: 40px;"/>
-                       
+                               Style="height: 40px;" />
+
+                    @* Manual Email Button - Highlights administrative action *@
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Warning"
+                               OnClick="SendManualEmailToAdmin"
+                               Disabled="_isEmailing"
+                               StartIcon="@Icons.Material.Filled.Email"
+                               Style="height: 40px;">
+                        @(_isEmailing ? "SENDING..." : "EMAIL ADMIN")
+                    </MudButton>
+
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Tertiary"
                                OnClick="PrepareExcel"
@@ -52,21 +61,25 @@
                     </MudButton>
                 </MudStack>
             </MudItem>
+
+
         </MudGrid>
+
         @if (!string.IsNullOrEmpty(_excelDataUrl))
         {
             <MudAlert Severity="Severity.Success" Variant="Variant.Filled" Dense="true" Class="mb-4">
-                Report Ready!
+                Local Export Ready!
                 <a href="@_excelDataUrl" download="@_fileName" style="color:white; font-weight:bold; text-decoration:underline; margin-left:10px;">
-                    Click here to save file
+                    Download File
                 </a>
             </MudAlert>
         }
+
         <MudTable T="OrderViewModel"
                   @ref="_table"
                   ServerData="ServerReload"
                   Hover="true"
-                  Dense = "true"
+                  Dense="true"
                   FixedHeader="true"
                   RowsPerPage="10"
                   Class="border rounded-lg shadow-none">

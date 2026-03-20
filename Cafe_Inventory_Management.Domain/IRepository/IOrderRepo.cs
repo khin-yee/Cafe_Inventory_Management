@@ -19,5 +19,8 @@ public interface IOrderRepo
     Task<AdminDashboardData> GetAdminStatus();
     Task<OrderViewModel> GetOrderDetails(string orderId);
 
+    Task<List<OrderViewModel>> GetOrdersByDate(DateTime startDate, DateTime endDate);
+
+
 }
 

@@ -20,7 +20,7 @@ public partial class OrderHistory:ComponentBase
     private string _excelDataUrl = "";
     private string _fileName = "";
     private bool _isProcessing = false;
-
+    private bool _isEmailing = false;
 
     // This method is called ONLY when the button is clicked
     private async Task PerformSearch()
@@ -120,6 +120,45 @@ public partial class OrderHistory:ComponentBase
         finally
         {
             _isProcessing = false;
+        }
+    }
+
+    private async Task SendManualEmailToAdmin()
+    {
+        _isEmailing = true;
+        try
+        {
+            // Triggers the manual SendReportAsync logic in your service
+            var payload = new
+            {
+                StartDate = _dateRange.Start,
+                EndDate = _dateRange.End,
+                IsMonthly = false // Manual triggers are usually treated as ad-hoc daily reports
+            };
+
+            var response = await _apiService.APICall(new ApiRequest(
+                HttpMethod.Post,
+                "/api/reports/send-manual",
+                JsonConvert.SerializeObject(payload),
+                "")
+            );
+
+            if (response != null && response.ErrorCode == "00")
+            {
+                Snackbar.Add("Report emailed to administrators successfully.", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Failed to send email. Ensure SMTP settings are correct.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isEmailing = false;
         }
     }
 }
