@@ -1,30 +1,37 @@
 ﻿<MudNavMenu>
-    <div class="pa-4">
-        <MudText Typo="Typo.overline" Style="color: #967E76; font-weight: 700;">Main Menu</MudText>
-    </div>
+   
 
-    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Home</MudNavLink>
 
+    <MudText Typo="Typo.overline" Style="color: #967E76; font-weight: 700;" Class="pa-3">
+        Orders
+    </MudText>
     <MudNavLink Href="/orders" Icon="@Icons.Material.Filled.ReceiptLong">Order Management</MudNavLink>
     
     <MudNavLink Href="/ordersList" Icon="@Icons.Material.Filled.People">Order List</MudNavLink>
 
     <MudNavLink Href="/order-history" Icon="@Icons.Material.Filled.People">Order History</MudNavLink>
 
+    <MudText Typo="Typo.overline" Style="color: #967E76; font-weight: 700;" Class="pa-3">
+        Products
+    </MudText>
     <MudNavLink Href="/product" Icon="@Icons.Material.Filled.LocalCafe">Product List</MudNavLink>
+    <MudNavLink Href="/product-import" Icon="@Icons.Material.Filled.Inventory">Products Import</MudNavLink>
+
+    <MudText Typo="Typo.overline" Style="color: #967E76; font-weight: 700;" Class="pa-3">
+        Ingredients
+    </MudText>
+
+  
 
     <MudNavLink Href="/Ingredients" Icon="@Icons.Material.Filled.Inventory">Stock Control</MudNavLink>
 
     <MudNavLink Href="/ingredient-import" Icon="@Icons.Material.Filled.Inventory">Ingredients Import</MudNavLink>
 
-    <MudNavLink Href="/product-import" Icon="@Icons.Material.Filled.Inventory">Products Import</MudNavLink>
 
     <MudDivider Class="my-2" />
 
         <AuthorizeView Roles="Admin"><Authorized>
-    <div class="pa-4">
-        <MudText Typo="Typo.overline" Style="color: #967E76; font-weight: 700;">Administration</MudText>
-    </div>
+    <MudText Typo="Typo.overline" Style="color: #967E76; font-weight: 700;" Class="pa-3">Adminstrations</MudText>
 
     <MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Assessment">Business Reports</MudNavLink>
 
