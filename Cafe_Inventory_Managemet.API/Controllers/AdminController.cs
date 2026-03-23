@@ -44,5 +44,6 @@ namespace Cafe_Inventory_Managemet.API.Controllers
             return Ok(await _emailservice.SendReportAsync(true));
         }
 
+
     }
 }

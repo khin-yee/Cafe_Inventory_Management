@@ -123,23 +123,22 @@ public partial class OrderHistory:ComponentBase
         }
     }
 
-    private async Task SendManualEmailToAdmin()
+    private async Task SendManualEmailToAdmin(bool montly)
     {
         _isEmailing = true;
         try
         {
-            // Triggers the manual SendReportAsync logic in your service
-            var payload = new
-            {
-                StartDate = _dateRange.Start,
-                EndDate = _dateRange.End,
-                IsMonthly = false // Manual triggers are usually treated as ad-hoc daily reports
-            };
+            //var payload = new
+            //{
+            //    //StartDate = _dateRange.Start,
+            //    //EndDate = _dateRange.End,
+            //    IsMonthly = montly 
+            //};
 
             var response = await _apiService.APICall(new ApiRequest(
                 HttpMethod.Post,
-                "/api/reports/send-manual",
-                JsonConvert.SerializeObject(payload),
+                "/EmailToAdmin",
+                montly,
                 "")
             );
 

@@ -8,8 +8,8 @@
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-6">
     <MudPaper Elevation="3" Class="pa-6 rounded-xl">
-        <MudGrid Items="AlignItems.Center" Class="mb-4">
-            <MudItem xs="12" sm="3">
+        <MudGrid Class="mb-4">
+            <MudItem xs="12" sm="4">
                 <MudStack Row="true" AlignItems="AlignItems.Center">
                     <MudIcon Icon="@Icons.Material.Filled.History" Size="Size.Large" Color="Color.Primary" />
                     <MudStack Spacing="0">
@@ -19,13 +19,14 @@
                 </MudStack>
             </MudItem>
 
-            <MudItem xs="12" sm="9">
+            <MudItem xs="12" sm="8">
                 <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
                     <MudDateRangePicker Label="Date Range"
                                         @bind-DateRange="_dateRange"
                                         Margin="Margin.Dense"
                                         Variant="Variant.Outlined"
-                                        Clearable="true" />
+                                        Clearable="true"
+                                     />
 
                     <MudTextField @bind-Value="_searchString"
                                   Placeholder="Order ID..."
@@ -33,44 +34,53 @@
                                   Margin="Margin.Dense"
                                   Adornment="Adornment.Start"
                                   AdornmentIcon="@Icons.Material.Filled.Search"
-                                  Style="width: 150px;" />
+                                   />
 
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               OnClick="PerformSearch"
-                               StartIcon="@Icons.Material.Filled.Search"
-                               Style="height: 40px;" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Search"
+                                   Variant="Variant.Filled"
+                                   Class="px-2"
+                                   Color="Color.Primary"
+                                   OnClick="PerformSearch"
+                                   Size="Size.Medium" />
+                </MudStack>
+            </MudItem>
 
-                    @* Manual Email Button - Highlights administrative action *@
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Warning"
-                               OnClick="SendManualEmailToAdmin"
+            <MudItem xs="12">
+                <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Dark"
+                               OnClick="@(() => SendManualEmailToAdmin(true))"
                                Disabled="_isEmailing"
                                StartIcon="@Icons.Material.Filled.Email"
-                               Style="height: 40px;">
-                        @(_isEmailing ? "SENDING..." : "EMAIL ADMIN")
+                               Style="height: 40px; min-width: 160px;">
+                        @(_isEmailing ? "SENDING..." : "EMAIL Montly Report")
                     </MudButton>
-
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Dark"
+                               OnClick="@(() => SendManualEmailToAdmin(false))"
+                               Disabled="_isEmailing"
+                               StartIcon="@Icons.Material.Filled.Email"
+                               Style="height: 40px; min-width: 160px;">
+                        @(_isEmailing ? "SENDING..." : "EMAIL Daily Report")
+                    </MudButton>
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Tertiary"
                                OnClick="PrepareExcel"
                                Disabled="_isProcessing"
                                StartIcon="@Icons.Material.Filled.Download"
-                               Style="height: 40px;">
-                        @(_isProcessing ? "PREPARING..." : "EXPORT")
+                               Style="height: 40px; min-width: 160px;">
+                        @(_isProcessing ? "PREPARING..." : "EXPORT EXCEL")
                     </MudButton>
                 </MudStack>
             </MudItem>
-
-
         </MudGrid>
 
         @if (!string.IsNullOrEmpty(_excelDataUrl))
         {
             <MudAlert Severity="Severity.Success" Variant="Variant.Filled" Dense="true" Class="mb-4">
-                Local Export Ready!
+                Report Ready!
                 <a href="@_excelDataUrl" download="@_fileName" style="color:white; font-weight:bold; text-decoration:underline; margin-left:10px;">
-                    Download File
+                    Click here to save file
                 </a>
             </MudAlert>
         }

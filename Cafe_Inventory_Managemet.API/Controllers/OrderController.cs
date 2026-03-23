@@ -14,10 +14,12 @@ namespace Cafe_Inventory_Managemet.API.Controllers;
 public class OrderController : ControllerBase
 {
     private readonly IOrderService _service;
+    private readonly EmailReportService _emailService;
 
-    public OrderController(IOrderService service)
+    public OrderController(IOrderService service, EmailReportService emailService)
     {
         _service = service;
+        _emailService = emailService;
     }
 
     [HttpPost("/CreateOrder")]
@@ -134,5 +136,11 @@ public class OrderController : ControllerBase
     public async Task<IActionResult> GetOrderDetails(string orderId)
     {          
         return Ok(await _service.GetOrderDetails(orderId));
+    }
+
+    [HttpPost("/EmailToAdmin")]
+    public async Task<IActionResult> EmailToAdmin([FromBody] bool montly)
+    {
+        return Ok(await _emailService.SendReportAsync(montly));
     }
 }
