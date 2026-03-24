@@ -1,44 +1,57 @@
-﻿<MudNavMenu>
-   
+﻿<MudNavMenu Dense="true">
 
+    <!-- Orders -->
+    <MudNavGroup Title="Orders" Ripple="true" Class="py-3 mt-1"
+                 Icon="@Icons.Material.Filled.ReceiptLong"
+                 ExpandIcon="@Icons.Material.Filled.ExpandMore"
+                 CollapseIcon="@Icons.Material.Filled.ExpandLess">
 
-    <MudText Typo="Typo.overline" Style="color: #967E76; font-weight: 700;" Class="pa-3">
-        Orders
-    </MudText>
-    <MudNavLink Href="/orders" Icon="@Icons.Material.Filled.ReceiptLong">Order Management</MudNavLink>
-    
-    <MudNavLink Href="/ordersList" Icon="@Icons.Material.Filled.People">Order List</MudNavLink>
+        <MudNavLink Href="/orders">Order Management</MudNavLink>
+        <MudNavLink Href="/ordersList">Order List</MudNavLink>
+        <MudNavLink Href="/order-history">Order History</MudNavLink>
 
-    <MudNavLink Href="/order-history" Icon="@Icons.Material.Filled.People">Order History</MudNavLink>
+    </MudNavGroup>
 
-    <MudText Typo="Typo.overline" Style="color: #967E76; font-weight: 700;" Class="pa-3">
-        Products
-    </MudText>
-    <MudNavLink Href="/product" Icon="@Icons.Material.Filled.LocalCafe">Product List</MudNavLink>
-    <MudNavLink Href="/product-import" Icon="@Icons.Material.Filled.Inventory">Products Import</MudNavLink>
+    <!-- Products -->
+    <MudNavGroup title="Products" Ripple="true" Class="py-3"
+                 Icon="@Icons.Material.Filled.LocalCafe"
+                 ExpandIcon="@Icons.Material.Filled.ExpandMore"
+                 CollapseIcon="@Icons.Material.Filled.ExpandLess">
 
-    <MudText Typo="Typo.overline" Style="color: #967E76; font-weight: 700;" Class="pa-3">
-        Ingredients
-    </MudText>
+        <MudNavLink Href="/product">Product List</MudNavLink>
+        <MudNavLink Href="/product-import">Products Import</MudNavLink>
 
-  
+    </MudNavGroup>
 
-    <MudNavLink Href="/Ingredients" Icon="@Icons.Material.Filled.Inventory">Stock Control</MudNavLink>
+    <!-- Ingredients -->
+    <MudNavGroup Title="Ingredients" Ripple="true" Class="py-3"
+                 Icon="@Icons.Material.Filled.Inventory"
+                 ExpandIcon="@Icons.Material.Filled.ExpandMore"
+                 CollapseIcon="@Icons.Material.Filled.ExpandLess">
 
-    <MudNavLink Href="/ingredient-import" Icon="@Icons.Material.Filled.Inventory">Ingredients Import</MudNavLink>
+        <MudNavLink Href="/Ingredients">Stock Control</MudNavLink>
+        <MudNavLink Href="/ingredient-import">Ingredients Import</MudNavLink>
 
+    </MudNavGroup>
 
     <MudDivider Class="my-2" />
 
-        <AuthorizeView Roles="Admin"><Authorized>
-    <MudText Typo="Typo.overline" Style="color: #967E76; font-weight: 700;" Class="pa-3">Adminstrations</MudText>
+    <!-- Admin -->
+    <AuthorizeView Roles="Admin">
+        <Authorized>
 
-    <MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Assessment">Business Reports</MudNavLink>
+            <MudNavGroup title="Administrations" Ripple="true" Class="py-3"
+                         Icon="@Icons.Material.Filled.AdminPanelSettings"
+                         ExpandIcon="@Icons.Material.Filled.ExpandMore"
+                         CollapseIcon="@Icons.Material.Filled.ExpandLess">
 
-    <MudNavLink Href="/admin-dashboard" Icon="@Icons.Material.Filled.People">Staff Reports</MudNavLink>
+                <MudNavLink Href="/dashboard">Business Reports</MudNavLink>
+                <MudNavLink Href="/admin-dashboard">Staff Reports</MudNavLink>
+                <MudNavLink Href="/users">Staff User Management</MudNavLink>
 
-    <MudNavLink Href="/users" Icon="@Icons.Material.Filled.People">Staff User Management</MudNavLink>
+            </MudNavGroup>
 
-    </Authorized>
+        </Authorized>
     </AuthorizeView>
+
 </MudNavMenu>
