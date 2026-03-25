@@ -29,15 +29,15 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost("/CreateProduct")]
-    public async Task<ApiResponse> CreateProduct([FromBody] Product product)
+    public async Task<ApiResponse> CreateProduct([FromBody] ProductRequest productrequest)
     {
-        return await _productService.CreateProduct(product);
+        return await _productService.CreateProduct(productrequest.Product,productrequest.Recipe);
     }
 
     [HttpPut("/UpdateProduct")]
-    public async Task<IActionResult>UpdateProduct([FromBody]Product product)
+    public async Task<IActionResult>UpdateProduct([FromBody] ProductRequest productrequest)
     {
-        return Ok(await _productService.UpdateProduct(product));
+        return Ok(await _productService.UpdateProduct(productrequest.Product,productrequest.Recipe));
     }
 
     [HttpDelete("/DeleteProduct")]

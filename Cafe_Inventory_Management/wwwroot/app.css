@@ -1,17 +1,41 @@
+:root {
+    --app-primary: #4b2e2b;
+    --app-bg: #faf7f2;
+    --app-surface: #ffffff;
+    --app-text-primary: #1b1212;
+    --app-text-secondary: rgba(27, 18, 18, 0.62);
+    --app-divider: rgba(17, 24, 39, 0.10);
+    --app-radius: 16px;
+}
+
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--app-bg);
+    color: var(--app-text-primary);
 }
 .custom-textfield .mud-input-root {
     min-height: 30px; /* reduce the overall height */
 }
+
+/* MudBlazor table polish (light mode classic-modern) */
+.mud-table thead th {
+    background: rgba(75, 46, 43, 0.08) !important;
+    color: var(--app-text-primary) !important;
+    font-weight: 700;
+    border-bottom: 1px solid var(--app-divider) !important;
+}
+
+.mud-table tbody tr:hover {
+    background: rgba(75, 46, 43, 0.04) !important;
+}
 a, .btn-link {
-    color: #006bb7;
+    color: var(--app-primary);
 }
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: var(--app-primary);
+    border-color: rgba(75, 46, 43, 0.75);
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {

@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @inject IDialogService Dialog
 @using Cafe_Inventory_Management.UI.Components.Pages
 @using Cafe_Inventory_Management.UI.Services
@@ -6,7 +6,7 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudThemeProvider IsDarkMode="false" />
+<MudThemeProvider IsDarkMode="false" Theme="_theme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -15,11 +15,10 @@
     <MudLayout>
         @if (!IsLoginPage)
         {
-            <MudAppBar Elevation="1" Dense="true" Fixed="true"
-                       Style="background-color: white; border-bottom: 1px solid #eee; z-index: 1300;">
+            <MudAppBar Elevation="1" Dense="true" Fixed="true" Class="appbar">
 
                 <MudText Typo="Typo.h6"
-                         Style="font-weight:900; color:#1B1212; letter-spacing: 1px;">
+                         Class="brand-title">
                     CHANOHOLIC            <MudImage Src="/Images/cf1.png" Width="30" Height="30" Alt="Product" Class="mr-3" />
 
                 </MudText>
@@ -30,7 +29,7 @@
                     <Authorized Context="auth">
                         <StockAlertBanner />
 
-                        <MudText Typo="Typo.body1" Class="mr-3" Style="color: #666;">
+                        <MudText Typo="Typo.body1" Class="mr-3 user-name">
                              <b>@auth.User.FindFirst(c => c.Type == "name")?.Value</b>
                         </MudText>
 
@@ -48,11 +47,11 @@
             </MudAppBar>
 
 
-            <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
+            <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2" Class="drawer">
                 <NavMenu />
             </MudDrawer>
-            <MudMainContent Style="background-color: #FAF9F6; min-height: 100vh;">
-                <div  >
+            <MudMainContent Class="main-content">
+                <div>
                     @Body
                 </div>
             </MudMainContent>
@@ -74,6 +73,23 @@ else
 }
 
 @code {
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#4b2e2b",
+            PrimaryContrastText = "#ffffff",
+            Secondary = "#6b4f4f",
+            Background = "#faf7f2",
+            Surface = "#ffffff",
+            DrawerBackground = "#ffffff",
+            DrawerText = "#1b1212",
+            AppbarBackground = "#ffffff",
+            AppbarText = "#1b1212",
+            Divider = "rgba(17, 24, 39, 0.10)"
+        }
+    };
+
     private bool IsLoginPage => Navigation.ToBaseRelativePath(Navigation.Uri) == "" ||
                                 Navigation.ToBaseRelativePath(Navigation.Uri).ToLower().Contains("signin") ||
                                 Navigation.ToBaseRelativePath(Navigation.Uri).ToLower().Contains("login");

@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 namespace Cafe_Inventory_Management.Domain.IRepository;
 public interface IOrderRepo
 {
+    Task<ApiResponse> GetRecipeByProductCode(string productCode);
+
     Task<ApiResponse> SaveOrder(OrderRequestDto request);
     Task<ApiResponse> UpdateOrder(OrderViewModel updatedOrder);
     Task<List<OrderViewModel>> GetOrders();

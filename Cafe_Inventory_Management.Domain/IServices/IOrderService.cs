@@ -19,5 +19,8 @@ public interface IOrderService
     Task<AdminDashboardData> GetAdminStatus();
     Task<OrderViewModel> GetOrderDetails(string orderId);
 
+    Task<ApiResponse> GetRecipeByProductCode(string productCode);
+
+
 }
 

@@ -143,4 +143,16 @@ public class OrderController : ControllerBase
     {
         return Ok(await _emailService.SendReportAsync(montly));
     }
+
+    [HttpGet("/GetRecipe")]
+    public async Task<ApiResponse> GetRecipe([FromQuery] string productCode)
+    {
+        if (string.IsNullOrEmpty(productCode))
+        {
+            return new ApiResponse { ErrorCode = "01", ErrorMessage = "Product Code is required." };
+        }
+
+        return await _service.GetRecipeByProductCode(productCode);
+    }
+
 }

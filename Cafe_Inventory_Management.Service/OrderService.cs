@@ -78,4 +78,10 @@ public class OrderService:IOrderService
         return await _repo.GetOrderDetails(orderId);
     }
 
+
+    public async Task<ApiResponse> GetRecipeByProductCode(string productCode)
+    {
+        return await _repo.GetRecipeByProductCode(productCode);
+    }
+
 }

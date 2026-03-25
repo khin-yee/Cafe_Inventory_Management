@@ -71,52 +71,90 @@ public class ProductRepository:IProductRepo
         };
     }
 
-    public async Task<ApiResponse> CreateProduct(Product product)
+    public async Task<ApiResponse> CreateProduct(Product product, List<ProductIngredients> ingredients)
     {
-        var response = new ApiResponse();
         using var transaction = await _context.Database.BeginTransactionAsync();
-        if (product.IsRecipe == false)
+        try
         {
-            var res = await _context.ProductIngredients.Where(x => x.ProductCode==product.Code).ToListAsync();
-            foreach(var item in res)
+            // 1. Save the Product
+            await _context.Product.AddAsync(product);
+
+            // 2. Save the Recipe Mapping
+            await _context.ProductIngredients.AddRangeAsync(ingredients);
+
+            // 3. CHECK LOGIC: If NOT a Recipe (Batch Production), deduct ingredients NOW
+            if (!product.IsRecipe)
             {
-                var ingredient = await _context.Ingredients.Where(x=>x.Code==item.IngredientCode).FirstOrDefaultAsync();
-
-                if (ingredient == null)
+                foreach (var item in ingredients)
                 {
-                    response.ErrorCode = "01";
-                    response.ErrorMessage = $"Ingredient with ID {item.IngredientCode} not found.";
-                    return response;
+                    var stock = await _context.Ingredients.FirstOrDefaultAsync(x => x.Code == item.IngredientCode);
+                    if (stock != null)
+                    {
+                        decimal totalNeeded = (product.Quatity ?? 0) * item.RequiredAmount;
+                        stock.Quatity -= totalNeeded;
+                        _context.Ingredients.Update(stock);
+                    }
                 }
-                decimal totalDeduction = (product.Quatity ?? 0) * (item.RequiredAmount );
-
-                if (ingredient.Quatity < totalDeduction)
-                {
-                    response.ErrorCode = "01";
-                    response.ErrorMessage = $"Stock too low for {ingredient.Name}. Needed: {totalDeduction}";
-                    return response;
-                }
-
-                ingredient.Quatity -= totalDeduction;
-                _context.Ingredients.Update(ingredient);
             }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return new ApiResponse { ErrorCode = "00" };
         }
-        await _context.Product.AddAsync(product);
-        _context.SaveChanges();
-        await transaction.CommitAsync();
-        return response;
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return new ApiResponse { ErrorCode = "99", ErrorMessage = ex.Message };
+        }
     }
 
-    public async Task<int>UpdatePrduct(Product updateProduct)
+    public async Task<ApiResponse> UpdateProduct(Product product, List<ProductIngredients> ingredients)
     {
-        var product = await _context.Product.Where(x => x.Id == updateProduct.Id).FirstOrDefaultAsync();
-        product.Name=updateProduct.Name;
-        product.Amount=updateProduct.Amount;
-        product.Quatity = updateProduct.Quatity;
-        product.IsActive = updateProduct.IsActive;
-        _context.Update(product);
-        var result = _context.SaveChanges();
-        return result;
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            // 1. Update the main Product details
+            var existingProduct = await _context.Product
+                .FirstOrDefaultAsync(x => x.Code == product.Code);
+
+            if (existingProduct == null)
+                return new ApiResponse { ErrorCode = "99", ErrorMessage = "Product not found." };
+
+            // Update fields
+            existingProduct.Name = product.Name;
+            existingProduct.Category = product.Category;
+            existingProduct.Amount = product.Amount;
+            existingProduct.IsActive = product.IsActive;
+            existingProduct.IsRecipe = product.IsRecipe;
+            existingProduct.Quatity = product.Quatity;
+            _context.Product.Update(existingProduct);
+            await _context.SaveChangesAsync();
+
+            var oldRecipe = await _context.ProductIngredients
+                .Where(x => x.ProductCode == product.Code)
+                .ToListAsync();
+            _context.ProductIngredients.RemoveRange(oldRecipe);
+
+            if (ingredients != null && ingredients.Any())
+            {
+                foreach (var item in ingredients)
+                {
+                    item.ProductCode = product.Code;
+                    await _context.ProductIngredients.AddAsync(item);
+                }
+            }
+
+ 
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return new ApiResponse { ErrorCode = "00" };
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return new ApiResponse { ErrorCode = "99", ErrorMessage = ex.Message };
+        }
     }
 
     public async Task<int> DeleteProduct(int id)

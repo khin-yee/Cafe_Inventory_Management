@@ -28,20 +28,16 @@ public class ProductService:IProductService
         return  await _repo.GetPagedProducts(pageNumber, pageSize, searchTerm);
     }
 
-    public async  Task<ApiResponse> CreateProduct(Product product)
+    public async Task<ApiResponse> CreateProduct(Product product, List<ProductIngredients> ingredients)
+  
     {
-        return await _repo.CreateProduct(product);
+        return await _repo.CreateProduct(product, ingredients);
         
     }
 
-    public async Task<string> UpdateProduct(Product product)
+    public async Task<ApiResponse> UpdateProduct(Product product, List<ProductIngredients> ingredients)
     {
-        var result = await _repo.UpdatePrduct(product);
-        if (result != 1)
-            return "fail";
-
-        else
-            return "success";
+         return await _repo.UpdateProduct(product,ingredients); 
     }
 
     public async Task<string> DeleteProduct(int id)

@@ -23,13 +23,62 @@ public class OrderRepository : IOrderRepo
         _context =context;
     }
 
-    public async Task<int> CreateProduct(OrdersModel order)
-    {
-        await _context.Orders.AddAsync(order);
-        var result = _context.SaveChanges();
-        return result;
-    }
 
+    public async Task<ApiResponse> CreateProduct(Product product, List<ProductIngredients> ingredients)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            // 1. Save the Product metadata
+            await _context.Product.AddAsync(product);
+
+            // 2. Save the Recipe Mapping
+            if (ingredients != null && ingredients.Any())
+            {
+                foreach (var ing in ingredients) ing.ProductCode = product.Code;
+                await _context.ProductIngredients.AddRangeAsync(ingredients);
+
+                // 3. Batch Production Logic (IsRecipe = false)
+                if (!product.IsRecipe)
+                {
+                    // First, validate ALL stock levels to avoid partial updates
+                    foreach (var item in ingredients)
+                    {
+                        var stock = await _context.Ingredients
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(x => x.Code == item.IngredientCode);
+
+                        if (stock == null)
+                            return new ApiResponse { ErrorCode = "99", ErrorMessage = $"Ingredient {item.IngredientCode} not found." };
+
+                        decimal totalNeeded = (product.Quatity ?? 0) * item.RequiredAmount;
+
+                        if (stock.Quatity < totalNeeded)
+                            return new ApiResponse { ErrorCode = "99", ErrorMessage = $"Insufficient {stock.Name}. Need {totalNeeded}{stock.Unit}, but only {stock.Quatity} left." };
+                    }
+
+                    // If validation passes, perform the actual deduction
+                    foreach (var item in ingredients)
+                    {
+                        var stock = await _context.Ingredients.FirstOrDefaultAsync(x => x.Code == item.IngredientCode);
+                        decimal totalNeeded = (product.Quatity ?? 0) * item.RequiredAmount;
+
+                        stock.Quatity -= totalNeeded;
+                        _context.Ingredients.Update(stock);
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return new ApiResponse { ErrorCode = "00" };
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return new ApiResponse { ErrorCode = "99", ErrorMessage = ex.Message };
+        }
+    }
     public async Task<ApiResponse> SaveOrder(OrderRequestDto request)
     {
         var response = new ApiResponse();
@@ -92,6 +141,25 @@ public class OrderRepository : IOrderRepo
         }
     }
 
+    public async Task<ApiResponse> GetRecipeByProductCode(string productCode)
+    {
+        try
+        {
+            var recipe = await _context.ProductIngredients
+                .Where(x => x.ProductCode == productCode)
+                .ToListAsync();
+
+            return new ApiResponse
+            {
+                ErrorCode = "00",
+                Detail = JsonConvert.SerializeObject(recipe)
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ApiResponse { ErrorCode = "99", ErrorMessage = ex.Message };
+        }
+    }
     public async Task<ApiResponse> UpdateOrder(OrderViewModel updatedOrder)
     {
         using var transaction = await _context.Database.BeginTransactionAsync();

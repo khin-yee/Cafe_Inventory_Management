@@ -1,3 +1,25 @@
+:deep .mud-nav-menu {
+    padding: 10px 10px 14px 10px;
+}
+
+:deep .mud-nav-link {
+    border-radius: 12px !important;
+    padding: 10px 12px !important;
+    color: rgba(27, 18, 18, 0.72) !important;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+:deep .mud-nav-link:hover {
+    background-color: rgba(75, 46, 43, 0.08) !important;
+    color: rgba(27, 18, 18, 0.95) !important;
+}
+
+:deep .mud-nav-link.mud-nav-link-active {
+    background-color: rgba(75, 46, 43, 0.12) !important;
+    color: rgba(27, 18, 18, 1) !important;
+}
+
 .navbar-toggler {
     appearance: none;
     cursor: pointer;

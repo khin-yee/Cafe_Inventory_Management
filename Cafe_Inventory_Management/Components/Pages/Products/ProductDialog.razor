@@ -5,193 +5,208 @@
 @using Newtonsoft.Json
 @inject IApiCallService ApiService
 
-<MudDialog FullWidth="true" Class="rounded-xl p-3" Style="max-width: 500px;">
+<MudDialog FullWidth="true" Class="rounded-xl pa-4" Style="max-width: 700px;">
+    <TitleContent>
+        <MudText Typo="Typo.h5" FontWeight="700">
+            <MudIcon Icon="@(IsEdit ? Icons.Material.Filled.Edit : Icons.Material.Filled.AddCircle)" Class="mr-2 mb-1" />
+            @(IsEdit ? "Update Product" : "Create New Product")
+        </MudText>
+    </TitleContent>
+
     <DialogContent>
-        <MudStack Spacing="3">
-            <MudTextField Label="Product Name"
-            Margin="Margin.Dense"
-            Variant="Variant.Outlined"
-            Adornment="Adornment.Start"
-            AdornmentIcon="@Icons.Material.Filled.Inventory"
-            @bind-Value="Model.Name"
-            Required />
-            <MudTextField Label="Product Code"
-            Margin="Margin.Dense"
-            Variant="Variant.Outlined"
-            Adornment="Adornment.Start"
-            AdornmentIcon="@Icons.Material.Filled.Inventory"
-            @bind-Value="Model.Code"
-            Required />
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="6">
+                <MudStack Spacing="3">
+                    <MudTextField Label="Product Name" @bind-Value="Model.Name" Variant="Variant.Outlined" Margin="Margin.Dense" Required />
+                    <MudTextField Label="Product Code" @bind-Value="Model.Code" Variant="Variant.Outlined" Margin="Margin.Dense" Required />
 
-            @* Category Dropdown *@
-            <MudSelect T="string"
-            Label="Category"
-            Variant="Variant.Outlined"
-            Margin="Margin.Dense"
-            @bind-Value="Model.Category"
-            AdornmentIcon="@Icons.Material.Filled.Category"
-            Required>
-                @if (_categories != null)
-                {
-                    @foreach (var cat in _categories)
-                    {
-                        <MudSelectItem Value="@cat">@cat</MudSelectItem>
-                    }
-                }
-            </MudSelect>
+                    <MudSelect T="string" Label="Category" @bind-Value="Model.Category" Variant="Variant.Outlined" Margin="Margin.Dense" Required>
+                        @foreach (var cat in _categories)
+                        {
+                            <MudSelectItem Value="@cat">@cat</MudSelectItem>
+                        }
+                    </MudSelect>
 
-            <MudGrid>
-                <MudItem xs="6">
-                    <MudNumericField Label="Quantity"
-                    Variant="Variant.Outlined"
-                    Margin="Margin.Dense"
-                    @bind-Value="Model.Quatity"
-                    Min="1"
-                    Required />
-                </MudItem>
+                    <MudNumericField Label="Production Qty" @bind-Value="Model.Quatity" Variant="Variant.Outlined" Margin="Margin.Dense" Min="1" HelperText="Qty to add to stock now" />
+                    <MudNumericField Label="Selling Price" @bind-Value="Model.Amount" Variant="Variant.Outlined" Margin="Margin.Dense" Adornment="Adornment.Start" AdornmentText="MMK" />
+                </MudStack>
+            </MudItem>
 
-                <MudItem xs="6">
-                    <MudNumericField Label="Amount"
-                    Variant="Variant.Outlined"
-                    Margin="Margin.Dense"
-                    Adornment="Adornment.Start"
-                    AdornmentText="$"
-                    @bind-Value="Model.Amount"
-                    Required />
-                </MudItem>
-            </MudGrid>
-            <MudPaper Elevation="0" Class="pa-2 d-flex align-center justify-space-between" Style="background: transparent; border: 1px solid #e0e0e0; border-radius: 8px;">
-                <MudText Typo="Typo.body1">Product Availability</MudText>
-                <MudSwitch @bind-Value="Model.IsRecipe"
-                Color="Color.Success"
-                UnCheckedColor="Color.Error"
-                Label="@(Model.IsRecipe ? "Recipe" : "NotRecipe")" />
-            </MudPaper>
-            <MudPaper Elevation="0" Class="pa-2 d-flex align-center justify-space-between" Style="background: transparent; border: 1px solid #e0e0e0; border-radius: 8px;">
-                <MudText Typo="Typo.body1">Product Availability</MudText>
-                <MudSwitch @bind-Value="Model.IsActive"
-                Color="Color.Success"
-                UnCheckedColor="Color.Error"
-                Label="@(Model.IsActive ? "Active" : "Inactive")" />
-            </MudPaper>
-        </MudStack>
+            <MudItem xs="12" md="6">
+                <MudStack Spacing="3">
+                    <MudPaper Elevation="0" Class="pa-3" Style="border: 1px solid #e0e0e0; border-radius: 12px; background: #fafafa;">
+                        <MudText Typo="Typo.subtitle2" Color="Color.Primary" Class="mb-1">Inventory Deduction Logic</MudText>
+                        <MudSwitch @bind-Value="Model.IsRecipe" Color="Color.Success" UnCheckedColor="Color.Info"
+                        Label="@(Model.IsRecipe ? "Deduct during Sale (Menu Item)" : "Deduct Now (Batch Production)")" />
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary mt-1 d-block">
+                            @(Model.IsRecipe ? "*Stock reduces when a customer orders." : "*Stock reduces immediately upon saving.")
+                        </MudText>
+                    </MudPaper>
+
+                    <MudPaper Elevation="0" Class="pa-3" Style="border: 1px solid #e0e0e0; border-radius: 12px;">
+                        <MudSwitch @bind-Value="Model.IsActive" Color="Color.Success" Label="Active in Menu" />
+                    </MudPaper>
+                </MudStack>
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudDivider Class="my-2" />
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                    <MudText Typo="Typo.h6">Recipe / Ingredients</MudText>
+                    <MudButton OnClick="AddIngredientRow" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Text">Add Ingredient</MudButton>
+                </MudStack>
+
+                <MudTable Items="_recipeRows" Dense="true" Hover="true" Elevation="0" MaxHeight="250px" FixedHeader="true" Class="mt-2 border rounded-lg">
+                    <HeaderContent>
+                        <MudTh>Ingredient</MudTh>
+                        <MudTh Style="width: 120px;">Amount</MudTh>
+                        <MudTh Style="width: 80px;">Unit</MudTh>
+                        <MudTh Style="width: 50px;"></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                            <MudSelect T="string" @bind-Value="context.IngredientCode" Margin="Margin.Dense" Dense="true" Placeholder="Select...">
+                                @foreach (var ing in _allIngredients)
+                                {
+                                    <MudSelectItem Value="@ing.Code">@ing.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudTd>
+                        <MudTd>
+                            <MudNumericField @bind-Value="context.RequiredAmount" Margin="Margin.Dense" HideSpinButtons="true" />
+                        </MudTd>
+                        <MudTd>
+                            <MudText Typo="Typo.body2" Class="mt-2">@GetUnit(context.IngredientCode)</MudText>
+                        </MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="@(() => _recipeRows.Remove(context))" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudItem>
+        </MudGrid>
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Outlined"
-        Size="Size.Small"
-        Color="Color.Dark"
-        OnClick="Cancel">
-            Cancel
-        </MudButton>
-        <MudButton Variant="Variant.Filled"
-        Size="Size.Small"
-        Color="Color.Primary"
-        OnClick="Save">
-            @(IsEdit ? "Update Product" : "Create Product")
+        <MudButton OnClick="Cancel" Variant="Variant.Text" Class="px-6">Cancel</MudButton>
+        <MudButton OnClick="Save" Color="Color.Primary" Variant="Variant.Filled" Class="px-10 rounded-pill" Disabled="_isSaving">
+            @if (_isSaving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            @(IsEdit ? "Update" : "Save Product")
         </MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
-    [Inject] InventoryStateService StateService { get; set; }
-
-
-
-    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
-
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
     [Parameter] public Product Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
+
     [Inject] private ISnackbar Snackbar { get; set; }
-    private List<string> _categories = new();
+    [Inject] InventoryStateService StateService { get; set; }
+
+    private List<ProductIngredients> _recipeRows = new();
+    private List<Ingredients> _allIngredients = new();
+    private List<string> _categories = new() { "Coffee", "Juice", "Snack", "Bakery" };
+    private bool _isSaving = false;
 
     protected override async Task OnInitializedAsync()
     {
-        // Fetch categories from API to populate the dropdown
-        await LoadCategories();
+        await LoadData(); // 1. Load the MASTER list of all ingredients for dropdowns
 
-        if (!IsEdit)
+        if (IsEdit)
         {
-            Model = new Product(); 
+            await LoadExistingRecipe(); // 2. Load the specific recipe for THIS product
         }
     }
 
-    private async Task LoadCategories()
+    private async Task LoadData()
     {
+        var url = "/Ingredients?pageNumber=1&pageSize=100&search=";
+        var request = new ApiRequest(HttpMethod.Get, url, "", "");
 
-        _categories = new List<string> { "Coffee", "Juice", "Snack", "Bakery" };
+        var response = await ApiService.APICall(request);
 
-        // try
-        // {
-        //     // Update this URL to your actual Category endpoint
-        //     var request = new ApiRequest(HttpMethod.Get, "/Category", "", "");
-        //     var response = await ApiService.APICall(request);
+        if (response != null && response.ErrorCode == "00")
+        {
+            var data = JsonConvert.DeserializeObject<PagedResult<Ingredients>>(response.Detail);
+            _allIngredients = data.Items;
+        }
 
-        //     if (response.ErrorCode == "00")
-        //     {
-        //         // Assuming your category API returns a list of names or objects
-        //         _categories = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(response.Detail);
-        //     }
-        // }
-        // catch (Exception ex)
-        // {
-        //     Console.WriteLine($"Error loading categories: {ex.Message}");
-        //     // Fallback static categories if API fails
-        //     _categories = new List<string> { "Coffee", "Juice", "Snack", "Bakery" };
-        // }
     }
 
-    // Inside ProductDialog.razor @code block
-    private bool _isSaving = false;
-
-    async Task Save()
+    private async Task LoadExistingRecipe()
     {
-        if (string.IsNullOrWhiteSpace(Model.Name)) return;
+        // Call the new API we just created
+        var url = $"/GetRecipe?productCode={Model.Code}";
+        var res = await ApiService.APICall(new ApiRequest(HttpMethod.Get, url, "", ""));
+
+        if (res.ErrorCode == "00" && !string.IsNullOrEmpty(res.Detail))
+        {
+            try
+            {
+                var apiresponse = JsonConvert.DeserializeObject<ApiResponse>(res.Detail);
+                _recipeRows = JsonConvert.DeserializeObject<List<ProductIngredients>>(apiresponse.Detail)
+                              ?? new List<ProductIngredients>();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add("Error loading recipe details.", Severity.Error);
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }
+
+    private void AddIngredientRow() => _recipeRows.Add(new ProductIngredients { ProductCode = Model.Code });
+
+    private string GetUnit(string code) => _allIngredients.FirstOrDefault(x => x.Code == code)?.Unit ?? "-";
+
+    private async Task Save()
+    {
+        if (!Model.IsRecipe && (Model.Quatity == null || Model.Quatity <= 0))
+        {
+            Snackbar.Add("Please enter a Production Quantity to deduct stock.", Severity.Warning);
+            return;
+        }
+
+        if (!_recipeRows.Any())
+        {
+            Snackbar.Add("Please add at least one ingredient to the recipe.", Severity.Warning);
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(Model.Name) || string.IsNullOrWhiteSpace(Model.Code))
+        {
+            Snackbar.Add("Name and Code are required", Severity.Warning);
+            return;
+        }
 
         _isSaving = true;
         try
         {
-            var method = IsEdit ? HttpMethod.Put : HttpMethod.Post;
-            var url = IsEdit ? $"/UpdateProduct" : "/CreateProduct";
+            // Sync product code to recipe items
+            _recipeRows.ForEach(r => r.ProductCode = Model.Code);
 
-            var request = new ApiRequest(method, url, Model, "");
-            var response = await ApiService.APICall(request);
+            var payload = new { Product = Model, Recipe = _recipeRows };
+            var method = IsEdit ? HttpMethod.Put : HttpMethod.Post;
+            var url = IsEdit ? "/UpdateProduct" : "/CreateProduct";
+
+            var response = await ApiService.APICall(new ApiRequest(method, url, payload, ""));
 
             if (response.ErrorCode == "00")
             {
-
-                var apires = JsonConvert.DeserializeObject<ApiResponse>(response.Detail);
-
-                if (apires.ErrorCode == "00")
-                {
-
-                    string message = IsEdit ? "Product updated successfully!" : "Product created successfully!";
-
-                    Snackbar.Add(message, Severity.Success);
-
-                    StateService.NotifyStockChanged();
-                }
-                else
-                {
-                    Snackbar.Add(apires.ErrorMessage, Severity.Error);
-
-                }
+                Snackbar.Add("Product Saved Successfully!", Severity.Success);
+                StateService.NotifyStockChanged();
                 MudDialog.Close(DialogResult.Ok(true));
             }
-           
             else
             {
                 Snackbar.Add(response.ErrorMessage, Severity.Error);
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-        finally
-        {
-            _isSaving = false;
-        }
+        catch (Exception ex) { Snackbar.Add(ex.Message, Severity.Error); }
+        finally { _isSaving = false; }
     }
 
     void Cancel() => MudDialog.Cancel();

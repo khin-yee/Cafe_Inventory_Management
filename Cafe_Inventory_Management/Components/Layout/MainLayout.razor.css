@@ -8,6 +8,31 @@ main {
     flex: 1;
 }
 
+.appbar {
+    background-color: var(--app-surface) !important;
+    border-bottom: 1px solid var(--app-divider) !important;
+    z-index: 1300;
+}
+
+.brand-title {
+    font-weight: 900;
+    color: var(--app-text-primary) !important;
+    letter-spacing: 0.06em;
+}
+
+.user-name {
+    color: var(--app-text-secondary) !important;
+}
+
+.drawer {
+    background-color: var(--app-surface) !important;
+}
+
+.main-content {
+    background-color: var(--app-bg) !important;
+    min-height: 100vh;
+}
+
 .sidebar {
     background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
 }
