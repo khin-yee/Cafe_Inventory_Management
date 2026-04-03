@@ -52,7 +52,7 @@ using (var scope = app.Services.CreateScope())
     recurringJobManager.AddOrUpdate<EmailReportService>(
         "monthly-admin-report",
         service => service.SendReportAsync(true), // isMonthly = true
-        "*/2 * * * *");
+        "0 19 * * *");
 }
 
 app.UseHangfireDashboard(); 

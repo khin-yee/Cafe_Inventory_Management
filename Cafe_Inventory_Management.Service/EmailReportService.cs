@@ -27,14 +27,19 @@ namespace Cafe_Inventory_Management.Service
             var settings = _config.GetSection("EmailSettings");
 
             var startDate = isMonthly
-                ? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(-1)
-                : DateTime.Now.Date.AddDays(-1);
+                ? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1)
+                : DateTime.UtcNow.Date.AddDays(-1);
 
             var endDate = isMonthly
-                ? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59)
-                : DateTime.Now.Date.AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59);
+                ? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59)
+                : DateTime.UtcNow.Date.AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59);
+            startDate = EnsureUtc(startDate);
+            endDate = EnsureUtc(endDate);
+            try
+            {
 
-            var orders = await _repo.GetOrdersByDate(startDate,endDate);
+                var orders = await _repo.GetOrdersByDate(startDate, endDate);
+           
 
             using var workbook = new XLWorkbook();
             var ws = workbook.Worksheets.Add("Business Sales Report");
@@ -97,6 +102,18 @@ namespace Cafe_Inventory_Management.Service
             ws.Column(4).Width = 40;
             await ExecuteEmailSend(workbook, isMonthly, settings, startDate, endDate, orders.Count);
             return "true";
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private static DateTime EnsureUtc(DateTime value)
+        {
+            if (value.Kind == DateTimeKind.Utc) return value;
+            if (value.Kind == DateTimeKind.Local) return value.ToUniversalTime();
+            return DateTime.SpecifyKind(value, DateTimeKind.Utc);
         }
 
         private async Task ExecuteEmailSend(XLWorkbook workbook, bool isMonthly, IConfigurationSection settings, DateTime start, DateTime end, int count)

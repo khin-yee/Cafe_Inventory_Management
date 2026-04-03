@@ -69,25 +69,35 @@ public partial class OrdersMenu : ComponentBase
 
     private async Task UpdateStatus(OrderViewModel order, string newStatus)
     {
-        // 1. Logic to call your API to update status in DB
-        // Example: await _apiService.UpdateStatus(orderId, newStatus);
-        order.Status = newStatus;
+        var originalStatus = order.Status;
         var url = "/UpdateOrderStatus";
-        var request = new ApiRequest(HttpMethod.Put, url,order, "");
+        order.Status = newStatus;
+        var request = new ApiRequest(HttpMethod.Put, url, order, "");
         var response = await _apiService.APICall(request);
+
         if (response.ErrorCode == "00")
         {
-            // 2. UI Feedback
-            Snackbar.Add($"Order #{order} is now {newStatus}", Severity.Success);
+            var apiResult = JsonConvert.DeserializeObject<ApiResponse>(response.Detail ?? "{}");
+            if (apiResult?.ErrorCode == "00")
+            {
+                Snackbar.Add($"Order #{order.OrderId} is now {newStatus}", Severity.Success);
+                StateService.NotifyStockChanged();
+                await LoadOrders();
+                return;
+            }
+
+            var message = string.IsNullOrWhiteSpace(apiResult?.ErrorMessage)
+                ? $"Order status change failed for {newStatus}"
+                : apiResult!.ErrorMessage;
+
+            order.Status = originalStatus;
+            Snackbar.Add(message, Severity.Error);
         }
         else
         {
-            Snackbar.Add($"Order status change error for  {newStatus}", Severity.Error);
-
+            order.Status = originalStatus;
+            Snackbar.Add($"Order status change error for {newStatus}", Severity.Error);
         }
-        StateService.NotifyStockChanged();
-
-        await LoadOrders();
     }
 
     private Color GetStatusColor(string status) => status switch

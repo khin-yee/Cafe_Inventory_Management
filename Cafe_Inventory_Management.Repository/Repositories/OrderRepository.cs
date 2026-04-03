@@ -302,6 +302,8 @@ public class OrderRepository : IOrderRepo
 
     public async Task<List<OrderViewModel>> GetOrdersByDate(DateTime startDate, DateTime endDate)
     {
+        startDate = NormalizeUtc(startDate);
+        endDate = NormalizeUtc(endDate);
 
         var orders = await _context.Orders
   .Where(o => o.Status == "Completed" &&
@@ -331,12 +333,14 @@ public class OrderRepository : IOrderRepo
     public async Task<PagedResult<OrderViewModel>> GetAllSuccessOrders(int page, int pageSize, string? search, DateTime? start, DateTime? end)
     {
         var query = _context.Orders.Where(o => o.Status == "Success" || o.Status == "Completed");
+        DateTime? utcStart = start.HasValue ? NormalizeUtc(start.Value) : null;
+        DateTime? utcEnd = end.HasValue ? NormalizeUtc(end.Value) : null;
 
         if (!string.IsNullOrEmpty(search))
             query = query.Where(o => o.OrderId.Contains(search));
 
-        if (start.HasValue) query = query.Where(o => o.CreatedAt >= start.Value);
-        if (end.HasValue) query = query.Where(o => o.CreatedAt < end.Value.AddDays(1));
+        if (utcStart.HasValue) query = query.Where(o => o.CreatedAt >= utcStart.Value);
+        if (utcEnd.HasValue) query = query.Where(o => o.CreatedAt < utcEnd.Value.AddDays(1));
 
         int totalCount = await query.CountAsync();
 
@@ -364,10 +368,12 @@ public class OrderRepository : IOrderRepo
     {
         var query = _context.Orders
             .Where(o => o.Status == "Success" || o.Status == "Completed");
+        DateTime? utcStart = start.HasValue ? NormalizeUtc(start.Value) : null;
+        DateTime? utcEnd = end.HasValue ? NormalizeUtc(end.Value) : null;
 
         if (!string.IsNullOrEmpty(search)) query = query.Where(o => o.OrderId.Contains(search));
-        if (start.HasValue) query = query.Where(o => o.CreatedAt >= start.Value);
-        if (end.HasValue) query = query.Where(o => o.CreatedAt < end.Value.AddDays(1));
+        if (utcStart.HasValue) query = query.Where(o => o.CreatedAt >= utcStart.Value);
+        if (utcEnd.HasValue) query = query.Where(o => o.CreatedAt < utcEnd.Value.AddDays(1));
 
         var data = await query
             .OrderByDescending(o => o.CreatedAt)
@@ -387,13 +393,14 @@ public class OrderRepository : IOrderRepo
 
     public async Task<DashboardData> GetStats(string range)
     {
-        var today = DateTime.Now.Date;
+        var today = DateTime.UtcNow.Date;
         DateTime startDate = range switch
         {
-            "month" => new DateTime(today.Year, today.Month, 1),
-            "year" => new DateTime(today.Year, 1, 1),
+            "month" => new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc),
+            "year" => new DateTime(today.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             _ => today.AddDays(-6)
         };
+        startDate = NormalizeUtc(startDate);
 
         var orders = await _context.Orders
             .Where(o => (o.Status == "Success" || o.Status == "Completed") && o.CreatedAt >= startDate)
@@ -495,13 +502,14 @@ public class OrderRepository : IOrderRepo
 
     public async Task<List<StaffResponseDto>> GetStaffPerformance(string range)
     {
-        var today = DateTime.Now.Date;
+        var today = DateTime.UtcNow.Date;
         DateTime startDate = range switch
         {
             "today" => today,
-            "month" => new DateTime(today.Year, today.Month, 1),
+            "month" => new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc),
             _ => today.AddDays(-6)
         };
+        startDate = NormalizeUtc(startDate);
 
         var staffStats = await _context.Orders.Where(o => (o.Status == "Success" || o.Status == "Completed") && o.CreatedAt >= startDate)
             .GroupBy(o => o.CreatedBy)
@@ -573,5 +581,12 @@ public class OrderRepository : IOrderRepo
 
         }
         return order;
+    }
+
+    private static DateTime NormalizeUtc(DateTime value)
+    {
+        if (value.Kind == DateTimeKind.Utc) return value;
+        if (value.Kind == DateTimeKind.Local) return value.ToUniversalTime();
+        return DateTime.SpecifyKind(value, DateTimeKind.Utc);
     }
 }
