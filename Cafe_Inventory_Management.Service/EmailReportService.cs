@@ -37,69 +37,100 @@ namespace Cafe_Inventory_Management.Service
                 }
 
                 var orders = await _repo.GetOrdersByDate(startDate, endDate);
-           
+                var totalRevenue = orders.Sum(x => x.TotalPrice);
 
-            using var workbook = new XLWorkbook();
-            var ws = workbook.Worksheets.Add("Business Sales Report");
+                using var workbook = new XLWorkbook();
+                var ws = workbook.Worksheets.Add("Sales Report");
 
-            var colorHeaderBg = XLColor.FromHtml("#1A73E8"); 
-            var colorOrderRowBg = XLColor.FromHtml("#E8F0FE");
-            var colorTextSecondary = XLColor.FromHtml("#5F6368"); 
+                var colorHeaderBg = XLColor.FromHtml("#203A5F");
+                var colorAccentBg = XLColor.FromHtml("#F3F6FA");
+                var colorGrid = XLColor.FromHtml("#D9DEE7");
+                var colorTextMuted = XLColor.FromHtml("#5B6470");
 
-            string[] headers = { "Order ID", "Staff Name", "Date Time", "Product / Item", "Qty", "Unit Price", "Subtotal" };
-            for (int i = 0; i < headers.Length; i++)
-            {
-                var cell = ws.Cell(1, i + 1);
-                cell.Value = headers[i];
-                cell.Style.Font.Bold = true;
-                cell.Style.Font.FontColor = XLColor.White;
-                cell.Style.Fill.BackgroundColor = colorHeaderBg;
-                cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            }
+                ws.Style.Font.FontName = "Calibri";
+                ws.Style.Font.FontSize = 11;
 
-            int currentRow = 2;
+                ws.Range("A1:G1").Merge().Value = "CAFE INVENTORY MANAGEMENT";
+                ws.Range("A2:G2").Merge().Value = isMonthly ? "MONTHLY SALES REPORT" : "DAILY SALES REPORT";
+                ws.Range("A1:G2").Style.Font.Bold = true;
+                ws.Range("A1:G1").Style.Font.FontSize = 14;
+                ws.Range("A2:G2").Style.Font.FontSize = 12;
+                ws.Range("A1:G2").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                ws.Range("A1:G2").Style.Fill.BackgroundColor = XLColor.White;
 
-            foreach (var order in orders)
-            {
-                var orderRange = ws.Range(currentRow, 1, currentRow, 7);
-                orderRange.Style.Fill.BackgroundColor = colorOrderRowBg;
-                orderRange.Style.Font.Bold = true;
-                orderRange.Style.Border.TopBorder = XLBorderStyleValues.Thin;
-                orderRange.Style.Border.TopBorderColor = XLColor.FromHtml("#ADCCFB");
+                ws.Cell("A4").Value = "Report Period";
+                ws.Cell("B4").Value = $"{startDate:dd MMM yyyy HH:mm} - {endDate:dd MMM yyyy HH:mm}";
+                ws.Cell("A5").Value = "Generated At";
+                ws.Cell("B5").Value = $"{DateTime.UtcNow:dd MMM yyyy HH:mm} UTC";
+                ws.Cell("A6").Value = "Total Orders";
+                ws.Cell("B6").Value = orders.Count;
+                ws.Cell("A7").Value = "Total Revenue";
+                ws.Cell("B7").Value = totalRevenue;
+                ws.Cell("B7").Style.NumberFormat.Format = "#,##0 \"MMK\"";
+                ws.Range("A4:A7").Style.Font.Bold = true;
+                ws.Range("A4:G7").Style.Fill.BackgroundColor = colorAccentBg;
+                ws.Range("A4:G7").Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                ws.Range("A4:G7").Style.Border.OutsideBorderColor = colorGrid;
 
-                ws.Cell(currentRow, 1).Value = order.OrderId;
-                ws.Cell(currentRow, 2).Value = order.CreatedBy;
-                ws.Cell(currentRow, 3).Value = order.CreatedAt.ToString("g");
-                ws.Cell(currentRow, 4).Value = "ORDER TOTAL";
-                ws.Cell(currentRow, 7).Value = order.TotalPrice;
-                ws.Cell(currentRow, 7).Style.NumberFormat.Format = "#,##0 \"MMK\"";
-
-                currentRow++;
-
-                foreach (var item in order.Items)
+                int headerRow = 9;
+                string[] headers = { "Order ID", "Staff Name", "Date Time", "Product / Item", "Qty", "Unit Price", "Subtotal" };
+                for (int i = 0; i < headers.Length; i++)
                 {
-                    ws.Cell(currentRow, 4).Value = "   • " + item.ProductName;
-                    ws.Cell(currentRow, 4).Style.Font.FontColor = colorTextSecondary;
-
-                    ws.Cell(currentRow, 5).Value = item.Quatity;
-                    ws.Cell(currentRow, 6).Value = item.Amount;
-                    ws.Cell(currentRow, 6).Style.NumberFormat.Format = "#,##0";
-                    ws.Cell(currentRow, 7).Value = item.Quatity * item.Amount;
-                    ws.Cell(currentRow, 7).Style.NumberFormat.Format = "#,##0";
-                    ws.Cell(currentRow, 7).Style.Font.FontColor = colorTextSecondary;
-                    ws.Cell(currentRow, 5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                    currentRow++;
+                    var cell = ws.Cell(headerRow, i + 1);
+                    cell.Value = headers[i];
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Font.FontColor = XLColor.White;
+                    cell.Style.Fill.BackgroundColor = colorHeaderBg;
+                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                 }
 
-                ws.Range(currentRow - 1, 1, currentRow - 1, 7).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
-                ws.Range(currentRow - 1, 1, currentRow - 1, 7).Style.Border.BottomBorderColor = XLColor.FromHtml("#E0E0E0");
-            }
+                int currentRow = headerRow + 1;
+                foreach (var order in orders)
+                {
+                    var orderRange = ws.Range(currentRow, 1, currentRow, 7);
+                    orderRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#EDF2F8");
+                    orderRange.Style.Font.Bold = true;
 
-            ws.Columns().AdjustToContents();
-            ws.Column(4).Width = 40;
-            await ExecuteEmailSend(workbook, isMonthly, settings, startDate, endDate, orders.Count);
-            return "true";
+                    ws.Cell(currentRow, 1).Value = order.OrderId;
+                    ws.Cell(currentRow, 2).Value = order.CreatedBy;
+                    ws.Cell(currentRow, 3).Value = order.CreatedAt.ToString("dd MMM yyyy HH:mm");
+                    ws.Cell(currentRow, 4).Value = "Order Total";
+                    ws.Cell(currentRow, 7).Value = order.TotalPrice;
+                    ws.Cell(currentRow, 7).Style.NumberFormat.Format = "#,##0 \"MMK\"";
+                    ws.Cell(currentRow, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                    currentRow++;
+
+                    foreach (var item in order.Items)
+                    {
+                        ws.Cell(currentRow, 4).Value = item.ProductName;
+                        ws.Cell(currentRow, 4).Style.Font.FontColor = colorTextMuted;
+                        ws.Cell(currentRow, 5).Value = item.Quatity;
+                        ws.Cell(currentRow, 5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        ws.Cell(currentRow, 6).Value = item.Amount;
+                        ws.Cell(currentRow, 6).Style.NumberFormat.Format = "#,##0 \"MMK\"";
+                        ws.Cell(currentRow, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                        ws.Cell(currentRow, 7).Value = item.Quatity * item.Amount;
+                        ws.Cell(currentRow, 7).Style.NumberFormat.Format = "#,##0 \"MMK\"";
+                        ws.Cell(currentRow, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                        currentRow++;
+                    }
+                }
+
+                if (currentRow > headerRow + 1)
+                {
+                    var dataRange = ws.Range(headerRow, 1, currentRow - 1, 7);
+                    dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                    dataRange.Style.Border.OutsideBorderColor = colorGrid;
+                    dataRange.Style.Border.InsideBorderColor = colorGrid;
+                }
+
+                ws.Columns().AdjustToContents();
+                ws.Column(4).Width = Math.Max(ws.Column(4).Width, 34);
+                ws.SheetView.FreezeRows(headerRow);
+                await ExecuteEmailSend(workbook, isMonthly, settings, startDate, endDate, orders.Count);
+                return "true";
             }
             catch (Exception ex)
             {
