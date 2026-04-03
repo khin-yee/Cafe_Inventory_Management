@@ -57,18 +57,25 @@ public class IngredientRepository : IIngredientRepo
         // 2. Get Total Count (before pagination)
         var totalCount = await query.CountAsync();
 
-        // 3. Pagination
-        var items = await query
-            .OrderByDescending(p => p.Id) // Newest first
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        return new PagedResult<Ingredients>
+        try
         {
-            Items = items,
-            TotalCount = totalCount
-        };
+            // 3. Pagination
+            var items = await query
+                .OrderByDescending(p => p.Id) // Newest first
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return new PagedResult<Ingredients>
+            {
+                Items = items,
+                TotalCount = totalCount
+            };
+        }
+        catch(Exception ex)
+        {
+            throw ex;
+        }
+        
     }
 
     public async Task<int> CreateIngredients(Ingredients ingredients)

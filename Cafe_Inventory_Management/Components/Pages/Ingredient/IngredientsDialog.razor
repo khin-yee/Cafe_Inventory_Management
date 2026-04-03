@@ -1,6 +1,7 @@
-﻿@using Cafe_Inventory_Management.Domain
+@using Cafe_Inventory_Management.Domain
 @using Cafe_Inventory_Management.Domain.Model
 @using Cafe_Inventory_Management.UI.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @using MudBlazor
 @inject IApiCallService ApiService
 
@@ -92,6 +93,7 @@
     [Parameter] public Ingredients Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
     [Inject] private ISnackbar Snackbar { get; set; }
+    [Inject] AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
     private List<string> _categories = new();
 
     protected override async Task OnInitializedAsync()
@@ -133,6 +135,13 @@
     // Inside IngredientsDialog.razor @code block
     private bool _isSaving = false;
 
+    private async Task<string> GetCurrentUserName()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        return user.FindFirst(c => c.Type == "name")?.Value ?? user.Identity?.Name ?? "Unknown User";
+    }
+
     async Task Save()
     {
         if (string.IsNullOrWhiteSpace(Model.Name)) return;
@@ -140,6 +149,17 @@
         _isSaving = true;
         try
         {
+            var currentUser = await GetCurrentUserName();
+            if (IsEdit)
+            {
+                Model.UpdatedBy = currentUser;
+            }
+            else
+            {
+                Model.CreatedBy = currentUser;
+                Model.UpdatedBy = currentUser;
+            }
+
             var method = IsEdit ? HttpMethod.Put : HttpMethod.Post;
             var url = IsEdit ? $"/UpdateIngredients" : "/CreateIngredients";
 

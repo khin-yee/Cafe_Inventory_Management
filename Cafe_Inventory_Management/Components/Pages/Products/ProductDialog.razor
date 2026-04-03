@@ -1,6 +1,7 @@
 ﻿@using Cafe_Inventory_Management.Domain
 @using Cafe_Inventory_Management.Domain.Model
 @using Cafe_Inventory_Management.UI.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @using MudBlazor
 @using Newtonsoft.Json
 @inject IApiCallService ApiService
@@ -106,6 +107,7 @@
 
     [Inject] private ISnackbar Snackbar { get; set; }
     [Inject] InventoryStateService StateService { get; set; }
+    [Inject] AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
 
     private List<ProductIngredients> _recipeRows = new();
     private List<Ingredients> _allIngredients = new();
@@ -163,6 +165,13 @@
 
     private string GetUnit(string code) => _allIngredients.FirstOrDefault(x => x.Code == code)?.Unit ?? "-";
 
+    private async Task<string> GetCurrentUserName()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        return user.FindFirst(c => c.Type == "name")?.Value ?? user.Identity?.Name ?? "Unknown User";
+    }
+
     private async Task Save()
     {
         if (!Model.IsRecipe && (Model.Quatity == null || Model.Quatity <= 0))
@@ -185,8 +194,31 @@
         _isSaving = true;
         try
         {
+            var currentUser = await GetCurrentUserName();
+            if (IsEdit)
+            {
+                Model.UpdatedBy = currentUser;
+            }
+            else
+            {
+                Model.CreatedBy = currentUser;
+                Model.UpdatedBy = currentUser;
+            }
+
             // Sync product code to recipe items
-            _recipeRows.ForEach(r => r.ProductCode = Model.Code);
+            _recipeRows.ForEach(r =>
+            {
+                r.ProductCode = Model.Code;
+                if (IsEdit)
+                {
+                    r.UpdatedBy = currentUser;
+                }
+                else
+                {
+                    r.CreatedBy = currentUser;
+                    r.UpdatedBy = currentUser;
+                }
+            });
 
             var payload = new { Product = Model, Recipe = _recipeRows };
             var method = IsEdit ? HttpMethod.Put : HttpMethod.Post;
