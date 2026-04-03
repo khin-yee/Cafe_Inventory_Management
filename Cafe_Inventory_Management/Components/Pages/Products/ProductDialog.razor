@@ -229,7 +229,7 @@
             if (response.ErrorCode == "00")
             {
                 var serverResult = JsonConvert.DeserializeObject<ApiResponse>(response.Detail ?? "{}");
-                Snackbar.Add(serverResult?.ErrorMessage ?? "Product saved successfully!", Severity.Success);
+                Snackbar.Add(GetUiSuccessMessage(serverResult?.ErrorMessage, IsEdit ? "Product updated successfully!" : "Product created successfully!"), Severity.Success);
                 StateService.NotifyStockChanged();
                 MudDialog.Close(DialogResult.Ok(true));
             }
@@ -240,6 +240,16 @@
         }
         catch (Exception ex) { Snackbar.Add(ex.Message, Severity.Error); }
         finally { _isSaving = false; }
+    }
+
+    private static string GetUiSuccessMessage(string? apiMessage, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(apiMessage) || string.Equals(apiMessage.Trim(), "No Error", StringComparison.OrdinalIgnoreCase))
+        {
+            return fallback;
+        }
+
+        return apiMessage;
     }
 
     void Cancel() => MudDialog.Cancel();

@@ -164,7 +164,7 @@ public partial class ProductUpload : ComponentBase
         if (response.ErrorCode == "00")
         {
             var apiResult = JsonConvert.DeserializeObject<ApiResponse>(response.Detail ?? "{}");
-            Snackbar.Add(apiResult?.ErrorMessage ?? "All products and ingredients saved successfully!", Severity.Success);
+            Snackbar.Add(GetUiSuccessMessage(apiResult?.ErrorMessage, "All products and ingredients saved successfully!"), Severity.Success);
             _previewData.Clear();
         }
         else
@@ -187,6 +187,16 @@ public partial class ProductUpload : ComponentBase
 
             Snackbar.Add(message, Severity.Error);
         }
+    }
+
+    private static string GetUiSuccessMessage(string? apiMessage, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(apiMessage) || string.Equals(apiMessage.Trim(), "No Error", StringComparison.OrdinalIgnoreCase))
+        {
+            return fallback;
+        }
+
+        return apiMessage;
     }
 }
 

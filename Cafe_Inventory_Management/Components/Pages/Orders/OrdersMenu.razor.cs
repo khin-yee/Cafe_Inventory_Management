@@ -86,7 +86,7 @@ public partial class OrdersMenu : ComponentBase
                 return;
             }
 
-            var message = string.IsNullOrWhiteSpace(apiResult?.ErrorMessage)
+            var message = string.IsNullOrWhiteSpace(apiResult?.ErrorMessage) || string.Equals(apiResult?.ErrorMessage?.Trim(), "No Error", StringComparison.OrdinalIgnoreCase)
                 ? $"Order status change failed for {newStatus}"
                 : apiResult!.ErrorMessage;
 
