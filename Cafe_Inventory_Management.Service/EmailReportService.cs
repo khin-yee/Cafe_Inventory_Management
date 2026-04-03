@@ -22,21 +22,19 @@ namespace Cafe_Inventory_Management.Service
             _repo = repo;
         }
 
-        public async Task<string> SendReportAsync(bool isMonthly)
+        public async Task<string> SendReportAsync(bool isMonthly, bool scheduledOnly = false)
         {
             var settings = _config.GetSection("EmailSettings");
-
-            var startDate = isMonthly
-                ? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1)
-                : DateTime.UtcNow.Date.AddDays(-1);
-
-            var endDate = isMonthly
-                ? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59)
-                : DateTime.UtcNow.Date.AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59);
+            var nowUtc = DateTime.UtcNow;
+            var (startDate, endDate) = GetReportRangeUtc(nowUtc, isMonthly);
             startDate = EnsureUtc(startDate);
             endDate = EnsureUtc(endDate);
             try
             {
+                if (scheduledOnly && isMonthly && !IsLastDayOfMonthInMyanmar(nowUtc))
+                {
+                    return "skipped-monthly-not-last-day";
+                }
 
                 var orders = await _repo.GetOrdersByDate(startDate, endDate);
            
@@ -114,6 +112,43 @@ namespace Cafe_Inventory_Management.Service
             if (value.Kind == DateTimeKind.Utc) return value;
             if (value.Kind == DateTimeKind.Local) return value.ToUniversalTime();
             return DateTime.SpecifyKind(value, DateTimeKind.Utc);
+        }
+
+        private static bool IsLastDayOfMonthInMyanmar(DateTime utcNow)
+        {
+            var tz = GetMyanmarTimeZone();
+
+            var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, tz);
+            return localNow.Day == DateTime.DaysInMonth(localNow.Year, localNow.Month);
+        }
+
+        private static (DateTime startUtc, DateTime endUtc) GetReportRangeUtc(DateTime utcNow, bool isMonthly)
+        {
+            var tz = GetMyanmarTimeZone();
+            var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, tz);
+
+            if (isMonthly)
+            {
+                var localMonthStart = new DateTime(localNow.Year, localNow.Month, 1, 0, 0, 0, DateTimeKind.Unspecified);
+                var monthStartUtc = TimeZoneInfo.ConvertTimeToUtc(localMonthStart, tz);
+                return (monthStartUtc, utcNow);
+            }
+
+            var localDayStart = localNow.Date;
+            var dayStartUtc = TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(localDayStart, DateTimeKind.Unspecified), tz);
+            return (dayStartUtc, utcNow);
+        }
+
+        private static TimeZoneInfo GetMyanmarTimeZone()
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById("Myanmar Standard Time");
+            }
+            catch
+            {
+                return TimeZoneInfo.Local;
+            }
         }
 
         private async Task ExecuteEmailSend(XLWorkbook workbook, bool isMonthly, IConfigurationSection settings, DateTime start, DateTime end, int count)

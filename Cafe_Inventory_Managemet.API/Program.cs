@@ -43,16 +43,27 @@ app.UseAuthorization();
 using (var scope = app.Services.CreateScope())
 {
     var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+    TimeZoneInfo reportTimeZone;
+    try
+    {
+        reportTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Myanmar Standard Time");
+    }
+    catch
+    {
+        reportTimeZone = TimeZoneInfo.Local;
+    }
 
     recurringJobManager.AddOrUpdate<EmailReportService>(
         "daily-admin-report",
-        service => service.SendReportAsync(false), // isMonthly = false
-        "0 19 * * *");
+        service => service.SendReportAsync(false, true),
+        "0 22 * * *",
+        new RecurringJobOptions { TimeZone = reportTimeZone });
 
     recurringJobManager.AddOrUpdate<EmailReportService>(
         "monthly-admin-report",
-        service => service.SendReportAsync(true), // isMonthly = true
-        "0 19 * * *");
+        service => service.SendReportAsync(true, true),
+        "0 23 * * *",
+        new RecurringJobOptions { TimeZone = reportTimeZone });
 }
 
 app.UseHangfireDashboard(); 
