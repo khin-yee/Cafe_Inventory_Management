@@ -3,7 +3,13 @@
 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="m-3">
     <MudText Typo="Typo.h5" FontWeight="700" Class="fw-bold">Product Excel Import </MudText>
 
-    <MudStack Row="true">
+    <MudStack Row="true" Spacing="2">
+        <MudButton Variant="Variant.Outlined" Color="Color.Info"
+                   OnClick="PrepareSampleExcel"
+                   StartIcon="@Icons.Material.Filled.Download">
+            Download Sample Excel
+        </MudButton>
+
         <MudButton HtmlTag="label" Variant="Variant.Filled" Color="Color.Dark"
                    StartIcon="@Icons.Custom.FileFormats.FileExcel" for="excelInput">
             Select Excel File
@@ -17,6 +23,18 @@
         </MudButton>
     </MudStack>
 </MudStack>
+<MudText Typo="Typo.body2" Class="mx-3 mb-2 mud-text-secondary">
+    Excel columns: Name, Code, Category, Quantity, Amount, IsRecipe, IngredientCode, RequiredAmount.
+</MudText>
+@if (!string.IsNullOrWhiteSpace(_sampleExcelDataUrl))
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mx-3 mb-2">
+        Sample file is ready.
+        <a href="@_sampleExcelDataUrl" download="@_sampleFileName" style="margin-left:10px; font-weight:bold;">
+            Click here to download
+        </a>
+    </MudAlert>
+}
 
 @* Table to show uploaded data (Read Only) *@
 <MudTable Items="@_previewData"
@@ -34,18 +52,20 @@
         <MudTh Style="font-weight:bold">Quantity</MudTh>
         <MudTh Style="font-weight:bold">Amount</MudTh>
         <MudTh Style="font-weight:bold">IsRecipe</MudTh>
+        <MudTh Style="font-weight:bold">Ingredients</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd DataLabel="Name">@context.Name</MudTd>
-        <MudTd DataLabel="Code">@context.Code</MudTd>
-        <MudTd DataLabel="Category">@context.Category</MudTd>
-        <MudTd DataLabel="Quantity">@context.Quatity</MudTd>
+        <MudTd DataLabel="Name">@context.Product.Name</MudTd>
+        <MudTd DataLabel="Code">@context.Product.Code</MudTd>
+        <MudTd DataLabel="Category">@context.Product.Category</MudTd>
+        <MudTd DataLabel="Quantity">@context.Product.Quatity</MudTd>
         <MudTd DataLabel="Amount">
             <MudText Color="Color.Dark">
-                @context.Amount.ToString("N2")MMK
+                @context.Product.Amount.ToString("N2")MMK
             </MudText>
         </MudTd>
-        <MudTd DataLabel="IsRecipe">@context.IsRecipe</MudTd>
+        <MudTd DataLabel="IsRecipe">@context.Product.IsRecipe</MudTd>
+        <MudTd DataLabel="Ingredients">@context.Recipe.Count</MudTd>
 
     </RowTemplate>
     <PagerContent>

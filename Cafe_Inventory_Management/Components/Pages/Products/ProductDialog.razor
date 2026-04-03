@@ -196,7 +196,8 @@
 
             if (response.ErrorCode == "00")
             {
-                Snackbar.Add("Product Saved Successfully!", Severity.Success);
+                var serverResult = JsonConvert.DeserializeObject<ApiResponse>(response.Detail ?? "{}");
+                Snackbar.Add(serverResult?.ErrorMessage ?? "Product saved successfully!", Severity.Success);
                 StateService.NotifyStockChanged();
                 MudDialog.Close(DialogResult.Ok(true));
             }

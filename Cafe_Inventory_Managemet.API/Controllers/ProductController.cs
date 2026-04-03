@@ -47,9 +47,15 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost("/ProductBulkUpload")]
-    public async Task<IActionResult> BulkUpload([FromBody] List<Product>? products)
+    public async Task<IActionResult> BulkUpload([FromBody] List<ProductRequest>? products)
     {
-        return Ok(await _productService.CreateProductList(products));
+        var result = await _productService.CreateProductList(products ?? new List<ProductRequest>());
+        if (result.ErrorCode == "00")
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
     }
 }
 

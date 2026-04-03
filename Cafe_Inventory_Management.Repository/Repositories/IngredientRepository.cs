@@ -1,4 +1,4 @@
-﻿using Cafe_Inventory_Management.Domain.IRepository;
+using Cafe_Inventory_Management.Domain.IRepository;
 using Cafe_Inventory_Management.Domain.Model;
 using Cafe_Inventory_Management.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -59,7 +59,7 @@ public class IngredientRepository : IIngredientRepo
 
         // 3. Pagination
         var items = await query
-            .OrderBy(p => p.Name) // Sorting is required for Skip/Take
+            .OrderByDescending(p => p.Id) // Newest first
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -73,9 +73,13 @@ public class IngredientRepository : IIngredientRepo
 
     public async Task<int> CreateIngredients(Ingredients ingredients)
     {
-        await _context.Ingredients.AddAsync(ingredients);
-        var result = _context.SaveChanges();
-        return result;
+        if (ingredients == null || string.IsNullOrWhiteSpace(ingredients.Code))
+        {
+            return 0;
+        }
+
+        await UpsertIngredient(ingredients);
+        return await _context.SaveChangesAsync();
     }
 
     public async Task<int> UpdateIngredients(Ingredients updateingredients)
@@ -85,7 +89,6 @@ public class IngredientRepository : IIngredientRepo
         product.Amount=updateingredients.Amount;
         product.Quatity = updateingredients.Quatity;
         product.IsActive = updateingredients.IsActive;
-        _context.Update(product);
         var result = _context.SaveChanges();
         return result;
     }
@@ -100,9 +103,46 @@ public class IngredientRepository : IIngredientRepo
 
     public async Task<int> CreateIngredientsList(List<Ingredients> ingredients)
     {
-        await _context.Ingredients.AddRangeAsync(ingredients);
-        var result = await _context.SaveChangesAsync();
-        return result;
+        if (ingredients == null || !ingredients.Any())
+        {
+            return 0;
+        }
+
+        foreach (var item in ingredients)
+        {
+            if (item == null || string.IsNullOrWhiteSpace(item.Code))
+            {
+                continue;
+            }
+
+            await UpsertIngredient(item);
+        }
+
+        return await _context.SaveChangesAsync();
+    }
+
+    private async Task UpsertIngredient(Ingredients incoming)
+    {
+        var code = incoming.Code.Trim();
+        var existing = await _context.Ingredients.FirstOrDefaultAsync(x => x.Code == code);
+
+        if (existing == null)
+        {
+            incoming.Code = code;
+            incoming.CreatedAt = GetDbTimestamp();
+            incoming.UpdatedAt = GetDbTimestamp();
+            await _context.Ingredients.AddAsync(incoming);
+            return;
+        }
+
+        existing.Name = incoming.Name;
+        existing.Unit = incoming.Unit;
+        existing.Amount = incoming.Amount;
+        existing.MinStockLevel = incoming.MinStockLevel;
+        existing.IsActive = incoming.IsActive;
+        existing.UpdatedAt = GetDbTimestamp();
+        existing.UpdatedBy = incoming.CreatedBy ?? incoming.UpdatedBy;
+        existing.Quatity += incoming.Quatity;
     }
 
     public async Task<List<Ingredients>> GetLowStockIngredientsAsync()
@@ -110,5 +150,10 @@ public class IngredientRepository : IIngredientRepo
         return await _context.Ingredients
             .Where(i => i.Quatity <= i.MinStockLevel)
             .ToListAsync();
+    }
+
+    private static DateTime GetDbTimestamp()
+    {
+        return DateTime.UtcNow;
     }
 }

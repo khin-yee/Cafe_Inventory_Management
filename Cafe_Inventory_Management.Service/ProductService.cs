@@ -50,14 +50,9 @@ public class ProductService:IProductService
             return "success";
     }
 
-    public async Task<string> CreateProductList(List<Product> products)
+    public async Task<ApiResponse> CreateProductList(List<ProductRequest> products)
     {
-        var result = await _repo.CreateProductList(products);
-        if (result != 1)
-            return "fail";
-        else
-            return "success";
-
+        return await _repo.CreateProductList(products);
     }
 
 }

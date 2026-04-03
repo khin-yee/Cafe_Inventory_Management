@@ -31,7 +31,7 @@ public class IngredientsService : IIngredientsService
     public async Task<string> CreateIngredients(Ingredients ingredients)
     {
         var result = await _repo.CreateIngredients(ingredients);
-        if (result != 1)
+        if (result <= 0)
             return "fail";
 
         else
@@ -41,7 +41,7 @@ public class IngredientsService : IIngredientsService
     public async Task<string> UpdateIngredients(Ingredients ingredients)
     {
         var result = await _repo.UpdateIngredients(ingredients);
-        if (result != 1)
+        if (result <= 0)
             return "fail";
 
         else
@@ -51,7 +51,7 @@ public class IngredientsService : IIngredientsService
     public async Task<string> DeleteIngredients(int id)
     {
         var result = await _repo.DeleteIngredients(id);
-        if (result != 1)
+        if (result <= 0)
             return "fail";
 
         else
@@ -61,7 +61,7 @@ public class IngredientsService : IIngredientsService
     public async Task<string> CreateIngredientsList(List<Ingredients> ingredients)
     {
         var result = await _repo.CreateIngredientsList(ingredients);
-        if (result != 1)
+        if (result <= 0)
             return "fail";
 
         else

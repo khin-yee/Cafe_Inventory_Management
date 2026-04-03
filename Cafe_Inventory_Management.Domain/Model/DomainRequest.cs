@@ -8,7 +8,7 @@ namespace Cafe_Inventory_Management.Domain.Model
 {
     public class ProductRequest
     {
-        public Product Product { get; set; }
-        public List<ProductIngredients> Recipe { get; set; }
+        public Product Product { get; set; } = new();
+        public List<ProductIngredients> Recipe { get; set; } = new();
     }
 }

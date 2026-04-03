@@ -13,7 +13,7 @@ public interface IProductService
     Task<ApiResponse> CreateProduct(Product product, List<ProductIngredients> ingredients);
     Task<ApiResponse> UpdateProduct(Product product, List<ProductIngredients> ingredients);
     Task<string> DeleteProduct(int id);
-    Task<string> CreateProductList(List<Product> products);
+    Task<ApiResponse> CreateProductList(List<ProductRequest> products);
 
 }
 
