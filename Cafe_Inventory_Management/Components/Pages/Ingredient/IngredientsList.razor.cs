@@ -90,7 +90,7 @@ public partial class IngredientsList : ComponentBase
          new MessageBoxOptions
          {
              Title = "Warning",
-             MarkupMessage = new MarkupString("Are you sure you want to delete this Ingredients? <br/><b>This action cannot be undone!</b>"),
+             MarkupMessage = new MarkupString("Are you sure you want to delete this ingredient?<br/><b>This action cannot be undone.</b>"),
              YesText = "Delete",
              CancelText = "Cancel",
          },
@@ -113,17 +113,17 @@ public partial class IngredientsList : ComponentBase
 
             if (response.ErrorCode == "00")
             {
-                Snackbar.Add("Ingredients deleted successfully!", Severity.Success);
+                Snackbar.Add("Ingredient deleted successfully.", Severity.Success);
                 await _table.ReloadServerData();
             }
             else
             {
-                Snackbar.Add($"Error: {response.ErrorMessage}", Severity.Error);
+                Snackbar.Add($"Unable to delete ingredient: {response.ErrorMessage}", Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error:", Severity.Error);
+            Snackbar.Add($"Unable to delete ingredient: {ex.Message}", Severity.Error);
         }
     }
 
@@ -199,7 +199,7 @@ public partial class IngredientsList : ComponentBase
 
             if (response.ErrorCode == "00")
             {
-                Snackbar.Add("Excel uploaded and ingredients added!", Severity.Success);
+                Snackbar.Add("Ingredient import completed successfully.", Severity.Success);
                 await _table.ReloadServerData();
             }
         }

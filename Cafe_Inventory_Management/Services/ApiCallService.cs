@@ -46,9 +46,9 @@ public class ApiCallService : IApiCallService
                 responseModel.Detail = await response.Content.ReadAsStringAsync();
             }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
         catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)

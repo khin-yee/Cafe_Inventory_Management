@@ -86,18 +86,21 @@ public class OrderRepository : IOrderRepo
 
         try
         {
-
-            Random random = new Random();
-            string code = "";
-            for (int i = 0; i < 5; i++)
+            if (request.Items == null || !request.Items.Any())
             {
-                code = random.Next(10000, 99999).ToString();
+                return new ApiResponse
+                {
+                    ErrorCode = "01",
+                    ErrorMessage = "Order must contain at least one item."
+                };
             }
+
+            string code = await GenerateUniqueOrderIdAsync();
             // 2. Create the Order Header
             var newOrder = new OrdersModel
             {
                 OrderId = code,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
                 TotalPrice = request.Items.Sum(x => x.Price * x.Quantity),
                 Status = Status.Pending,
                 CreatedBy = request.UserName,
@@ -137,7 +140,12 @@ public class OrderRepository : IOrderRepo
 
         catch (Exception ex)
         {
-            throw ex;
+            await transaction.RollbackAsync();
+            return new ApiResponse
+            {
+                ErrorCode = "01",
+                ErrorMessage = ex.Message
+            };
         }
     }
 
@@ -196,7 +204,7 @@ public class OrderRepository : IOrderRepo
                     ProductName = item.ProductName,
                     Quatity = item.Quatity, // Matches your DB typo
                     Amount = item.Amount,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
                     IsActive = true
                 };
 
@@ -206,7 +214,7 @@ public class OrderRepository : IOrderRepo
 
             // 3. Update the Header Total
             orderHeader.TotalPrice = newTotal;
-            orderHeader.UpdatedAt = DateTime.Now;
+            orderHeader.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -227,17 +235,36 @@ public class OrderRepository : IOrderRepo
     public async Task<ApiResponse> UpdateOrderStatus(OrderViewModel updatedOrder)
     {
         var order = await _context.Orders.Where(x => x.OrderId == updatedOrder.OrderId).FirstOrDefaultAsync();
+        if (order == null)
+        {
+            return new ApiResponse
+            {
+                ErrorCode = "01",
+                ErrorMessage = $"Order with ID {updatedOrder.OrderId} was not found."
+            };
+        }
+
         order.Status = updatedOrder.Status;
+        order.UpdatedAt = DateTime.UtcNow;
         if (updatedOrder.Status == Status.Preparing)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
                 foreach (var item in updatedOrder.Items)
                 {
                     var product = await _context.Product.Where(x => x.Code == item.ProductCode).FirstOrDefaultAsync();
+                    if (product == null)
+                    {
+                        return new ApiResponse
+                        {
+                            ErrorCode = "01",
+                            ErrorMessage = $"Product with code {item.ProductCode} not found."
+                        };
+                    }
 
                     var response = new ApiResponse();
-                    if (product!.IsRecipe == true)
+                    if (product.IsRecipe == true)
                     {
                         var res = await _context.ProductIngredients.Where(x => x.ProductCode== item.ProductCode).ToListAsync();
                         foreach (var ingre in res)
@@ -267,12 +294,22 @@ public class OrderRepository : IOrderRepo
                 _context.Orders.Update(order);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
+                return new ApiResponse { ErrorCode = "00" };
             }
-
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return new ApiResponse
+                {
+                    ErrorCode = "01",
+                    ErrorMessage = ex.Message
+                };
+            }
         }
-        var result = _context.Orders.Update(order);
+
+        _context.Orders.Update(order);
         await _context.SaveChangesAsync();
-        return new ApiResponse();
+        return new ApiResponse { ErrorCode = "00" };
     }
 
     public async Task<List<OrderViewModel>> GetOrders()
@@ -588,5 +625,18 @@ public class OrderRepository : IOrderRepo
         if (value.Kind == DateTimeKind.Utc) return value;
         if (value.Kind == DateTimeKind.Local) return value.ToUniversalTime();
         return DateTime.SpecifyKind(value, DateTimeKind.Utc);
+    }
+
+    private async Task<string> GenerateUniqueOrderIdAsync()
+    {
+        var random = new Random();
+        string code;
+        do
+        {
+            code = random.Next(10000, 99999).ToString();
+        }
+        while (await _context.Orders.AnyAsync(x => x.OrderId == code));
+
+        return code;
     }
 }

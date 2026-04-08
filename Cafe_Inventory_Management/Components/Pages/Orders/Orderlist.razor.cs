@@ -130,7 +130,7 @@ namespace Cafe_Inventory_Management.UI.Components.Pages.Orders
                     Quantity = 1
                 });
             }
-            Snackbar.Add($"{product.Name} added to cart", Severity.Success);
+            Snackbar.Add($"{product.Name} was added to cart successfully.", Severity.Success);
         }
 
         private void RemoveFromCart(CartItem item)
@@ -165,25 +165,34 @@ namespace Cafe_Inventory_Management.UI.Components.Pages.Orders
                     var apires = JsonConvert.DeserializeObject<ApiResponse>(response.Detail);
                     if (apires.ErrorCode == "00")
                     {
-                        Snackbar.Add("Order Placed Successfully!", Severity.Success);
+                        Snackbar.Add("Order has been placed successfully.", Severity.Success);
                         _cart.Clear();
                         Nav.NavigateTo("/ordersList");
                     }
                     else
                     {
-                        Snackbar.Add(apires.ErrorMessage, Severity.Error);
+                        Snackbar.Add(GetUiErrorMessage(apires.ErrorMessage, "Unable to place the order. Please review the order details and try again."), Severity.Error);
 
                     }// Reload to reflect any inventory changes
                 }
                 else
                 {
-                    Snackbar.Add("Error placing order. Check inventory levels.", Severity.Error);
+                    Snackbar.Add("Unable to place the order. Please verify inventory availability and try again.", Severity.Error);
                     Nav.NavigateTo("/orderlist");
                     
                 }
             }
         }
 
-        
+        private static string GetUiErrorMessage(string? message, string fallback)
+        {
+            if (string.IsNullOrWhiteSpace(message) || string.Equals(message.Trim(), "No Error", StringComparison.OrdinalIgnoreCase))
+            {
+                return fallback;
+            }
+
+            return message;
+        }
+
     }
 }
