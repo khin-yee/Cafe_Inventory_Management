@@ -60,10 +60,10 @@ using (var scope = app.Services.CreateScope())
         new RecurringJobOptions { TimeZone = reportTimeZone });
 
     recurringJobManager.AddOrUpdate<EmailReportService>(
-        "monthly-admin-report",
-        service => service.SendReportAsync(true, true),
-        "0 23 * * *",
-        new RecurringJobOptions { TimeZone = reportTimeZone });
+     "monthly-admin-report",
+     service => service.SendReportAsync(true, true),
+     "0 23 28-31 * *",
+     new RecurringJobOptions { TimeZone = reportTimeZone });
 }
 
 app.UseHangfireDashboard(); 
