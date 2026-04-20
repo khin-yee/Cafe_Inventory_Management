@@ -357,8 +357,10 @@
 
         try
         {
+            
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            var username = authState?.User?.Identity?.Name ?? "Guest";
+            var user = authState.User;
+            var username = user.FindFirst(c => c.Type == "name")?.Value ?? user.Identity?.Name ?? "Guest";
 
             var request = new OrderRequestDto
             {

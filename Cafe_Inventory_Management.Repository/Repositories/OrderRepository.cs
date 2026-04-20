@@ -585,6 +585,17 @@ public class OrderRepository : IOrderRepo
                 Category = p.Category
             })
             .ToListAsync();
+        var lowStockIngredient = await _context.Ingredients.Where(p=>p.Quantity <=10)
+                                   .Select(p => new LowStockProduct
+                                   {
+                                       Name = p.Name,
+                                       CurrentStock = (double)p.Quantity,
+                                   })
+            .ToListAsync();
+        foreach(var item in lowStockIngredient)
+        {
+            lowStock.Add(item);
+        }
 
         var activity = await _context.Orders.OrderByDescending(o => o.CreatedAt)
             .Take(5)
