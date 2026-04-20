@@ -32,7 +32,7 @@
                                       Placeholder="Search by name or code..."
                                       Adornment="Adornment.Start"
                                       AdornmentIcon="@Icons.Material.Filled.Search"
-                                      Variant="Variant.Outlined"
+                                      Variant="Variant.Text"
                                       Margin="Margin.Dense"
                                       FullWidth="true" />
                     </MudItem>
@@ -43,7 +43,7 @@
                     {
                         <MudChip T="string"
                                  Variant="@(_selectedCategory == cat ? Variant.Filled : Variant.Outlined)"
-                                 Color="@(_selectedCategory == cat ? Color.Dark : Color.Default)"
+                                 Color="@(_selectedCategory == cat ? Color.Success : Color.Default)"
                                  OnClick="@(() => SelectCategory(cat))">
                             @cat
                         </MudChip>
@@ -190,20 +190,25 @@
     .pos-cart-panel {
         position: sticky;
         top: 76px;
-        height: calc(100vh - 92px);
-        max-height: calc(100vh);
-        min-height: 320px;
+        height: calc(100vh - 120px); /* adjust this value */
         display: flex;
         flex-direction: column;
-        border-radius: 12px;
-        border: 1px solid var(--mud-palette-lines-default);
+        overflow: hidden;
     }
 
+    /* IMPORTANT: allow flex child to shrink properly */
     .pos-cart-body {
         flex: 1;
-        min-height: 0;
         overflow-y: auto;
-        padding-right: 2px;
+        min-height: 0;
+    }
+
+    /* Make footer always visible */
+    .pos-cart-footer {
+        flex-shrink: 0; /* prevents it from being pushed out */
+        padding-top: 8px;
+        border-top: 1px solid var(--mud-palette-lines-default);
+        background: var(--mud-palette-surface);
     }
 
     .pos-empty {
@@ -218,10 +223,7 @@
         padding: 2px 4px;
     }
 
-    .pos-cart-footer {
-        border-top: 1px solid var(--mud-palette-lines-default);
-        background: var(--mud-palette-surface);
-    }
+  
 
     @@media (max-width: 960px) {
         .pos-cart-panel {
@@ -241,6 +243,7 @@
     private string _selectedCategory = "All";
     private string _searchString = "";
     private bool _isProcessing = false;
+    @inject NavigationManager Nav
 
     protected override async Task OnInitializedAsync()
     {
@@ -370,8 +373,7 @@
             if (response.ErrorCode == "00" || string.IsNullOrEmpty(response.ErrorCode))
             {
                 Snackbar.Add("Order placed successfully!", Severity.Success);
-                _cart.Clear();
-                StateService.NotifyStockChanged();
+                Nav.NavigateTo("/ordersList");
             }
             else
             {
