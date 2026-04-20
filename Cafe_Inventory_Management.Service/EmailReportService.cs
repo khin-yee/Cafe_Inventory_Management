@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
@@ -114,12 +114,12 @@ namespace Cafe_Inventory_Management.Service
                     {
                         ws.Cell(currentRow, 4).Value = item.ProductName;
                         ws.Cell(currentRow, 4).Style.Font.FontColor = colorTextMuted;
-                        ws.Cell(currentRow, 5).Value = item.Quatity;
+                        ws.Cell(currentRow, 5).Value = item.Quantity;
                         ws.Cell(currentRow, 5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                         ws.Cell(currentRow, 6).Value = item.Amount;
                         ws.Cell(currentRow, 6).Style.NumberFormat.Format = "#,##0 \"MMK\"";
                         ws.Cell(currentRow, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
-                        ws.Cell(currentRow, 7).Value = item.Quatity * item.Amount;
+                        ws.Cell(currentRow, 7).Value = item.Quantity * item.Amount;
                         ws.Cell(currentRow, 7).Style.NumberFormat.Format = "#,##0 \"MMK\"";
                         ws.Cell(currentRow, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
                         currentRow++;

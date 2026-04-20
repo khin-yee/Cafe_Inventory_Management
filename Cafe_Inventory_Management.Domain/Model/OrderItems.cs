@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,7 @@ public class OrderItems:BaseEntity
     public string OrderId { get; set; }
     public string ProductCode { get; set; }
     public string ProductName { get; set; }
-    public int Quatity { get; set; }
+    public int Quantity { get; set; }
     public  decimal Amount { get; set; }
 }
 

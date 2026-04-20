@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,14 +12,4 @@ public class OrdersModel:BaseEntity
     public string Status { get; set; }
 
 }
-
-public class OrderViewModel
-{
-    public string OrderId { get; set; }
-    public decimal TotalPrice { get; set; }
-    public string Status { get; set; }
-    public DateTime CreatedAt { get; set; }
-
-    public string? CreatedBy { get; set; }
-    public List<OrderItems> Items { get; set; } = new();
-}
+

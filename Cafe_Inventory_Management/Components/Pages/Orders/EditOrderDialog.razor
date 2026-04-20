@@ -1,4 +1,4 @@
-﻿@using Cafe_Inventory_Management.Domain
+@using Cafe_Inventory_Management.Domain
 @using Cafe_Inventory_Management.Domain.Model
 @using Cafe_Inventory_Management.UI.Services
 <MudDialog>
@@ -12,7 +12,7 @@
                 <MudPaper Class="pa-3 border" Elevation="0">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <MudText>@item.ProductCode</MudText>
-                        <MudNumericField @bind-Value="item.Quatity" Label="Quantity" Min="1" Variant="Variant.Outlined" Margin="Margin.Dense" Style="width: 80px;" />
+                        <MudNumericField @bind-Value="item.Quantity" Label="Quantity" Min="1" Variant="Variant.Outlined" Margin="Margin.Dense" Style="width: 80px;" />
                     </MudStack>
                 </MudPaper>
             }

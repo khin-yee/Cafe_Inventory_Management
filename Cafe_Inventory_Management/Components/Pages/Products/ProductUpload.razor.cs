@@ -1,4 +1,4 @@
-﻿using Cafe_Inventory_Management.Domain.Model;
+using Cafe_Inventory_Management.Domain.Model;
 using Cafe_Inventory_Management.Domain;
 using Cafe_Inventory_Management.UI.Services;
 using ClosedXML.Excel;
@@ -108,7 +108,7 @@ public partial class ProductUpload : ComponentBase
                             Name = row.Cell(1).GetValue<string>(),
                             Code = productCode,
                             Category = row.Cell(3).GetValue<string>(),
-                            Quatity = row.Cell(4).GetValue<int>(),
+                            Quantity = row.Cell(4).GetValue<int>(),
                             Amount = row.Cell(5).GetValue<decimal>(),
                             CreatedBy = user.FindFirst(c => c.Type == "name")?.Value ?? "Unknown User",
                             IsRecipe = row.Cell(6).GetValue<bool>(),

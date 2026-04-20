@@ -94,7 +94,7 @@ public class IngredientRepository : IIngredientRepo
         var product = await _context.Ingredients.Where(x => x.Id == updateingredients.Id).FirstOrDefaultAsync();
         product.Name=updateingredients.Name;
         product.Amount=updateingredients.Amount;
-        product.Quatity = updateingredients.Quatity;
+        product.Quantity = updateingredients.Quantity;
         product.IsActive = updateingredients.IsActive;
         var result = _context.SaveChanges();
         return result;
@@ -149,13 +149,13 @@ public class IngredientRepository : IIngredientRepo
         existing.IsActive = incoming.IsActive;
         existing.UpdatedAt = GetDbTimestamp();
         existing.UpdatedBy = incoming.CreatedBy ?? incoming.UpdatedBy;
-        existing.Quatity += incoming.Quatity;
+        existing.Quantity += incoming.Quantity;
     }
 
     public async Task<List<Ingredients>> GetLowStockIngredientsAsync()
     {
         return await _context.Ingredients
-            .Where(i => i.Quatity <= i.MinStockLevel)
+            .Where(i => i.Quantity <= i.MinStockLevel)
             .ToListAsync();
     }
 

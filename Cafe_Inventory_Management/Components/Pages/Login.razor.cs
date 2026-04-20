@@ -86,7 +86,7 @@ public partial class Login : ComponentBase
                 {
                     var name = claims.FirstOrDefault(c => c.Type == "name")?.Value ?? Username;
                     customAuthStateProvider.MarkUserAsAuthenticated(name, claims);
-                    Navigation.NavigateTo($"/product");
+                    Navigation.NavigateTo("/pos");
                 }
             }
             else

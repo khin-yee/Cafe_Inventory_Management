@@ -1,4 +1,4 @@
-﻿@using Cafe_Inventory_Management.Domain
+@using Cafe_Inventory_Management.Domain
 @using Cafe_Inventory_Management.Domain.Model
 @using Cafe_Inventory_Management.UI.Services
 @using Microsoft.AspNetCore.Components.Authorization
@@ -28,7 +28,7 @@
                         }
                     </MudSelect>
 
-                    <MudNumericField Label="Production Qty" @bind-Value="Model.Quatity" Variant="Variant.Outlined" Margin="Margin.Dense" Min="1" HelperText="Qty to add to stock now" />
+                    <MudNumericField Label="Production Qty" @bind-Value="Model.Quantity" Variant="Variant.Outlined" Margin="Margin.Dense" Min="1" HelperText="Qty to add to stock now" />
                     <MudNumericField Label="Selling Price" @bind-Value="Model.Amount" Variant="Variant.Outlined" Margin="Margin.Dense" Adornment="Adornment.Start" AdornmentText="MMK" />
                 </MudStack>
             </MudItem>
@@ -174,7 +174,7 @@
 
     private async Task Save()
     {
-        if (!Model.IsRecipe && (Model.Quatity == null || Model.Quatity <= 0))
+        if (!Model.IsRecipe && (Model.Quantity == null || Model.Quantity <= 0))
         {
             Snackbar.Add("Please enter a Production Quantity to deduct stock.", Severity.Warning);
             return;

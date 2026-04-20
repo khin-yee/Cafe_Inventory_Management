@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -88,7 +88,7 @@ namespace Cafe_Inventory_Management.UI.Components.Pages.Ingredient
                         Name = row.Cell(1).GetValue<string>(),
                         Code = row.Cell(2).GetValue<string>(),
                         Unit = row.Cell(3).GetValue<string>(),
-                        Quatity = row.Cell(4).GetValue<int>(),
+                        Quantity = row.Cell(4).GetValue<int>(),
                         Amount = row.Cell(5).GetValue<decimal>(),
                         CreatedBy = user.FindFirst(c => c.Type == "name")?.Value?? "Unknown User",
                         IsActive = true

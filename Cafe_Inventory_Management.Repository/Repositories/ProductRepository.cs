@@ -84,7 +84,7 @@ public class ProductRepository:IProductRepo
 
             var normalizedCode = product.Code.Trim();
             product.Code = normalizedCode;
-            var incomingQty = product.Quatity ?? 0;
+            var incomingQty = product.Quantity ?? 0;
 
             var existingProduct = await _context.Product.FirstOrDefaultAsync(x => x.Code == normalizedCode);
             var targetProduct = product;
@@ -102,7 +102,7 @@ public class ProductRepository:IProductRepo
                 existingProduct.Amount = product.Amount;
                 existingProduct.IsActive = product.IsActive;
                 existingProduct.IsRecipe = product.IsRecipe;
-                existingProduct.Quatity = (existingProduct.Quatity ?? 0) + incomingQty;
+                existingProduct.Quantity = (existingProduct.Quantity ?? 0) + incomingQty;
                 existingProduct.UpdatedAt = GetDbTimestamp();
                 existingProduct.UpdatedBy = product.CreatedBy ?? product.UpdatedBy;
                 targetProduct = existingProduct;
@@ -147,7 +147,7 @@ public class ProductRepository:IProductRepo
                     }
 
                     decimal totalNeeded = incomingQty * item.RequiredAmount;
-                    stock.Quatity -= totalNeeded;
+                    stock.Quantity -= totalNeeded;
                     _context.Ingredients.Update(stock);
                 }
             }
@@ -186,7 +186,7 @@ public class ProductRepository:IProductRepo
             existingProduct.Amount = product.Amount;
             existingProduct.IsActive = product.IsActive;
             existingProduct.IsRecipe = product.IsRecipe;
-            existingProduct.Quatity = product.Quatity;
+            existingProduct.Quantity = product.Quantity;
             await _context.SaveChangesAsync();
 
             var oldRecipe = await _context.ProductIngredients
@@ -246,7 +246,7 @@ public class ProductRepository:IProductRepo
                 var normalizedCode = product.Code.Trim();
                 product.Code = normalizedCode;
 
-                var incomingQty = product.Quatity ?? 0;
+                var incomingQty = product.Quantity ?? 0;
                 var existingProduct = await _context.Product.FirstOrDefaultAsync(x => x.Code == normalizedCode);
                 var targetProduct = product;
 
@@ -263,7 +263,7 @@ public class ProductRepository:IProductRepo
                     existingProduct.Amount = product.Amount;
                     existingProduct.IsActive = product.IsActive;
                     existingProduct.IsRecipe = product.IsRecipe;
-                    existingProduct.Quatity = (existingProduct.Quatity ?? 0) + incomingQty;
+                    existingProduct.Quantity = (existingProduct.Quantity ?? 0) + incomingQty;
                     existingProduct.UpdatedAt = GetDbTimestamp();
                     existingProduct.UpdatedBy = product.CreatedBy ?? product.UpdatedBy;
                     targetProduct = existingProduct;
@@ -327,7 +327,7 @@ public class ProductRepository:IProductRepo
                         if (stock != null)
                         {
                             decimal totalNeeded = incomingQty * item.RequiredAmount;
-                            stock.Quatity -= totalNeeded;
+                            stock.Quantity -= totalNeeded;
                             _context.Ingredients.Update(stock);
                         }
                     }

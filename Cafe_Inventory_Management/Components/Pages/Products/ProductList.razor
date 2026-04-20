@@ -1,4 +1,4 @@
-﻿@page "/product"
+@page "/product"
 @using Cafe_Inventory_Management.Domain.Model
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
@@ -80,7 +80,7 @@
             <MudTd DataLabel="Name" Style=" font-weight: 500;">@context.Name</MudTd>
             <MudTd DataLabel="Name" Style=" font-weight: 500;">@context.Category</MudTd>
             <MudTd DataLabel="Quantity" >
-                <MudChip T="string" Color="Color.Dark" Size="Size.Small" Variant="Variant.Text">@context.Quatity</MudChip>
+                <MudChip T="string" Color="Color.Dark" Size="Size.Small" Variant="Variant.Text">@context.Quantity</MudChip>
             </MudTd>
             <MudTd DataLabel="Amount" Style="font-weight: 600;">@context.Amount MMK</MudTd>
             <MudTd>

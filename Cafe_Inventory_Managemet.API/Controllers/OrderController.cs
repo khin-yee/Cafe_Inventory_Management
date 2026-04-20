@@ -1,4 +1,4 @@
-﻿using Cafe_Inventory_Management.Domain;
+using Cafe_Inventory_Management.Domain;
 using Cafe_Inventory_Management.Domain.IServices;
 using Cafe_Inventory_Management.Domain.Model;
 using Cafe_Inventory_Management.Service;
@@ -99,12 +99,12 @@ public class OrderController : ControllerBase
 
                 foreach (var item in order.Items)
                 {
-                    ws.Cell(currentRow, 4).Value = $"   • {item.ProductName} ({item.ProductCode})";
+                    ws.Cell(currentRow, 4).Value = $"   � {item.ProductName} ({item.ProductCode})";
                     ws.Cell(currentRow, 4).Style.Font.FontColor = XLColor.DimGray;
 
-                    ws.Cell(currentRow, 5).Value = item.Quatity;
+                    ws.Cell(currentRow, 5).Value = item.Quantity;
                     ws.Cell(currentRow, 6).Value = item.Amount;
-                    ws.Cell(currentRow, 7).Value = (item.Quatity * item.Amount);
+                    ws.Cell(currentRow, 7).Value = (item.Quantity * item.Amount);
 
                     ws.Cell(currentRow, 6).Style.NumberFormat.Format = "#,##0";
                     ws.Cell(currentRow, 7).Style.NumberFormat.Format = "#,##0";

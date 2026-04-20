@@ -1,4 +1,4 @@
-﻿@using Cafe_Inventory_Management.Domain.Model
+@using Cafe_Inventory_Management.Domain.Model
 
 <MudDialog>
     <TitleContent>
@@ -63,10 +63,10 @@
                         <MudText Typo="Typo.caption" Class="mud-text-secondary" Style="font-family: monospace;">@context.ProductCode</MudText>
                     </MudTd>
                     <MudTd Style="text-align:center">
-                        <MudText Typo="Typo.body2">@context.Quatity</MudText>
+                        <MudText Typo="Typo.body2">@context.Quantity</MudText>
                     </MudTd>
                     <MudTd Style="text-align:right">
-                        <MudText Typo="Typo.body2" FontWeight="FontWeight.Bold">@((context.Quatity * context.Amount).ToString("N0"))</MudText>
+                        <MudText Typo="Typo.body2" FontWeight="FontWeight.Bold">@((context.Quantity * context.Amount).ToString("N0"))</MudText>
                     </MudTd>
                 </RowTemplate>
             </MudTable>

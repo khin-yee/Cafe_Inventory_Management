@@ -1,4 +1,4 @@
-﻿@page "/ingredient-import"
+@page "/ingredient-import"
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="m-3">
     <MudText Typo="Typo.h5" FontWeight="700" Class="fw-bold">Ingredients Excel Import </MudText>
@@ -53,7 +53,7 @@
         <MudTd DataLabel="Name">@context.Name</MudTd>
         <MudTd DataLabel="Code">@context.Code</MudTd>
         <MudTd DataLabel="Unit">@context.Unit</MudTd>
-        <MudTd DataLabel="Quantity">@context.Quatity</MudTd>
+        <MudTd DataLabel="Quantity">@context.Quantity</MudTd>
         <MudTd DataLabel="Amount">
             <MudText Color="Color.Dark" >
                 @context.Amount.ToString("N2")MMK

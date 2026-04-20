@@ -1,4 +1,4 @@
-﻿using Cafe_Inventory_Management.Domain.Model;
+using Cafe_Inventory_Management.Domain.Model;
 using Cafe_Inventory_Management.Domain;
 using Cafe_Inventory_Management.UI.Components.Pages.Ingredient;
 using Cafe_Inventory_Management.UI.Services;
@@ -188,7 +188,7 @@ public partial class IngredientsList : ComponentBase
                 {
                     Name = row.Cell(1).GetValue<string>(),
                     Code = row.Cell(2).GetValue<string>(),
-                    Quatity = row.Cell(3).GetValue<int>(),
+                    Quantity = row.Cell(3).GetValue<int>(),
                     Unit = row.Cell(4).GetValue<string>(),
                     IsActive = true
                 });

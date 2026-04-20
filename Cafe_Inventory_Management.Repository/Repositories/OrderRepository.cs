@@ -1,4 +1,4 @@
-﻿using Cafe_Inventory_Management.Domain;
+using Cafe_Inventory_Management.Domain;
 using Cafe_Inventory_Management.Domain.IRepository;
 using Cafe_Inventory_Management.Domain.Model;
 using ClosedXML.Excel;
@@ -51,19 +51,19 @@ public class OrderRepository : IOrderRepo
                         if (stock == null)
                             return new ApiResponse { ErrorCode = "99", ErrorMessage = $"Ingredient {item.IngredientCode} not found." };
 
-                        decimal totalNeeded = (product.Quatity ?? 0) * item.RequiredAmount;
+                        decimal totalNeeded = (product.Quantity ?? 0) * item.RequiredAmount;
 
-                        if (stock.Quatity < totalNeeded)
-                            return new ApiResponse { ErrorCode = "99", ErrorMessage = $"Insufficient {stock.Name}. Need {totalNeeded}{stock.Unit}, but only {stock.Quatity} left." };
+                        if (stock.Quantity < totalNeeded)
+                            return new ApiResponse { ErrorCode = "99", ErrorMessage = $"Insufficient {stock.Name}. Need {totalNeeded}{stock.Unit}, but only {stock.Quantity} left." };
                     }
 
                     // If validation passes, perform the actual deduction
                     foreach (var item in ingredients)
                     {
                         var stock = await _context.Ingredients.FirstOrDefaultAsync(x => x.Code == item.IngredientCode);
-                        decimal totalNeeded = (product.Quatity ?? 0) * item.RequiredAmount;
+                        decimal totalNeeded = (product.Quantity ?? 0) * item.RequiredAmount;
 
-                        stock.Quatity -= totalNeeded;
+                        stock.Quantity -= totalNeeded;
                         _context.Ingredients.Update(stock);
                     }
                 }
@@ -117,7 +117,7 @@ public class OrderRepository : IOrderRepo
                     OrderId = newOrder.OrderId,
                     ProductCode = item.ProductCode,
                     ProductName = item.ProductName,
-                    Quatity = item.Quantity,
+                    Quantity = item.Quantity,
                     Amount = item.Price,
                     CreatedBy = request.UserName,
                     UpdatedBy = request.UserName,
@@ -202,13 +202,13 @@ public class OrderRepository : IOrderRepo
                     OrderId = updatedOrder.OrderId,
                     ProductCode = item.ProductCode,
                     ProductName = item.ProductName,
-                    Quatity = item.Quatity, // Matches your DB typo
+                    Quantity = item.Quantity, // Matches your DB typo
                     Amount = item.Amount,
                     CreatedAt = DateTime.UtcNow,
                     IsActive = true
                 };
 
-                newTotal += (item.Amount * item.Quatity); // Recalculate based on quantity
+                newTotal += (item.Amount * item.Quantity); // Recalculate based on quantity
                 _context.OrderItems.Add(dbItem);
             }
 
@@ -277,18 +277,31 @@ public class OrderRepository : IOrderRepo
                                 response.ErrorMessage = $"Ingredient with ID {ingre.IngredientCode} not found.";
                                 return response;
                             }
-                            decimal totalDeduction = item.Quatity  * (ingre.RequiredAmount);
+                            decimal totalDeduction = item.Quantity  * (ingre.RequiredAmount);
 
-                            if (ingredient.Quatity < totalDeduction)
+                            if (ingredient.Quantity < totalDeduction)
                             {
                                 response.ErrorCode = "01";
                                 response.ErrorMessage = $"Stock too low for {ingredient.Name}. Needed: {totalDeduction}";
                                 return response;
                             }
 
-                            ingredient.Quatity -= totalDeduction;
+                            ingredient.Quantity -= totalDeduction;
                             _context.Ingredients.Update(ingredient);
                         }
+                    }
+                    else
+                    {
+                        if (product.Quantity < item.Quantity)
+                        {
+                            return new ApiResponse
+                            {
+                                ErrorCode = "01",
+                                ErrorMessage = $"Stock too low for {product.Name}. Needed: {item.Quantity}"
+                            };
+                        }
+                        product.Quantity -= item.Quantity;
+                        _context.Product.Update(product);
                     }
                 }
                 _context.Orders.Update(order);
@@ -452,7 +465,7 @@ public class OrderRepository : IOrderRepo
                                      item.ProductCode,
                                      prod.Name,
                                      prod.Category,
-                                     item.Quatity,
+                                     item.Quantity,
                                      item.Amount,
                                      ord.CreatedAt
                                  }).ToListAsync();
@@ -463,7 +476,7 @@ public class OrderRepository : IOrderRepo
             .Select(g => new CategoryStat
             {
                 CategoryName = g.Key,
-                TotalRevenue = (double)g.Sum(x => x.Quatity * x.Amount)
+                TotalRevenue = (double)g.Sum(x => x.Quantity * x.Amount)
             }).ToList();
 
         // 4. Top 5 Products
@@ -472,7 +485,7 @@ public class OrderRepository : IOrderRepo
             .Select(g => new ProductStat
             {
                 ProductName = g.Key.Name,
-                TotalQty = g.Sum(x => x.Quatity)
+                TotalQty = g.Sum(x => x.Quantity)
             })
             .OrderByDescending(x => x.TotalQty)
             .Take(5)
@@ -564,11 +577,11 @@ public class OrderRepository : IOrderRepo
 
     public async Task<AdminDashboardData> GetAdminStatus()
     {     
-        var lowStock = await _context.Product.Where(p => p.Quatity <= 1)
+        var lowStock = await _context.Product.Where(p => p.Quantity <= 1)
             .Select(p => new LowStockProduct
             {
                 Name = p.Name,
-                CurrentStock = (double)p.Quatity,
+                CurrentStock = (double)p.Quantity,
                 Category = p.Category
             })
             .ToListAsync();

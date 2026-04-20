@@ -1,0 +1,391 @@
+@page "/pos"
+@using Cafe_Inventory_Management.Domain
+@using Cafe_Inventory_Management.Domain.Model
+@using Cafe_Inventory_Management.Domain.IServices
+@using Cafe_Inventory_Management.UI.Services
+@using Cafe_Inventory_Management.UI
+@using Newtonsoft.Json
+@rendermode InteractiveServer
+@inject IApiCallService _apiService
+@inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthStateProvider
+@inject InventoryStateService StateService
+
+<PageTitle>Point of Sale</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4 pb-4 pos-page">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudText Typo="Typo.h5" Class="fw-bold">Point of Sale</MudText>
+        <MudChip T="string" Color="Color.Dark" Variant="Variant.Text" Size="Size.Small">
+            @GetTotalItems() items in cart
+        </MudChip>
+    </MudStack>
+
+    <MudGrid Spacing="3">
+        <MudItem xs="12" md="8">
+            <MudPaper Class="pa-4 mb-3 pos-toolbar" Elevation="1">
+                <MudGrid>
+                    <MudItem xs="12" sm="8">
+                        <MudTextField @bind-Value="_searchString"
+                                      Immediate="true"
+                                      TextChanged="() => FilterProducts()"
+                                      Placeholder="Search by name or code..."
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Search"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true" />
+                    </MudItem>
+                </MudGrid>
+
+                <MudChipSet T="string" Class="mt-4 mb-1">
+                    @foreach (var cat in _categories)
+                    {
+                        <MudChip T="string"
+                                 Variant="@(_selectedCategory == cat ? Variant.Filled : Variant.Outlined)"
+                                 Color="@(_selectedCategory == cat ? Color.Dark : Color.Default)"
+                                 OnClick="@(() => SelectCategory(cat))">
+                            @cat
+                        </MudChip>
+                    }
+                </MudChipSet>
+            </MudPaper>
+
+            <MudGrid Spacing="2" Class="pos-product-grid">
+                @foreach (var product in _filteredProducts)
+                {
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudCard @onclick="() => AddToCart(product)" Class="pos-product-card">
+                            <MudCardContent Class="d-flex flex-column align-center justify-center text-center">
+                                <MudAvatar Color="Color.Dark" Size="Size.Medium" Class="mb-2">
+                                    <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Size="Size.Medium" />
+                                </MudAvatar>
+                                <MudText Typo="Typo.subtitle2" Class="fw-bold">@product.Name</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@product.Amount.ToString("C")</MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                }
+                @if (!_filteredProducts.Any())
+                {
+                    <MudItem xs="12">
+                        <MudAlert Severity="Severity.Info">No products found matching criteria.</MudAlert>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4 pos-cart-panel" Elevation="2">
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-1">
+                    <MudText Typo="Typo.h6" Class="fw-bold">
+                        <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Class="mr-2" />
+                        Current Order
+                    </MudText>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="ClearCart"
+                               Disabled="@(!_cart.Any())">
+                        Clear
+                    </MudButton>
+                </MudStack>
+
+
+                <div class="pos-cart-body">
+                    @if (!_cart.Any())
+                    {
+                        <MudPaper Class="pa-5 d-flex justify-center align-center pos-empty" Elevation="0">
+                            <MudText Typo="Typo.body1" Color="Color.Secondary">Your cart is empty.</MudText>
+                        </MudPaper>
+                    }
+                    else
+                    {
+                        <MudList T="CartItem">
+                            @foreach (var item in _cart.ToList())
+                            {
+                                <MudListItem Class="px-0 py-2">
+                                    <div class="d-flex justify-space-between align-center w-100">
+                                        <div class="flex-grow-1 pe-2">
+                                            <MudText Typo="Typo.subtitle2">@item.ProductName</MudText>
+                                            <MudText Typo="Typo.body2" Color="Color.Primary">@item.Price.ToString("C") x @item.Quantity</MudText>
+                                        </div>
+                                        <div class="d-flex align-center pos-qty-controls">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small" OnClick="() => DecreaseQuantity(item)" Color="Color.Default" />
+                                            <MudText Typo="Typo.body1" Class="px-2">@item.Quantity</MudText>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="() => IncreaseQuantity(item)" Color="Color.Primary" />
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="() => RemoveFromCart(item)" Color="Color.Error" />
+                                        </div>
+                                    </div>
+                                </MudListItem>
+                                <MudDivider />
+                            }
+                        </MudList>
+                    }
+                </div>
+
+                <div class="mt-1 pt-1 pos-cart-footer">
+                    <div class="d-flex justify-space-between align-center mb-1">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Items</MudText>
+                        <MudText Typo="Typo.body1">@GetTotalItems()</MudText>
+                    </div>
+                    <div class="d-flex justify-space-between align-center mb-4">
+                        <MudText Typo="Typo.subtitle2">Total</MudText>
+                        <MudText Typo="Typo.body1" Color="Color.Primary">@GetTotal().ToString("C")</MudText>
+                    </div>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Dark"
+                               Size="Size.Large"
+                               FullWidth="true"
+                               Disabled="@(!_cart.Any() || _isProcessing)"
+                               OnClick="Checkout">
+                        @if (_isProcessing)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Processing...</MudText>
+                        }
+                        else
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Payment" Class="mr-2" />
+                            <text>Checkout</text>
+                        }
+                    </MudButton>
+                </div>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+<style>
+    .pos-page {
+        background: linear-gradient(180deg, rgba(245, 245, 245, 0.65) 0%, rgba(250, 250, 250, 0) 100%);
+        border-radius: 14px;
+    }
+
+    .pos-toolbar {
+        border: 1px solid var(--mud-palette-lines-default);
+        border-radius: 12px;
+        background-color: var(--mud-palette-surface);
+    }
+
+    .pos-product-grid {
+        align-items: stretch;
+    }
+
+    .pos-product-card {
+        cursor: pointer;
+        height: 100%;
+        border: 1px solid var(--mud-palette-lines-default);
+        border-radius: 12px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .pos-product-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        border-color: var(--mud-palette-primary);
+    }
+
+    .pos-cart-panel {
+        position: sticky;
+        top: 76px;
+        height: calc(100vh - 92px);
+        max-height: calc(100vh);
+        min-height: 320px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 12px;
+        border: 1px solid var(--mud-palette-lines-default);
+    }
+
+    .pos-cart-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding-right: 2px;
+    }
+
+    .pos-empty {
+        min-height: 180px;
+        border: 1px dashed var(--mud-palette-lines-default);
+        border-radius: 10px;
+    }
+
+    .pos-qty-controls {
+        border: 1px solid var(--mud-palette-lines-default);
+        border-radius: 8px;
+        padding: 2px 4px;
+    }
+
+    .pos-cart-footer {
+        border-top: 1px solid var(--mud-palette-lines-default);
+        background: var(--mud-palette-surface);
+    }
+
+    @@media (max-width: 960px) {
+        .pos-cart-panel {
+            position: static;
+            height: auto;
+            max-height: none;
+            min-height: 0;
+        }
+    }
+</style>
+
+@code {
+    private List<Product> _allProducts = new();
+    private List<Product> _filteredProducts = new();
+    private List<CartItem> _cart = new();
+    private List<string> _categories = new();
+    private string _selectedCategory = "All";
+    private string _searchString = "";
+    private bool _isProcessing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await _apiService.APICall(new ApiRequest(HttpMethod.Get, "/Product?pageNumber=1&pageSize=1000", "", ""));
+        if (response != null && response.ErrorCode == "00")
+        {
+            var data = JsonConvert.DeserializeObject<PagedResult<Product>>(response.Detail);
+            _allProducts = data?.Items ?? new List<Product>();
+        }
+        else
+        {
+            _allProducts = new List<Product>();
+        }
+
+        _categories = _allProducts.Where(p => !string.IsNullOrEmpty(p.Category)).Select(p => p.Category).Distinct().ToList();
+        _categories.Insert(0, "All");
+        FilterProducts();
+    }
+
+    private void SelectCategory(string category)
+    {
+        _selectedCategory = category;
+        FilterProducts();
+    }
+
+    private void FilterProducts()
+    {
+        var query = _allProducts.AsQueryable();
+
+        if (_selectedCategory != "All")
+        {
+            query = query.Where(p => p.Category == _selectedCategory);
+        }
+
+        if (!string.IsNullOrWhiteSpace(_searchString))
+        {
+            query = query.Where(p => (p.Name ?? string.Empty).Contains(_searchString, StringComparison.OrdinalIgnoreCase) || 
+                                     (p.Code ?? string.Empty).Contains(_searchString, StringComparison.OrdinalIgnoreCase));
+        }
+
+        _filteredProducts = query.ToList();
+    }
+
+    private void AddToCart(Product product)
+    {
+        var existing = _cart.FirstOrDefault(c => c.ProductCode == product.Code);
+        if (existing != null)
+        {
+            existing.Quantity++;
+        }
+        else
+        {
+            _cart.Add(new CartItem
+            {
+                ProductCode = product.Code,
+                ProductName = product.Name,
+                Price = product.Amount,
+                Quantity = 1,
+                ProductId = product.Id
+            });
+        }
+    }
+
+    private void RemoveFromCart(CartItem item)
+    {
+        _cart.Remove(item);
+    }
+
+    private void IncreaseQuantity(CartItem item)
+    {
+        item.Quantity++;
+    }
+
+    private void DecreaseQuantity(CartItem item)
+    {
+        if (item.Quantity > 1)
+        {
+            item.Quantity--;
+        }
+        else
+        {
+            _cart.Remove(item);
+        }
+    }
+
+    private decimal GetTotal()
+    {
+        return _cart.Sum(x => x.Price * x.Quantity);
+    }
+
+    private int GetTotalItems()
+    {
+        return _cart.Sum(x => x.Quantity);
+    }
+
+    private void ClearCart()
+    {
+        _cart.Clear();
+    }
+
+    private async Task Checkout()
+    {
+        if (!_cart.Any())
+        {
+            Snackbar.Add("Cart is empty", Severity.Warning);
+            return;
+        }
+
+        _isProcessing = true;
+        StateHasChanged();
+
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var username = authState?.User?.Identity?.Name ?? "Guest";
+
+            var request = new OrderRequestDto
+            {
+                Items = _cart.ToList(),
+                UserName = username,
+                Note = "POS Order"
+            };
+
+            var apiReq = new ApiRequest(HttpMethod.Post, "/CreateOrder", request, "");
+            var response = await _apiService.APICall(apiReq);
+
+            if (response.ErrorCode == "00" || string.IsNullOrEmpty(response.ErrorCode))
+            {
+                Snackbar.Add("Order placed successfully!", Severity.Success);
+                _cart.Clear();
+                StateService.NotifyStockChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Error: {response.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to process checkout: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+}

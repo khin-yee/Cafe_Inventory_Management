@@ -50,7 +50,7 @@ builder.Services.AddScoped<AuthServices>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddAuthorizationCore();
-builder.Services.AddScoped<InventoryStateService>();
+builder.Services.AddSingleton<InventoryStateService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

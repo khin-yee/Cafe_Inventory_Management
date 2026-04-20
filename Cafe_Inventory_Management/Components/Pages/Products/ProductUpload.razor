@@ -1,4 +1,4 @@
-﻿@page "/product-import"
+@page "/product-import"
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="m-3">
     <MudText Typo="Typo.h5" FontWeight="700" Class="fw-bold">Product Excel Import </MudText>
@@ -55,7 +55,7 @@
         <MudTd DataLabel="Name">@context.Product.Name</MudTd>
         <MudTd DataLabel="Code">@context.Product.Code</MudTd>
         <MudTd DataLabel="Category">@context.Product.Category</MudTd>
-        <MudTd DataLabel="Quantity">@context.Product.Quatity</MudTd>
+        <MudTd DataLabel="Quantity">@context.Product.Quantity</MudTd>
         <MudTd DataLabel="Amount">
             <MudText Color="Color.Dark">
                 @context.Product.Amount.ToString("N2")MMK
