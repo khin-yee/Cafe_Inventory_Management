@@ -21,7 +21,7 @@
 
             <MudItem xs="12" sm="8">
                 <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
-                    <MudDateRangePicker Label="Date Range"
+                    <MudDateRangePicker 
                                         @bind-DateRange="_dateRange"
                                         Margin="Margin.Dense"
                                         Variant="Variant.Outlined"
@@ -43,33 +43,34 @@
                                    OnClick="PerformSearch"
                                    Size="Size.Medium" />
                 </MudStack>
+
             </MudItem>
 
             <MudItem xs="12">
-                <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd">
+                <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1" Justify="Justify.FlexEnd" Class="oh-actions">
                     <MudButton Variant="Variant.Outlined"
-                               Color="Color.Dark"
+                               Color="Color.Default"
                                OnClick="@(() => SendManualEmailToAdmin(true))"
                                Disabled="_isEmailing"
                                StartIcon="@Icons.Material.Filled.Email"
-                               Style="height: 40px; min-width: 160px;">
-                        @(_isEmailing ? "SENDING..." : "EMAIL Montly Report")
+                               Class="oh-action-btn">
+                        @(_isEmailing ? "SENDING..." : "Monthly Email")
                     </MudButton>
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Dark"
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Default"
                                OnClick="@(() => SendManualEmailToAdmin(false))"
                                Disabled="_isEmailing"
                                StartIcon="@Icons.Material.Filled.Email"
-                               Style="height: 40px; min-width: 160px;">
-                        @(_isEmailing ? "SENDING..." : "EMAIL Daily Report")
+                               Class="oh-action-btn">
+                        @(_isEmailing ? "SENDING..." : "Daily Email")
                     </MudButton>
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Tertiary"
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Success"
                                OnClick="PrepareExcel"
                                Disabled="_isProcessing"
                                StartIcon="@Icons.Material.Filled.Download"
-                               Style="height: 40px; min-width: 160px;">
-                        @(_isProcessing ? "PREPARING..." : "EXPORT EXCEL")
+                               Class="oh-action-btn oh-export-btn">
+                        @(_isProcessing ? "PREPARING..." : "Export Excel")
                     </MudButton>
                 </MudStack>
             </MudItem>
@@ -90,6 +91,7 @@
                   ServerData="ServerReload"
                   Hover="true"
                   Dense="true"
+                
                   FixedHeader="true"
                   RowsPerPage="10"
                   Class="border rounded-lg shadow-none">
