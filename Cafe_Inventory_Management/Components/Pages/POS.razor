@@ -13,7 +13,8 @@
 
 <PageTitle>Point of Sale</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4 pb-4 pos-page">
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4 pb-4 pos-page" @onkeydown="HandleKeyDown">
+
     <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
         <MudText Typo="Typo.h5" Class="fw-bold">Point of Sale</MudText>
         <MudChip T="string" Color="Color.Dark" Variant="Variant.Text" Size="Size.Small">
@@ -27,14 +28,17 @@
                 <MudGrid>
                     <MudItem xs="12" sm="8">
                         <MudTextField @bind-Value="_searchString"
+                                      @ref="_searchField"
                                       Immediate="true"
                                       TextChanged="() => FilterProducts()"
-                                      Placeholder="Search by name or code..."
+                                      Placeholder="Search products... (Ctrl+F)"
                                       Adornment="Adornment.Start"
                                       AdornmentIcon="@Icons.Material.Filled.Search"
-                                      Variant="Variant.Text"
                                       Margin="Margin.Dense"
+                                      Clearable="true"
                                       FullWidth="true" />
+
+
                     </MudItem>
                 </MudGrid>
 
@@ -106,10 +110,12 @@
                 <div class="pos-cart-body">
                     @if (!_cart.Any())
                     {
-                        <MudPaper Class="pa-5 d-flex justify-center align-center pos-empty" Elevation="0">
+                        <div class="pa-12 d-flex flex-column justify-center align-center pos-empty" Elevation="0">
+                            <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Size="Size.Large" Color="Color.Default" Style="opacity: 0.2;" Class="mb-3" />
                             <MudText Typo="Typo.body1" Color="Color.Secondary">Your cart is empty.</MudText>
-                        </MudPaper>
+                        </div>
                     }
+
                     else
                     {
                         <MudList T="CartItem">
@@ -256,6 +262,20 @@
     private bool _isProcessing = false;
     private bool _isLoadingData = true;
     @inject NavigationManager Nav
+    private MudTextField<string> _searchField;
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.CtrlKey && e.Key == "f")
+        {
+            await _searchField.FocusAsync();
+        }
+        else if (e.Key == "Escape")
+        {
+            _searchString = "";
+            FilterProducts();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

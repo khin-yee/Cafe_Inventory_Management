@@ -6,10 +6,31 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudThemeProvider IsDarkMode="false" Theme="_theme" />
+<MudThemeProvider IsDarkMode="@_isDarkMode" Theme="_theme" />
 <MudPopoverProvider />
-<MudDialogProvider />
+<MudDialogProvider FullWidth="true" CloseButton="true" MaxWidth="MaxWidth.ExtraSmall" />
 <MudSnackbarProvider />
+<style>
+    /* Premium Scrollbar Styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .dark-mode-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+    }
+</style>
 @if (!IsLoginPage)
 {
     <MudLayout>
@@ -17,13 +38,23 @@
         {
             <MudAppBar Elevation="1" Dense="true" Fixed="true" Class="appbar">
 
-                <MudText Typo="Typo.h6"
-                         Class="brand-title">
-                    CHANOHOLIC            <MudImage Src="/Images/cf1.png" Width="30" Height="30" Alt="Product" Class="mr-3" />
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="brand-stack">
+                    <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Color="Color.Primary" Size="Size.Medium" />
+                    <MudText Typo="Typo.h6" FontWeight="FontWeight.Bold" Class="brand-title">
+                        CHANOHOLIC
+                    </MudText>
+                </MudStack>
 
-                </MudText>
 
                 <MudSpacer />
+
+                <MudToggleIconButton @bind-Toggled="@_isDarkMode"
+                                   Icon="@Icons.Material.Filled.DarkMode"
+                                   ToggledIcon="@Icons.Material.Filled.LightMode"
+                                   Title="Toggle Dark Mode"
+                                   Class="mr-2"
+                                   Color="Color.Inherit" />
+
 
                 <AuthorizeView>
                     <Authorized Context="auth">
@@ -78,6 +109,8 @@ else
 }
 
 @code {
+    private bool _isDarkMode = false;
+
     private readonly MudTheme _theme = new()
     {
         PaletteLight = new PaletteLight
@@ -91,7 +124,25 @@ else
             DrawerText = "#1b1212",
             AppbarBackground = "#ffffff",
             AppbarText = "#1b1212",
-            Divider = "rgba(17, 24, 39, 0.10)"
+            Divider = "rgba(17, 24, 39, 0.10)",
+            ActionDefault = "#1b1212"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#8d6e63",
+            Secondary = "#bcaaa4",
+            Background = "#121212",
+            Surface = "#1e1e1e",
+            DrawerBackground = "#1e1e1e",
+            DrawerText = "rgba(255,255,255,0.8)",
+            AppbarBackground = "#121212",
+            AppbarText = "rgba(255,255,255,0.9)",
+            Divider = "rgba(255, 255, 255, 0.12)",
+            ActionDefault = "rgba(255,255,255,0.7)"
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "12px",
         }
     };
 

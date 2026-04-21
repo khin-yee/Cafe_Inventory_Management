@@ -14,14 +14,10 @@
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Product Catalog</MudText>
                 <MudSpacer />
-                <MudTextField T="string"
-                              ValueChanged="@(s => OnSearch(s))"
-                              Placeholder="Search products..."
-                              Adornment="Adornment.Start"
-                              AdornmentIcon="@Icons.Material.Filled.Search"
-                              IconSize="Size.Medium"
-                              Class="mt-0"
-                              Immediate="true" />
+                               Class="mt-0"
+                               Clearable="true"
+                               Immediate="true" />
+
             </ToolBarContent>
             <HeaderContent>
                 <MudTh>Name</MudTh>
@@ -47,7 +43,15 @@
             <PagerContent>
                 <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
             </PagerContent>
+            <NoRecordsContent>
+                <MudStack AlignItems="AlignItems.Center" Class="pa-12">
+                    <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Default" Style="opacity: 0.2;" />
+                    <MudText Typo="Typo.body1" Class="mud-text-secondary">No products found in catalog.</MudText>
+                </MudStack>
+            </NoRecordsContent>
+
         </MudTable>
+
     </MudItem>
 
     @* Right Side: Cart Summary *@

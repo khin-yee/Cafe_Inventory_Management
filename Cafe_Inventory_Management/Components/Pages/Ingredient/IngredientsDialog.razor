@@ -5,8 +5,20 @@
 @using MudBlazor
 @inject IApiCallService ApiService
 
-<MudDialog FullWidth="true" Class="rounded-xl p-3" Style="max-width: 500px;">
+<MudDialog FullWidth="true" Class="rounded-xl" Style="max-width: 500px;">
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-4 pb-0">
+            <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Medium">
+                <MudIcon Icon="@(IsEdit ? Icons.Material.Filled.Edit : Icons.Material.Filled.AddCircle)" />
+            </MudAvatar>
+            <MudText Typo="Typo.h5" FontWeight="700">
+                @(IsEdit ? "Update Ingredients" : "Create New Ingredients")
+            </MudText>
+        </MudStack>
+    </TitleContent>
     <DialogContent>
+        <div class="pa-6">
+
         <MudStack Spacing="3">
             @* Ingredients Name *@
             <MudTextField Label="Ingredients Name"
@@ -69,21 +81,27 @@
                            Label="@(Model.IsActive ? "Active" : "Inactive")" />
             </MudPaper>
         </MudStack>
+        </div>
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Outlined"
-                   Size="Size.Small"
-                   Color="Color.Dark"
-                   OnClick="Cancel">
-            Cancel
-        </MudButton>
-        <MudButton Variant="Variant.Filled"
-                   Size="Size.Small"
-                   Color="Color.Primary"
-                   OnClick="Save">
-            @(IsEdit ? "Update Ingredients" : "Create Ingredients")
-        </MudButton>
+        <div class="pa-4 d-flex justify-end gap-3 w-100">
+            <MudButton Variant="Variant.Text"
+                       OnClick="Cancel">
+                Cancel
+            </MudButton>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="Save"
+                       Class="px-8 rounded-pill"
+                       Disabled="_isSaving">
+                @if (_isSaving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                @(IsEdit ? "Update" : "Create")
+            </MudButton>
+        </div>
     </DialogActions>
 </MudDialog>
 

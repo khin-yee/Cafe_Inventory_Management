@@ -1,15 +1,23 @@
-﻿@using Cafe_Inventory_Management.Domain
+@using Cafe_Inventory_Management.Domain
 @using Cafe_Inventory_Management.UI.Services
 @using MudBlazor
 @inject AuthServices AuthService
 
 
-<MudDialog
-FullWidth="true"
-Class="rounded-xl p-3">
-
-    <!-- HEADER -->
+<MudDialog FullWidth="true" Class="rounded-xl" Style="max-width: 500px;">
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-4 pb-0">
+            <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Medium">
+                <MudIcon Icon="@(IsEdit ? Icons.Material.Filled.Edit : Icons.Material.Filled.PersonAdd)" />
+            </MudAvatar>
+            <MudText Typo="Typo.h5" FontWeight="700">
+                @(IsEdit ? "Update Staff User" : "Create New Staff")
+            </MudText>
+        </MudStack>
+    </TitleContent>
     <DialogContent>
+        <div class="pa-6">
+
 
         <MudStack Spacing="3">
 
@@ -58,31 +66,27 @@ Class="rounded-xl p-3">
             }
 
         </MudStack>
-
+        </div>
     </DialogContent>
 
 
-    <!-- FOOTER -->
+
     <DialogActions>
-
-        <MudButton Variant="Variant.Outlined"
-        Size="Size.Small"
-        Color="Color.Dark"
-        OnClick="Cancel">
-            Cancel
-        </MudButton>
-
-        <MudButton Variant="Variant.Filled"
-        Size="Size.Small"
-        Color="Color.Dark"
-
-        OnClick="Save">
-            @(IsEdit ? "Save" : "Create")
-        </MudButton>
-
+        <div class="pa-4 d-flex justify-end gap-3 w-100">
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="Save"
+                       Class="px-8 rounded-pill"
+                       Disabled="_isSaving">
+                @if (_isSaving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                @(IsEdit ? "Update" : "Create")
+            </MudButton>
+        </div>
     </DialogActions>
-
-
 </MudDialog>
 
 
@@ -128,6 +132,8 @@ Class="rounded-xl p-3">
     }
 
 
+    private bool _isSaving = false;
+
     async Task Save()
     {
         if (string.IsNullOrWhiteSpace(Email) ||
@@ -137,31 +143,30 @@ Class="rounded-xl p-3">
             return;
         }
 
-        if (IsEdit)
+        _isSaving = true;
+        try
         {
-            await AuthService.UpdateUser(User!.user_id, Email, Name);
-
-            // Update role
-            await AuthService.AssignRole(User.user_id, SelectedRole);
+            if (IsEdit)
+            {
+                await AuthService.UpdateUser(User!.user_id, Email, Name);
+                await AuthService.AssignRole(User.user_id, SelectedRole);
+            }
+            else
+            {
+                var newUserId = await AuthService.CreateUser(Email, Password, Name);
+                await AuthService.AssignRole(newUserId, SelectedRole);
+            }
+            MudDialog.Close(DialogResult.Ok(true));
         }
-        else
+        catch (Exception ex)
         {
-            // Create user
-            var newUserId = await AuthService.CreateUser(Email, Password, Name);
-
-            // Assign role
-            await AuthService.AssignRole(newUserId, SelectedRole);
+            // Error handling can be added here
         }
-
-        MudDialog.Close(DialogResult.Ok(true));
+        finally
+        {
+            _isSaving = false;
+        }
     }
 
-
-
-    void Cancel()
-    {
-        MudDialog.Cancel();
-    }
-
-
+    void Cancel() => MudDialog.Cancel();
 }

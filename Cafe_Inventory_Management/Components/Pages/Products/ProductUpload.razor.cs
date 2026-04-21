@@ -19,7 +19,9 @@ public partial class ProductUpload : ComponentBase
     [Inject] AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
 
 
-    [Inject] public IApiCallService _apiService { get; set; }
+
+
+[Inject] public IApiCallService _apiService { get; set; }
 
     private void PrepareSampleExcel()
     {
@@ -166,6 +168,8 @@ public partial class ProductUpload : ComponentBase
             var apiResult = JsonConvert.DeserializeObject<ApiResponse>(response.Detail ?? "{}");
             Snackbar.Add(GetUiSuccessMessage(apiResult?.ErrorMessage, "All products and ingredients saved successfully!"), Severity.Success);
             _previewData.Clear();
+            Nav.NavigateTo("/product");
+
         }
         else
         {

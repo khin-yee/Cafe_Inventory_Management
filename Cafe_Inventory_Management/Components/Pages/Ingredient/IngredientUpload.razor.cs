@@ -111,7 +111,9 @@ namespace Cafe_Inventory_Management.UI.Components.Pages.Ingredient
             {
                 Snackbar.Add("All ingredients saved successfully!", Severity.Success);
                 _previewData.Clear();
-            }        
+                Nav.NavigateTo("/Ingredients");
+
+            }
             else
             {
                 Snackbar.Add("Failed to save data to database.", Severity.Error);

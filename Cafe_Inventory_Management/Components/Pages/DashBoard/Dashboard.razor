@@ -1,4 +1,4 @@
-﻿@page "/dashboard"
+@page "/dashboard"
 @using Cafe_Inventory_Management.UI.Services
 @using Newtonsoft.Json
 @inject IApiCallService _apiService
@@ -23,32 +23,36 @@
     {
         <MudGrid>
             <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="pa-4 rounded-xl shadow-sm border-l-8" Style="border-color: #594AE2;">
+                <MudPaper Class="pa-4 rounded-xl shadow-sm border-l-8" Style="border-color: var(--mud-palette-primary);">
                     <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Total Revenue</MudText>
                     <MudText Typo="Typo.h5" FontWeight="700">@_stats.TotalSales.ToString("N0") MMK</MudText>
                 </MudPaper>
             </MudItem>
 
+
             <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="pa-4 rounded-xl shadow-sm border-l-8" Style="border-color: #00C853;">
+                <MudPaper Class="pa-4 rounded-xl shadow-sm border-l-8" Style="border-color: var(--mud-palette-success);">
                     <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Orders Completed</MudText>
                     <MudText Typo="Typo.h5" FontWeight="700">@_stats.TotalOrders.ToString("N0")</MudText>
                 </MudPaper>
             </MudItem>
 
+
             <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="pa-4 rounded-xl shadow-sm border-l-8" Style="border-color: #FF9800;">
+                <MudPaper Class="pa-4 rounded-xl shadow-sm border-l-8" Style="border-color: var(--mud-palette-warning);">
                     <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Today's Sales</MudText>
                     <MudText Typo="Typo.h5" FontWeight="700">@_stats.TodaySales.ToString("N0") MMK</MudText>
                 </MudPaper>
             </MudItem>
 
+
             <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="pa-4 rounded-xl shadow-sm border-l-8" Style="border-color: #FF4081;">
+                <MudPaper Class="pa-4 rounded-xl shadow-sm border-l-8" Style="border-color: var(--mud-palette-info);">
                     <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Avg. Order Value</MudText>
                     <MudText Typo="Typo.h5" FontWeight="700">@_stats.AvgOrderValue.ToString("N0") MMK</MudText>
                 </MudPaper>
             </MudItem>
+
 
             <MudItem xs="12" md="8">
                 <MudPaper Class="pa-6 rounded-xl shadow-sm">

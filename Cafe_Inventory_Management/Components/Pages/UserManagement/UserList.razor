@@ -120,6 +120,14 @@
             <PagerContent>
                 <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
             </PagerContent>
+            <NoRecordsContent>
+                <MudStack AlignItems="AlignItems.Center" Class="pa-12">
+                    <MudIcon Icon="@Icons.Material.Filled.PeopleOutline" Size="Size.Large" Color="Color.Default" Style="opacity: 0.2;" />
+                    <MudText Typo="Typo.body1" Class="mud-text-secondary">No users found matching your search.</MudText>
+                </MudStack>
+            </NoRecordsContent>
+
         </MudTable>
+
     }
 </MudPaper>

@@ -1,4 +1,4 @@
-﻿using Cafe_Inventory_Management.Domain;
+using Cafe_Inventory_Management.Domain;
 using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text;
@@ -42,9 +42,23 @@ public class ApiCallService : IApiCallService
             else
             {
                 responseModel.ErrorCode = "01";
-                responseModel.ErrorMessage = "System Error";
-                responseModel.Detail = await response.Content.ReadAsStringAsync();
+                var errorContent = await response.Content.ReadAsStringAsync();
+                responseModel.ErrorMessage = "System Error"; // Fallback
+                
+                try 
+                {
+                    // Try to extract a message if the API returns a structured error
+                    var errorObj = JsonConvert.DeserializeObject<dynamic>(errorContent);
+                    if (errorObj?.message != null)
+                    {
+                        responseModel.ErrorMessage = errorObj.message;
+                    }
+                }
+                catch { /* Ignore parsing errors and keep fallback */ }
+
+                responseModel.Detail = errorContent;
             }
+
             }
             catch (Exception)
             {

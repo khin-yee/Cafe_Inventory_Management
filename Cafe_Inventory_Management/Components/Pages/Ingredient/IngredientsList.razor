@@ -16,17 +16,7 @@
                 Add Ingredients
             </MudButton>
 
-            <MudButton HtmlTag="label"
-                       Variant="Variant.Filled"
-                       Color="Color.Dark"
-                       StartIcon="@Icons.Custom.FileFormats.FileExcel"
-                       Class="rounded-lg px-4"
-                       for="excelUploadInput">
-                Excel Upload
-            </MudButton>
-
-            @* This hidden input handles the actual file selection *@
-            <InputFile id="excelUploadInput" OnChange="UploadExcel" style="display:none" />
+           
 
             @* Modern Filter Toggle Button *@
             <MudTooltip Text="@(_showSearch ? "Hide Search" : "Show Search")">
@@ -53,7 +43,8 @@
                               Immediate="true"
                               OnKeyUp="HandleKeyUp"
                               FullWidth="true"
-                              Class="bg-white rounded-lg" />
+                              Class="bg-white rounded-lg"
+                              Clearable="true" />
             </MudItem>
 
             @* Search Button Container *@
@@ -131,6 +122,14 @@
                                OnClick="@(() => ConfirmDeleteIngredients(context.Id))" />
             </MudTd>
         </RowTemplate>
+        <NoRecordsContent>
+            <MudStack AlignItems="AlignItems.Center" Class="pa-12">
+                <MudIcon Icon="@Icons.Material.Filled.Inventory" Size="Size.Large" Color="Color.Default" Style="opacity: 0.2;" />
+                <MudText Typo="Typo.body1" Class="mud-text-secondary">No ingredients found in stock.</MudText>
+            </MudStack>
+        </NoRecordsContent>
+
+
         <PagerContent>
             <MudTablePager PageSizeOptions="new int[]{5, 10, 25,50}" />
         </PagerContent>

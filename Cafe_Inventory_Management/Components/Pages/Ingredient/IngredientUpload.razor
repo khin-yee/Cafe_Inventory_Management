@@ -1,28 +1,38 @@
 @page "/ingredient-import"
+    @inject NavigationManager Nav
 
-<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="m-3">
-    <MudText Typo="Typo.h5" FontWeight="700" Class="fw-bold">Ingredients Excel Import </MudText>
+<MudPaper Elevation="3" Class="pa-6 rounded-xl mb-4">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudStack Spacing="0">
+            <MudText Typo="Typo.h5" FontWeight="700">Ingredients Excel Import</MudText>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">Batch stock management</MudText>
+        </MudStack>
 
-    <MudStack Row="true" Spacing="2">
-        <MudButton Variant="Variant.Outlined" Color="Color.Info"
-                   OnClick="PrepareSampleExcel"
-                   StartIcon="@Icons.Material.Filled.Download">
-            Download Sample Excel
-        </MudButton>
+        <MudStack Row="true" Spacing="2">
+            <MudButton Variant="Variant.Outlined" Color="Color.Info"
+                       OnClick="PrepareSampleExcel"
+                       StartIcon="@Icons.Material.Filled.Download"
+                       Class="rounded-lg">
+                Sample
+            </MudButton>
 
-        <MudButton HtmlTag="label" Variant="Variant.Filled" Color="Color.Dark"
-                   StartIcon="@Icons.Custom.FileFormats.FileExcel" for="excelInput">
-            Select Excel File
-        </MudButton>
-        <InputFile id="excelInput" OnChange="HandleFileSelected" style="display:none" />
+            <MudButton HtmlTag="label" Variant="Variant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Custom.FileFormats.FileExcel" for="excelInput"
+                       Class="rounded-lg">
+                Select File
+            </MudButton>
+            <InputFile id="excelInput" OnChange="HandleFileSelected" style="display:none" />
 
-        <MudButton Variant="Variant.Filled" Color="Color.Success"
-                   Disabled="@(!_previewData.Any())" OnClick="SubmitToDatabase"
-                   StartIcon="@Icons.Material.Filled.CloudUpload">
-            Confirm & Save to DB
-        </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Success"
+                       Disabled="@(!_previewData.Any())" OnClick="SubmitToDatabase"
+                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                       Class="rounded-lg px-6">
+                Save to Database
+            </MudButton>
+        </MudStack>
     </MudStack>
-</MudStack>
+</MudPaper>
+
 @if (!string.IsNullOrWhiteSpace(_sampleExcelDataUrl))
 {
     <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mx-3 mb-2">
@@ -64,6 +74,10 @@
         <MudTablePager PageSizeOptions="new int[]{5, 10, 25, 50}" />
     </PagerContent>
     <NoRecordsContent>
-        <MudText Typo="Typo.body2" Class="pa-4">No data uploaded yet. Please select an Excel file.</MudText>
+        <MudStack AlignItems="AlignItems.Center" Class="pa-12">
+            <MudIcon Icon="@Icons.Custom.FileFormats.FileExcel" Size="Size.Large" Color="Color.Default" Style="opacity: 0.2;" />
+            <MudText Typo="Typo.body1" Class="mud-text-secondary">No data uploaded yet. Select an Excel file to preview.</MudText>
+        </MudStack>
     </NoRecordsContent>
+
 </MudTable>

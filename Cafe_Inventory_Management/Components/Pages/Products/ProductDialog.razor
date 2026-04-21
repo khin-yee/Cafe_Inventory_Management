@@ -6,15 +6,21 @@
 @using Newtonsoft.Json
 @inject IApiCallService ApiService
 
-<MudDialog FullWidth="true" Class="rounded-xl pa-4" Style="max-width: 700px;">
+<MudDialog FullWidth="true" Class="rounded-xl" Style="max-width: 700px;">
     <TitleContent>
-        <MudText Typo="Typo.h5" FontWeight="700">
-            <MudIcon Icon="@(IsEdit ? Icons.Material.Filled.Edit : Icons.Material.Filled.AddCircle)" Class="mr-2 mb-1" />
-            @(IsEdit ? "Update Product" : "Create New Product")
-        </MudText>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-4 pb-0">
+            <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Medium">
+                <MudIcon Icon="@(IsEdit ? Icons.Material.Filled.Edit : Icons.Material.Filled.AddCircle)" />
+            </MudAvatar>
+            <MudText Typo="Typo.h5" FontWeight="700">
+                @(IsEdit ? "Update Product" : "Create New Product")
+            </MudText>
+        </MudStack>
     </TitleContent>
 
     <DialogContent>
+        <div class="pa-6">
+
         <MudGrid Spacing="3">
             <MudItem xs="12" md="6">
                 <MudStack Spacing="3">
@@ -86,17 +92,20 @@
                 </MudTable>
             </MudItem>
         </MudGrid>
+        </div>
     </DialogContent>
 
     <DialogActions>
-        <MudButton OnClick="Cancel" Variant="Variant.Text" Class="px-6">Cancel</MudButton>
-        <MudButton OnClick="Save" Color="Color.Primary" Variant="Variant.Filled" Class="px-10 rounded-pill" Disabled="_isSaving">
-            @if (_isSaving)
-            {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-            }
-            @(IsEdit ? "Update" : "Save Product")
-        </MudButton>
+        <div class="pa-4 d-flex justify-end gap-3 w-100">
+            <MudButton OnClick="Cancel" Variant="Variant.Text" Class="px-6">Cancel</MudButton>
+            <MudButton OnClick="Save" Color="Color.Primary" Variant="Variant.Filled" Class="px-10 rounded-pill" Disabled="_isSaving">
+                @if (_isSaving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                @(IsEdit ? "Update" : "Save Product")
+            </MudButton>
+        </div>
     </DialogActions>
 </MudDialog>
 
