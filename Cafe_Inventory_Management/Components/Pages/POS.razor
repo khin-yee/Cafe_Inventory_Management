@@ -15,14 +15,17 @@
 
 <MudContainer MaxWidth="MaxWidth.Large" Class=" pb-4 pos-page" @onkeydown="HandleKeyDown">
 
-    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-        <MudText Typo="Typo.h5" Class="fw-bold">Point of Sale</MudText>
-        <MudChip T="string" Color="Color.Dark" Variant="Variant.Text" Size="Size.Small">
-            @GetTotalItems() items in cart
-        </MudChip>
-    </MudStack>
+    <div class="pos-header-section">
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+            <MudText Typo="Typo.h5" Class="fw-bold">Point of Sale</MudText>
+            <MudChip T="string" Color="Color.Dark" Variant="Variant.Text" Size="Size.Small">
+                @GetTotalItems() items in cart
+            </MudChip>
+        </MudStack>
+    </div>
 
-    <MudGrid Spacing="3">
+    <MudGrid Spacing="3" Class="pos-main-section">
+
         <MudItem xs="12" md="8">
             <MudPaper Class="pa-4 mb-3 pos-toolbar" Elevation="1">
                 <MudGrid>
@@ -179,9 +182,24 @@
 
 <style>
     .pos-page {
-        background: linear-gradient(180deg, rgba(245, 245, 245, 0.65) 0%, rgba(250, 250, 250, 0) 100%);
-        border-radius: 14px;
+        height: calc(100vh - 110px);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
+
+    .pos-header-section {
+        flex-shrink: 0;
+    }
+
+    .pos-main-section {
+        flex: 1;
+        overflow: hidden;
+        min-height: 0;
+        height: 100%;
+    }
+
+
 
     .pos-toolbar {
         border: 1px solid var(--mud-palette-lines-default);
@@ -208,11 +226,13 @@
     }
 
     .pos-grid-container {
-        height: calc(100vh - 280px);
-        overflow-y: auto;
+        height: calc(100vh - 300px); /* Strictly defined height to force scrollbar */
+        overflow-y: auto !important;
         overflow-x: hidden;
         padding-right: 8px;
     }
+
+
 
     .pos-grid-container::-webkit-scrollbar {
         width: 6px;
@@ -235,13 +255,12 @@
     }
 
     .pos-cart-panel {
-        position: sticky;
-        top: 76px;
-        height: calc(90vh - 100px);
+        height: 100%;
         display: flex;
         flex-direction: column;
         overflow: hidden;
     }
+
 
 
     /* IMPORTANT: allow flex child to shrink properly */
