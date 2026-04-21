@@ -71,7 +71,7 @@
                                         <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Size="Size.Medium" />
                                     </MudAvatar>
                                     <MudText Typo="Typo.subtitle2" Class="fw-bold">@product.Name</MudText>
-                                    <MudText Typo="Typo.body2" Color="Color.Secondary">@product.Amount.ToString("C")</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">@($"{product.Amount:N0} MMK")</MudText>
                                 </MudCardContent>
                             </MudCard>
                         </MudItem>
@@ -119,7 +119,7 @@
                                     <div class="d-flex justify-space-between align-center w-100">
                                         <div class="flex-grow-1 pe-2">
                                             <MudText Typo="Typo.subtitle2">@item.ProductName</MudText>
-                                            <MudText Typo="Typo.body2" Color="Color.Primary">@item.Price.ToString("C") x @item.Quantity</MudText>
+                                            <MudText Typo="Typo.body2" Color="Color.Primary">@($"{item.Price:N0} MMK") x @item.Quantity</MudText>
                                         </div>
                                         <div class="d-flex align-center pos-qty-controls">
                                             <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small" OnClick="() => DecreaseQuantity(item)" Color="Color.Default" />
@@ -142,7 +142,7 @@
                     </div>
                     <div class="d-flex justify-space-between align-center mb-4">
                         <MudText Typo="Typo.subtitle2">Total</MudText>
-                        <MudText Typo="Typo.body1" Color="Color.Primary">@GetTotal().ToString("C")</MudText>
+                        <MudText Typo="Typo.body1" Color="Color.Primary">@($"{GetTotal():N0} MMK")</MudText>
                     </div>
 
                     <MudButton Variant="Variant.Filled"

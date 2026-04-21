@@ -1,4 +1,4 @@
-﻿@page "/orders"
+@page "/orders"
 @using Cafe_Inventory_Management.Domain
 @using Cafe_Inventory_Management.Domain.Model
 @inject NavigationManager Nav
@@ -31,7 +31,7 @@
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Name">@context.Name</MudTd>
-                <MudTd DataLabel="Price">$@context.Amount</MudTd>
+                <MudTd DataLabel="Price">@($"{context.Amount:N0} MMK")</MudTd>
                 <MudTd DataLabel="Status">
                     @* Only allow active products to be ordered *@
                     <MudChip  T="String" Variant="Variant.Outlined" Color="@(context.IsActive ? Color.Success : Color.Error)" Size="Size.Small">
@@ -77,7 +77,7 @@
                                 <td>
                                     <MudNumericField @bind-Value="item.Quantity" Min="1" Margin="Margin.Dense" Style="width:60px" />
                                 </td>
-                                <td>$@(item.Price * item.Quantity)</td>
+                                <td>@($"{(item.Price * item.Quantity):N0} MMK")</td>
                                 <td>
                                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" 
                                                    OnClick="@(() => RemoveFromCart(item))" />
@@ -90,7 +90,7 @@
                 <MudDivider Class="my-4" />
                 <div class="d-flex justify-space-between align-center px-2">
                     <MudText Typo="Typo.h6">Grand Total:</MudText>
-                    <MudText Typo="Typo.h5" Color="Color.Default" Style="font-weight:800">$@_cart.Sum(x => x.Price * x.Quantity)</MudText>
+                    <MudText Typo="Typo.h5" Color="Color.Default" Style="font-weight:800">@($"{_cart.Sum(x => x.Price * x.Quantity):N0} MMK")</MudText>
                 </div>
 
                 <MudButton Variant="Variant.Outlined" Color="Color.Dark" FullWidth="true" 
