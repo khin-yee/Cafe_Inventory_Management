@@ -7,6 +7,7 @@ using Microsoft.JSInterop;
 using ClosedXML.Excel;
 using System.Data;
 using Cafe_Inventory_Management.UI.Components.Pages.Products;
+using System.Net;
 
 namespace Cafe_Inventory_Management.UI.Components.Pages.Orders;
 public partial class OrderHistory:ComponentBase
@@ -28,15 +29,26 @@ public partial class OrderHistory:ComponentBase
         await _table.ReloadServerData();
     }
 
+    private async Task OnDateRangeChanged(DateRange range)
+    {
+        _dateRange = range;
+
+        if (_table is not null)
+        {
+            await _table.ReloadServerData();
+        }
+    }
+
     private async Task<TableData<OrderViewModel>> ServerReload(TableState state,CancellationToken token)
     {
         try
         {
-            var start = _dateRange.Start?.ToString("yyyy-MM-dd");
-            var end = _dateRange.End?.ToString("yyyy-MM-dd");
+            var startDate = _dateRange.Start?.ToString("yyyy-MM-dd");
+            var endDate = _dateRange.End?.ToString("yyyy-MM-dd");
+            var encodedSearch = WebUtility.UrlEncode(_searchString ?? string.Empty);
 
             // page and pageSize are still handled by MudTable's pager
-            var url = $"/GetOrderSummary?page={state.Page}&pageSize={state.PageSize}&search={_searchString}&start={start}&end={end}";
+            var url = $"/GetOrderSummary?page={state.Page}&pageSize={state.PageSize}&search={encodedSearch}&startDate={startDate}&endDate={endDate}";
 
             var response = await _apiService.APICall(new ApiRequest(HttpMethod.Get, url, "", ""));
 
@@ -88,9 +100,10 @@ public partial class OrderHistory:ComponentBase
 
         try
         {
-            var start = _dateRange.Start?.ToString("yyyy-MM-dd");
-            var end = _dateRange.End?.ToString("yyyy-MM-dd");
-            var url = $"https://localhost:7223/ExportExcel?search={_searchString}&start={start}&end={end}";
+            var startDate = _dateRange.Start?.ToString("yyyy-MM-dd");
+            var endDate = _dateRange.End?.ToString("yyyy-MM-dd");
+            var encodedSearch = WebUtility.UrlEncode(_searchString ?? string.Empty);
+            var url = $"https://localhost:7223/ExportExcel?search={encodedSearch}&startDate={startDate}&endDate={endDate}";
 
             // 1. Use a clean HttpClient to fetch binary data directly
             var client = new HttpClient();

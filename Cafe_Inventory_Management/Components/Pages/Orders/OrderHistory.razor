@@ -22,7 +22,8 @@
             <MudItem xs="12" sm="8">
                 <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
                     <MudDateRangePicker 
-                                        @bind-DateRange="_dateRange"
+                                        DateRange="_dateRange"
+                                        DateRangeChanged="OnDateRangeChanged"
                                         Margin="Margin.Dense"
                                         Variant="Variant.Outlined"
                                         Clearable="true"
@@ -110,7 +111,7 @@
                 </MudTd>
                 <MudTd DataLabel="Total" Align="Right"><b>@context.TotalPrice.ToString("N0") MMK</b></MudTd>
                 <MudTd Align="Right">
-                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Info" OnClick="@(() => ViewDetails(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Tertiary" OnClick="@(() => ViewDetails(context))" />
                 </MudTd>
             </RowTemplate>
             <PagerContent>
