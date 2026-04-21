@@ -29,9 +29,14 @@
                     <Authorized Context="auth">
                         <StockAlertBanner />
 
-                        <MudText Typo="Typo.body1" Class="mr-3 user-name">
-                             <b>@auth.User.FindFirst(c => c.Type == "name")?.Value</b>
-                        </MudText>
+                        <MudLink Href="/profile" Underline="Underline.None" Color="Color.Inherit" Class="mr-3 user-name d-flex align-center">
+                            <MudAvatar Color="Color.Primary" Size="Size.Small" Class="mr-2">
+                                @(auth.User.FindFirst(c => c.Type == "name")?.Value?.FirstOrDefault() ?? 'U')
+                            </MudAvatar>
+                            <MudText Typo="Typo.body1">
+                                 <b>@auth.User.FindFirst(c => c.Type == "name")?.Value</b>
+                            </MudText>
+                        </MudLink>
 
                         <MudButton OnClick="Logout"
                                    Variant="Variant.Outlined"

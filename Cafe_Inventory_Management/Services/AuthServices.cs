@@ -1,4 +1,4 @@
-﻿using Cafe_Inventory_Management.Domain;
+using Cafe_Inventory_Management.Domain;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components;
 using Newtonsoft.Json;
@@ -224,8 +224,58 @@ public class AuthServices
         return JsonConvert.DeserializeObject<Auth0User>(json);
     }
 
-   
+    public async Task UpdateProfile(string id, string name, string? password)
+    {
+        var token = await GetManagementToken();
 
+        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/users/{id}";
 
+        var bodyObj = new Dictionary<string, object>();
+        bodyObj["name"] = name;
+        if (!string.IsNullOrWhiteSpace(password))
+        {
+            bodyObj["password"] = password;
+            bodyObj["connection"] = "Username-Password-Authentication";
+        }
 
+        var json = JsonConvert.SerializeObject(bodyObj);
+
+        var client = new HttpClient();
+
+        var req = new HttpRequestMessage(HttpMethod.Patch, url);
+
+        req.Headers.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        req.Content =
+            new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await client.SendAsync(req);
+        
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync();
+            var errorMessage = "An unknown error occurred while updating the profile.";
+            try
+            {
+                var parsedError = JsonConvert.DeserializeObject<dynamic>(errorBody);
+                if (parsedError?.message != null)
+                {
+                    errorMessage = parsedError.message;
+                    // Clean up specific known prefixes from Auth0 like "PasswordStrengthError:"
+                    if (errorMessage.StartsWith("PasswordStrengthError:"))
+                    {
+                        errorMessage = errorMessage.Replace("PasswordStrengthError:", "").Trim();
+                    }
+                }
+            }
+            catch
+            {
+                // Fallback if parsing fails
+                errorMessage = $"Status {response.StatusCode}: {errorBody}";
+            }
+
+            throw new Exception(errorMessage);
+        }
+    }
 }

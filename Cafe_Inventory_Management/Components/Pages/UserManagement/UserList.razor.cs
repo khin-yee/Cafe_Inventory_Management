@@ -1,4 +1,4 @@
-﻿using Cafe_Inventory_Management.Domain;
+using Cafe_Inventory_Management.Domain;
 using Cafe_Inventory_Management.UI.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -14,10 +14,13 @@ public partial class UserList : ComponentBase
     List<Auth0User> Users = new();
 
     string Search = "";
+    bool IsLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
+        IsLoading = true;
         Users = await _authService.GetUsers();
+        IsLoading = false;
     }
 
     IEnumerable<Auth0User> FilteredUsers => Users.Where(user =>
@@ -86,7 +89,12 @@ public partial class UserList : ComponentBase
     }
     async Task Reload()
     {
+        IsLoading = true;
+        StateHasChanged();
+        
         Users = await _authService.GetUsers();
+        
+        IsLoading = false;
         StateHasChanged();
 
         Snackbar.Add("User list updated", Severity.Success);

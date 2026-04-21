@@ -52,25 +52,36 @@
             </MudPaper>
 
             <MudGrid Spacing="2" Class="pos-product-grid">
-                @foreach (var product in _filteredProducts)
-                {
-                    <MudItem xs="12" sm="6" md="3">
-                        <MudCard @onclick="() => AddToCart(product)" Class="pos-product-card">
-                            <MudCardContent Class="d-flex flex-column align-center justify-center text-center">
-                                <MudAvatar Color="Color.Dark" Size="Size.Medium" Class="mb-2">
-                                    <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Size="Size.Medium" />
-                                </MudAvatar>
-                                <MudText Typo="Typo.subtitle2" Class="fw-bold">@product.Name</MudText>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">@product.Amount.ToString("C")</MudText>
-                            </MudCardContent>
-                        </MudCard>
-                    </MudItem>
-                }
-                @if (!_filteredProducts.Any())
+                @if (_isLoadingData)
                 {
                     <MudItem xs="12">
-                        <MudAlert Severity="Severity.Info">No products found matching criteria.</MudAlert>
+                        <div class="d-flex justify-center align-center" style="min-height: 200px;">
+                            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                        </div>
                     </MudItem>
+                }
+                else
+                {
+                    @foreach (var product in _filteredProducts)
+                    {
+                        <MudItem xs="12" sm="6" md="3">
+                            <MudCard @onclick="() => AddToCart(product)" Class="pos-product-card">
+                                <MudCardContent Class="d-flex flex-column align-center justify-center text-center">
+                                    <MudAvatar Color="Color.Dark" Size="Size.Medium" Class="mb-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Size="Size.Medium" />
+                                    </MudAvatar>
+                                    <MudText Typo="Typo.subtitle2" Class="fw-bold">@product.Name</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">@product.Amount.ToString("C")</MudText>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+                    }
+                    @if (!_filteredProducts.Any())
+                    {
+                        <MudItem xs="12">
+                            <MudAlert Severity="Severity.Info">No products found matching criteria.</MudAlert>
+                        </MudItem>
+                    }
                 }
             </MudGrid>
         </MudItem>
@@ -243,10 +254,12 @@
     private string _selectedCategory = "All";
     private string _searchString = "";
     private bool _isProcessing = false;
+    private bool _isLoadingData = true;
     @inject NavigationManager Nav
 
     protected override async Task OnInitializedAsync()
     {
+        _isLoadingData = true;
         var response = await _apiService.APICall(new ApiRequest(HttpMethod.Get, "/Product?pageNumber=1&pageSize=1000", "", ""));
         if (response != null && response.ErrorCode == "00")
         {
@@ -261,6 +274,7 @@
         _categories = _allProducts.Where(p => !string.IsNullOrEmpty(p.Category)).Select(p => p.Category).Distinct().ToList();
         _categories.Insert(0, "All");
         FilterProducts();
+        _isLoadingData = false;
     }
 
     private void SelectCategory(string category)

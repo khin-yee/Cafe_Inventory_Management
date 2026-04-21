@@ -1,4 +1,4 @@
-﻿@page "/users"
+@page "/users"
 @using Microsoft.AspNetCore.Authorization
 
 @inject IDialogService DialogService
@@ -37,81 +37,89 @@
     </MudStack>
 
 
-    <!-- Table -->
-    <MudTable Items="FilteredUsers"
-              Hover="true"
-              Dense="true"
-              Bordered="false"
-              Elevation="0"
-              Class="rounded-lg">
+    @if (IsLoading)
+    {
+        <div class="d-flex justify-center align-center" style="height: 300px;">
+            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        </div>
+    }
+    else
+    {
+        <!-- Table -->
+        <MudTable Items="FilteredUsers"
+                  Hover="true"
+                  Dense="true"
+                  Bordered="false"
+                  Elevation="0"
+                  Class="rounded-lg">
 
-        <HeaderContent>
+            <HeaderContent>
 
-            <MudTh>Email</MudTh>
-            <MudTh>Name</MudTh>
-            <MudTh>Status</MudTh>
-            <MudTh>Role</MudTh>
-            <MudTh Align="Right">Action</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Name</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Role</MudTh>
+                <MudTh Align="Right">Action</MudTh>
 
-        </HeaderContent>
+            </HeaderContent>
 
-        <RowTemplate>
+            <RowTemplate>
 
-            <MudTd>
-                <MudText Typo="Typo.subtitle2">@context.email</MudText>
-            </MudTd>
+                <MudTd>
+                    <MudText Typo="Typo.subtitle2">@context.email</MudText>
+                </MudTd>
 
-            <MudTd>
-                <MudText>@context.name</MudText>
-            </MudTd>
+                <MudTd>
+                    <MudText>@context.name</MudText>
+                </MudTd>
 
-            <MudTd>
+                <MudTd>
 
-                @if (context.email_verified)
-                {
-                    <MudChip T="String" Color="Color.Success"
-                    Variant="Variant.Filled"
-                    Size="Size.Small">
-                        Verified
-                    </MudChip>
-                }
-                else
-                {
-                    <MudChip T="String" Color="Color.Warning"
-                    Variant="Variant.Outlined"
-                    Size="Size.Small">
-                        Pending
-                    </MudChip>
-                }
-
-            </MudTd>
-            <MudTd>
-                <MudText>
-                    @foreach (var item in context.roles)
+                    @if (context.email_verified)
                     {
-                        @item 
+                        <MudChip T="String" Color="Color.Success"
+                        Variant="Variant.Filled"
+                        Size="Size.Small">
+                            Verified
+                        </MudChip>
                     }
-                </MudText>
-            </MudTd>
-            <MudTd Align="Right">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                               Color="Color.Primary"
-                               Size="Size.Small"
-                               Class="me-1"
-                               OnClick="() => OpenEdit(context)" />
+                    else
+                    {
+                        <MudChip T="String" Color="Color.Warning"
+                        Variant="Variant.Outlined"
+                        Size="Size.Small">
+                            Pending
+                        </MudChip>
+                    }
 
-                <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                               Color="Color.Error"
-                               OnClick="@(() => ConfirmDeleteUser(context.user_id))"
-                               Size="Size.Small" />
-            </MudTd>
+                </MudTd>
+                <MudTd>
+                    <MudText>
+                        @foreach (var item in context.roles)
+                        {
+                            @item 
+                        }
+                    </MudText>
+                </MudTd>
+                <MudTd Align="Right">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   Class="me-1"
+                                   OnClick="() => OpenEdit(context)" />
 
-        </RowTemplate>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   OnClick="@(() => ConfirmDeleteUser(context.user_id))"
+                                   Size="Size.Small" />
+                </MudTd>
+
+            </RowTemplate>
 
 
-        <PagerContent>
-            <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
-        </PagerContent>
-    </MudTable>
-
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
+            </PagerContent>
+        </MudTable>
+    }
 </MudPaper>

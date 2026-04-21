@@ -1,0 +1,117 @@
+@page "/profile"
+@using MudBlazor
+@using Cafe_Inventory_Management.UI.Services
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
+@inject AuthServices AuthService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudCard Elevation="3" Class="rounded-lg p-4">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h5" Align="Align.Center">User Profile</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            @if (isLoading)
+            {
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="d-block mx-auto" />
+            }
+            else
+            {
+                <MudStack Spacing="4">
+                    <MudTextField @bind-Value="name" Label="Full Name" Variant="Variant.Outlined" Required="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person" />
+                    
+                    <MudTextField @bind-Value="password" Label="New Password (leave blank to keep current)" Variant="Variant.Outlined" InputType="InputType.Password" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
+
+                    <MudButton OnClick="SaveProfile" Variant="Variant.Filled" Color="Color.Primary" Disabled="isSaving" Size="Size.Large" Class="w-100 mt-2">
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Saving...</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Save Changes</MudText>
+                        }
+                    </MudButton>
+                </MudStack>
+            }
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+
+@code {
+    private string name = "";
+    private string password = "";
+    private string userId = "";
+    private bool isLoading = true;
+    private bool isSaving = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            name = user.FindFirst(c => c.Type == "name")?.Value ?? "";
+            userId = user.FindFirst(c => c.Type == "sub")?.Value ?? ""; // Auth0 uses 'sub' for user ID
+
+            // If sub isn't present, we try ClaimTypes.NameIdentifier
+            if (string.IsNullOrEmpty(userId))
+            {
+                userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+            }
+        }
+        else
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        isLoading = false;
+    }
+
+    private async Task SaveProfile()
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            Snackbar.Add("Name is required.", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            Snackbar.Add("Could not retrieve user ID.", Severity.Error);
+            return;
+        }
+
+        try
+        {
+            isSaving = true;
+            await AuthService.UpdateProfile(userId, name, password);
+            Snackbar.Add("Profile updated successfully!", Severity.Success);
+            
+            if (AuthStateProvider is CustomAuthStateProvider customProvider)
+            {
+                customProvider.UpdateUserName(name);
+            }
+            
+            // Password change might invalidate current token implicitly on Auth0 depending on settings,
+            // but we don't handle local logout here unless requested.
+            
+            password = ""; // Reset password field
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error updating profile: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}
