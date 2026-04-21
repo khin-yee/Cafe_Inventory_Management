@@ -138,16 +138,47 @@ public class ProductRepository:IProductRepo
 
             if (!targetProduct.IsRecipe && incomingQty > 0 && validRecipe.Any())
             {
-                foreach (var item in validRecipe)
-                {
-                    var stock = await _context.Ingredients.FirstOrDefaultAsync(x => x.Code == item.IngredientCode);
-                    if (stock == null)
+                var stockUsage = validRecipe
+                    .GroupBy(x => x.IngredientCode)
+                    .Select(x => new
                     {
-                        continue;
+                        IngredientCode = x.Key,
+                        RequiredAmount = incomingQty * x.Sum(y => y.RequiredAmount)
+                    })
+                    .ToList();
+
+                var ingredientCodes = stockUsage.Select(x => x.IngredientCode).ToList();
+                var ingredientStocks = await _context.Ingredients
+                    .Where(x => ingredientCodes.Contains(x.Code))
+                    .ToDictionaryAsync(x => x.Code);
+
+                foreach (var usage in stockUsage)
+                {
+                    if (!ingredientStocks.TryGetValue(usage.IngredientCode, out var stock))
+                    {
+                        await transaction.RollbackAsync();
+                        return new ApiResponse
+                        {
+                            ErrorCode = "99",
+                            ErrorMessage = $"Ingredient with code '{usage.IngredientCode}' not found."
+                        };
                     }
 
-                    decimal totalNeeded = incomingQty * item.RequiredAmount;
-                    stock.Quantity -= totalNeeded;
+                    if (stock.Quantity < usage.RequiredAmount)
+                    {
+                        await transaction.RollbackAsync();
+                        return new ApiResponse
+                        {
+                            ErrorCode = "99",
+                            ErrorMessage = $"Insufficient stock for {stock.Name}. Needed: {usage.RequiredAmount}, Available: {stock.Quantity}"
+                        };
+                    }
+                }
+
+                foreach (var usage in stockUsage)
+                {
+                    var stock = ingredientStocks[usage.IngredientCode];
+                    stock.Quantity -= usage.RequiredAmount;
                     _context.Ingredients.Update(stock);
                 }
             }
@@ -321,15 +352,49 @@ public class ProductRepository:IProductRepo
 
                 if (!targetProduct.IsRecipe && incomingQty > 0)
                 {
-                    foreach (var item in deductionRecipe)
-                    {
-                        var stock = await _context.Ingredients.FirstOrDefaultAsync(x => x.Code == item.IngredientCode);
-                        if (stock != null)
+                    var stockUsage = deductionRecipe
+                        .Where(x => !string.IsNullOrWhiteSpace(x.IngredientCode) && x.RequiredAmount > 0)
+                        .GroupBy(x => x.IngredientCode)
+                        .Select(x => new
                         {
-                            decimal totalNeeded = incomingQty * item.RequiredAmount;
-                            stock.Quantity -= totalNeeded;
-                            _context.Ingredients.Update(stock);
+                            IngredientCode = x.Key,
+                            RequiredAmount = incomingQty * x.Sum(y => y.RequiredAmount)
+                        })
+                        .ToList();
+
+                    var ingredientCodes = stockUsage.Select(x => x.IngredientCode).ToList();
+                    var ingredientStocks = await _context.Ingredients
+                        .Where(x => ingredientCodes.Contains(x.Code))
+                        .ToDictionaryAsync(x => x.Code);
+
+                    foreach (var usage in stockUsage)
+                    {
+                        if (!ingredientStocks.TryGetValue(usage.IngredientCode, out var stock))
+                        {
+                            await transaction.RollbackAsync();
+                            return new ApiResponse
+                            {
+                                ErrorCode = "99",
+                                ErrorMessage = $"Ingredient with code '{usage.IngredientCode}' not found."
+                            };
                         }
+
+                        if (stock.Quantity < usage.RequiredAmount)
+                        {
+                            await transaction.RollbackAsync();
+                            return new ApiResponse
+                            {
+                                ErrorCode = "99",
+                                ErrorMessage = $"Insufficient stock for {stock.Name}. Needed: {usage.RequiredAmount}, Available: {stock.Quantity}"
+                            };
+                        }
+                    }
+
+                    foreach (var usage in stockUsage)
+                    {
+                        var stock = ingredientStocks[usage.IngredientCode];
+                        stock.Quantity -= usage.RequiredAmount;
+                        _context.Ingredients.Update(stock);
                     }
                 }
             }
