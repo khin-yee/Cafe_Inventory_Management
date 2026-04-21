@@ -55,39 +55,42 @@
                 </MudChipSet>
             </MudPaper>
 
-            <MudGrid Spacing="2" Class="pos-product-grid">
-                @if (_isLoadingData)
-                {
-                    <MudItem xs="12">
-                        <div class="d-flex justify-center align-center" style="min-height: 200px;">
-                            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
-                        </div>
-                    </MudItem>
-                }
-                else
-                {
-                    @foreach (var product in _filteredProducts)
-                    {
-                        <MudItem xs="12" sm="6" md="3">
-                            <MudCard @onclick="() => AddToCart(product)" Class="pos-product-card">
-                                <MudCardContent Class="d-flex flex-column align-center justify-center text-center">
-                                    <MudAvatar Color="Color.Dark" Size="Size.Medium" Class="mb-2">
-                                        <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Size="Size.Medium" />
-                                    </MudAvatar>
-                                    <MudText Typo="Typo.subtitle2" Class="fw-bold">@product.Name</MudText>
-                                    <MudText Typo="Typo.body2" Color="Color.Secondary">@($"{product.Amount:N0} MMK")</MudText>
-                                </MudCardContent>
-                            </MudCard>
-                        </MudItem>
-                    }
-                    @if (!_filteredProducts.Any())
+            <div class="pos-grid-container">
+                <MudGrid Spacing="1" Class="pos-product-grid">
+                    @if (_isLoadingData)
                     {
                         <MudItem xs="12">
-                            <MudAlert Severity="Severity.Info">No products found matching criteria.</MudAlert>
+                            <div class="d-flex justify-center align-center" style="min-height: 200px;">
+                                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                            </div>
                         </MudItem>
                     }
-                }
-            </MudGrid>
+                    else
+                    {
+                        @foreach (var product in _filteredProducts)
+                        {
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudCard @onclick="() => AddToCart(product)" Class="pos-product-card">
+                                    <MudCardContent Class="pa-2 d-flex flex-column align-center justify-center text-center">
+                                        <MudAvatar Color="Color.Dark" Size="Size.Small" Class="mb-1">
+                                            <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Size="Size.Small" />
+                                        </MudAvatar>
+                                        <MudText Typo="Typo.caption" Class="fw-bold line-clamp-1">@product.Name</MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">@($"{product.Amount:N0}")</MudText>
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+                        }
+                        @if (!_filteredProducts.Any())
+                        {
+                            <MudItem xs="12">
+                                <MudAlert Severity="Severity.Info">No products found.</MudAlert>
+                            </MudItem>
+                        }
+                    }
+                </MudGrid>
+            </div>
+
         </MudItem>
 
         <MudItem xs="12" md="4">
@@ -200,18 +203,46 @@
 
     .pos-product-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-        border-color: var(--mud-palette-primary);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+        border-color: var(--mud-palette-primary) !important;
+    }
+
+    .pos-grid-container {
+        height: calc(100vh - 280px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 8px;
+    }
+
+    .pos-grid-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .pos-grid-container::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.1);
+        border-radius: 10px;
+    }
+
+    .dark .pos-grid-container::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.1);
+    }
+
+    .line-clamp-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;  
+        overflow: hidden;
     }
 
     .pos-cart-panel {
         position: sticky;
         top: 76px;
-        height: calc(90vh - 100px); /* adjust this value */
+        height: calc(90vh - 100px);
         display: flex;
         flex-direction: column;
         overflow: hidden;
     }
+
 
     /* IMPORTANT: allow flex child to shrink properly */
     .pos-cart-body {
