@@ -433,6 +433,7 @@ public class OrderRepository : IOrderRepo
                 TotalPrice = o.TotalPrice,
                 Status = o.Status,
                 CreatedAt = o.CreatedAt,
+                CreatedBy= o.CreatedBy,
                 Items = _context.OrderItems.Where(i => i.OrderId == o.OrderId).ToList()
             })
             .ToListAsync();
@@ -662,5 +663,37 @@ public class OrderRepository : IOrderRepo
         while (await _context.Orders.AnyAsync(x => x.OrderId == code));
 
         return code;
+    }
+
+    public async Task<ApiResponse> DeleteOrder(string orderId)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var order = await _context.Orders.FirstOrDefaultAsync(x => x.OrderId == orderId);
+            if (order == null)
+            {
+                return new ApiResponse { ErrorCode = "01", ErrorMessage = "Order not found." };
+            }
+
+            if (order.Status != Status.Pending)
+            {
+                return new ApiResponse { ErrorCode = "01", ErrorMessage = "Only pending orders can be deleted." };
+            }
+
+            var items = await _context.OrderItems.Where(x => x.OrderId == orderId).ToListAsync();
+            _context.OrderItems.RemoveRange(items);
+            _context.Orders.Remove(order);
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return new ApiResponse { ErrorCode = "00" };
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return new ApiResponse { ErrorCode = "99", ErrorMessage = ex.InnerException?.Message ?? ex.Message };
+        }
     }
 }

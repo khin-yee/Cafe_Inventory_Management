@@ -28,10 +28,6 @@ namespace Cafe_Inventory_Management.Service
             {
                 var today = DateTime.Now;
                 var tomorrow = today.AddDays(1);
-
-                // Only run if tomorrow is next month (meaning today is last day)
-                if (tomorrow.Month == today.Month)
-                    return null;
             }
             var settings = _config.GetSection("EmailSettings");
             var nowUtc = DateTime.UtcNow;

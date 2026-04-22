@@ -66,9 +66,10 @@
         border-radius: 30px !important;
         text-transform: none !important;
         font-weight: 600 !important;
-        font-size: 14px !important;
-        padding: 6px 16px !important;
+        font-size: 12.5px !important;
+        padding: 5px 14px !important;
     }
+
 
     .cta-btn-outline {
         border: 1px solid #e2e8f0 !important;
@@ -90,25 +91,33 @@
     /* Horizontal Menu Styling */
     .nav-link-horizontal {
         font-weight: 600 !important;
-        font-size: 14px !important;
+        font-size: 12.5px !important;
         color: #475569 !important;
         text-transform: none !important;
         padding: 0 10px !important;
         transition: color 0.2s ease;
     }
 
-
-    .nav-link-horizontal:hover {
-        color: #0F172A !important;
-        background: transparent !important;
-    }
-
     .nav-menu-horizontal {
         font-weight: 600 !important;
-        font-size: 14px !important;
+        font-size: 12.5px !important;
         color: #475569 !important;
         text-transform: none !important;
     }
+
+    .brand-title {
+        font-size: 12.5px !important;
+        font-weight: 800 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .user-name-text {
+        font-size: 12.5px !important;
+        font-weight: 600 !important;
+    }
+
+
 
 
     .nav-menu-horizontal:hover {
@@ -137,11 +146,12 @@
 
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="brand-stack">
                         <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Color="Color.Primary" Size="Size.Medium" />
-                        <MudText Typo="Typo.body1" FontWeight="FontWeight.ExtraBold" Style="letter-spacing: -0.5px;">
+                        <MudText Class="brand-title">
                             CHANOHOLIC
                         </MudText>
 
                     </MudStack>
+
                 </MudStack>
 
                 <MudSpacer />
@@ -208,9 +218,10 @@
                             <MudAvatar Color="Color.Primary" Size="Size.Small" Class="mr-2">
                                 @(auth.User.FindFirst(c => c.Type == "name")?.Value?.FirstOrDefault() ?? 'U')
                             </MudAvatar>
-                            <MudText Typo="Typo.body2" Class="fw-bold">
+                            <MudText Class="user-name-text">
                                  @auth.User.FindFirst(c => c.Type == "name")?.Value
                             </MudText>
+
                         </MudLink>
 
                         <MudButton OnClick="Logout"

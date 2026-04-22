@@ -77,6 +77,12 @@
                                        Color="Color.Default"
                                        Size="Size.Small"
                                        OnClick="@(() => OpenEditDialog(context))"
+                                       Class="mr-1" />
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="@(() => DeleteOrder(context))"
                                        Class="mr-2" />
 
                         <MudButton Variant="Variant.Outlined"

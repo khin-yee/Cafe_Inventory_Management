@@ -1,4 +1,4 @@
-﻿using Cafe_Inventory_Management.Domain;
+using Cafe_Inventory_Management.Domain;
 using Cafe_Inventory_Management.Domain.IRepository;
 using Cafe_Inventory_Management.Domain.IServices;
 using Cafe_Inventory_Management.Domain.Model;
@@ -82,6 +82,11 @@ public class OrderService:IOrderService
     public async Task<ApiResponse> GetRecipeByProductCode(string productCode)
     {
         return await _repo.GetRecipeByProductCode(productCode);
+    }
+
+    public async Task<ApiResponse> DeleteOrder(string orderId)
+    {
+        return await _repo.DeleteOrder(orderId);
     }
 
 }

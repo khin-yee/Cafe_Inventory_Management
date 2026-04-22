@@ -1,4 +1,4 @@
-using Cafe_Inventory_Management.Domain;
+ï»¿using Cafe_Inventory_Management.Domain;
 using Cafe_Inventory_Management.Domain.IServices;
 using Cafe_Inventory_Management.Domain.Model;
 using Cafe_Inventory_Management.Service;
@@ -99,7 +99,7 @@ public class OrderController : ControllerBase
 
                 foreach (var item in order.Items)
                 {
-                    ws.Cell(currentRow, 4).Value = $"   • {item.ProductName} ({item.ProductCode})";
+                    ws.Cell(currentRow, 4).Value = "     " + item.ProductName + " (" + item.ProductCode + ")";
                     ws.Cell(currentRow, 4).Style.Font.FontColor = XLColor.DimGray;
 
                     ws.Cell(currentRow, 5).Value = item.Quantity;
@@ -125,7 +125,7 @@ public class OrderController : ControllerBase
                 return File(
                     mstream.ToArray(),
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    $"Detailed_Report_{DateTime.Now:yyyyMMdd}.xlsx"
+                    "Detailed_Report_" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx"
                 );
             }
         }
@@ -136,6 +136,12 @@ public class OrderController : ControllerBase
     public async Task<IActionResult> GetOrderDetails(string orderId)
     {          
         return Ok(await _service.GetOrderDetails(orderId));
+    }
+
+    [HttpDelete("/DeleteOrder/{orderId}")]
+    public async Task<IActionResult> DeleteOrder(string orderId)
+    {
+        return Ok(await _service.DeleteOrder(orderId));
     }
 
     [HttpPost("/EmailToAdmin")]

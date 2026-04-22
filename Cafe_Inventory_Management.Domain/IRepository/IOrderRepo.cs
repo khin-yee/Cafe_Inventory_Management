@@ -1,4 +1,4 @@
-﻿using Cafe_Inventory_Management.Domain.Model;
+using Cafe_Inventory_Management.Domain.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +22,7 @@ public interface IOrderRepo
     Task<OrderViewModel> GetOrderDetails(string orderId);
 
     Task<List<OrderViewModel>> GetOrdersByDate(DateTime startDate, DateTime endDate);
+    Task<ApiResponse> DeleteOrder(string orderId);
 
 
 }

@@ -1,4 +1,4 @@
-﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Cafe_Inventory_Management.Domain.Model;
@@ -107,6 +107,37 @@ public partial class OrdersMenu : ComponentBase
         "Completed" => Color.Success,
         _ => Color.Default
     };
+
+    private async Task DeleteOrder(OrderViewModel order)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Delete Order",
+            $"Are you sure you want to delete order #{order.OrderId}? This action cannot be undone.",
+            yesText: "Delete", cancelText: "Cancel");
+
+        if (result == true)
+        {
+            var response = await _apiService.APICall(new ApiRequest(HttpMethod.Delete, $"/DeleteOrder/{order.OrderId}", "", ""));
+
+            if (response != null && response.ErrorCode == "00")
+            {
+                var apiResult = JsonConvert.DeserializeObject<ApiResponse>(response.Detail ?? "{}");
+                if (apiResult?.ErrorCode == "00")
+                {
+                    Snackbar.Add($"Order #{order.OrderId} deleted successfully.", Severity.Success);
+                    await LoadOrders();
+                }
+                else
+                {
+                    Snackbar.Add(apiResult?.ErrorMessage ?? "Failed to delete order.", Severity.Error);
+                }
+            }
+            else
+            {
+                Snackbar.Add("Error communicating with server.", Severity.Error);
+            }
+        }
+    }
 
     public void Dispose()
     {
