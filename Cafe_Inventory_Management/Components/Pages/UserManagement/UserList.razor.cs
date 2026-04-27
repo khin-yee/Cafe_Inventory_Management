@@ -12,6 +12,7 @@ public partial class UserList : ComponentBase
     [Inject] public AuthServices _authService { get; set; }
 
     List<Auth0User> Users = new();
+    readonly HashSet<string> _deletedUserIds = new();
 
     string Search = "";
     bool IsLoading = true;
@@ -19,7 +20,7 @@ public partial class UserList : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
-        Users = await _authService.GetUsers();
+        Users = await LoadUsers();
         IsLoading = false;
     }
 
@@ -83,21 +84,53 @@ public partial class UserList : ComponentBase
 
         if (result == true)
         {
-            await _authService.DeleteUser(userId);
-            await Reload();
+            try
+            {
+                await _authService.DeleteUser(userId);
+                _deletedUserIds.Add(userId);
+                Users = Users.Where(user => user.user_id != userId).ToList();
+                StateHasChanged();
+
+                Snackbar.Add("User deleted successfully", Severity.Success);
+
+                _ = RefreshAfterDelete();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Failed to delete user: {ex.Message}", Severity.Error);
+            }
         }
     }
+
+    async Task RefreshAfterDelete()
+    {
+        await Task.Delay(1500);
+        await Reload(showSuccessMessage: false);
+    }
+
     async Task Reload()
+        => await Reload(showSuccessMessage: true);
+
+    async Task Reload(bool showSuccessMessage)
     {
         IsLoading = true;
         StateHasChanged();
         
-        Users = await _authService.GetUsers();
+        Users = await LoadUsers();
         
         IsLoading = false;
         StateHasChanged();
 
-        Snackbar.Add("User list updated", Severity.Success);
+        if (showSuccessMessage)
+        {
+            Snackbar.Add("User list updated", Severity.Success);
+        }
+    }
+
+    async Task<List<Auth0User>> LoadUsers()
+    {
+        var users = await _authService.GetUsers();
+        return users.Where(user => !_deletedUserIds.Contains(user.user_id)).ToList();
     }
 }
 

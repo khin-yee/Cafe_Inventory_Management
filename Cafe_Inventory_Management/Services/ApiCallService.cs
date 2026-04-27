@@ -92,10 +92,19 @@ public class ApiCallService : IApiCallService
         {
             baseUrl = apiRequest.url;
         }
+        HttpContent? content = null;
+        if (isFormContent)
+        {
+            content = apiRequest.requestBody as MultipartFormDataContent;
+        }
+        else if (apiRequest.requestBody != null)
+        {
+            content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(apiRequest.requestBody), Encoding.UTF8, MediaTypeNames.Application.Json);
+        }
+
         var httpRequestMsg = new HttpRequestMessage(apiRequest.method, baseUrl)
         {
-            Content = (isFormContent) ?
-           (apiRequest.requestBody as MultipartFormDataContent) : new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(apiRequest.requestBody), Encoding.UTF8, MediaTypeNames.Application.Json)
+            Content = content
         };
 
         httpRequestMsg.Headers.UserAgent.ParseAdd("HttpRequestsSample");

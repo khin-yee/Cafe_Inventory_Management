@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Use Case Diagram - Chanoholic Cafe Inventory Management</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 30px 10px;
+        }
+        .canvas {
+            width: 1150px;
+            position: relative;
+        }
+        h1.title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 800;
+            color: #222;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+        }
+
+        .main-layout {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+        }
+
+        /* Actor columns */
+        .actor-col {
+            width: 130px;
+            min-width: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 30px;
+        }
+
+        /* Stick figure */
+        .stick {
+            position: relative;
+            width: 56px;
+            height: 80px;
+            margin-bottom: 6px;
+        }
+        .stick .head {
+            width: 22px; height: 22px;
+            border: 2.5px solid #222;
+            border-radius: 50%;
+            position: absolute;
+            top: 0; left: 50%; transform: translateX(-50%);
+            background: #fff;
+        }
+        .stick .torso {
+            position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+            width: 2.5px; height: 24px; background: #222;
+        }
+        .stick .arms {
+            position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+            width: 34px; height: 2.5px; background: #222;
+        }
+        .stick .leg-l {
+            position: absolute; top: 46px; left: 50%;
+            width: 2.5px; height: 22px; background: #222;
+            transform: translateX(-50%) rotate(20deg); transform-origin: top center;
+        }
+        .stick .leg-r {
+            position: absolute; top: 46px; left: 50%;
+            width: 2.5px; height: 22px; background: #222;
+            transform: translateX(-50%) rotate(-20deg); transform-origin: top center;
+        }
+        .actor-label {
+            font-weight: 800; font-size: 16px; color: #222;
+        }
+
+        /* Side use-case lists (admin-only left, staff-only right) */
+        .side-cases {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        /* Oval use case */
+        .uc {
+            border: 2px solid #444;
+            border-radius: 100px;
+            padding: 10px 14px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #222;
+            line-height: 1.35;
+            background: #f0f4ff;
+            position: relative;
+        }
+        .uc .sub {
+            font-size: 10px;
+            font-weight: 400;
+            color: #666;
+            display: block;
+            margin-top: 1px;
+        }
+
+        /* Color themes */
+        .uc.admin-only {
+            background: #E8EAF6;
+            border-color: #3F51B5;
+            color: #1A237E;
+        }
+        .uc.staff-only {
+            background: #E0F2F1;
+            border-color: #00897B;
+            color: #004D40;
+        }
+        .uc.shared {
+            background: #FFF8E1;
+            border-color: #F9A825;
+            color: #4E342E;
+        }
+        .uc.shared-new {
+            background: #FFF8E1;
+            border-color: #F9A825;
+            color: #4E342E;
+            box-shadow: 0 0 0 2.5px #66BB6A;
+        }
+        .uc.admin-new {
+            background: #E8EAF6;
+            border-color: #3F51B5;
+            color: #1A237E;
+            box-shadow: 0 0 0 2.5px #66BB6A;
+        }
+        .uc.staff-new {
+            background: #E0F2F1;
+            border-color: #00897B;
+            color: #004D40;
+            box-shadow: 0 0 0 2.5px #66BB6A;
+        }
+
+        /* Center shared column */
+        .center-col {
+            flex: 1;
+            border: 2.5px solid #555;
+            border-radius: 14px;
+            padding: 18px 14px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .center-label {
+            position: absolute;
+            top: -13px; left: 50%; transform: translateX(-50%);
+            background: #fff;
+            padding: 0 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #444;
+            white-space: nowrap;
+        }
+
+        /* Connection lines container */
+        .connections {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Grid inside center */
+        .shared-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .shared-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .shared-row .uc {
+            flex: 0 1 auto;
+            min-width: 140px;
+            max-width: 200px;
+        }
+
+        /* Legend */
+        .legend {
+            margin-top: 22px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #444;
+        }
+        .legend-swatch {
+            width: 36px; height: 20px;
+            border-radius: 50px;
+            border: 2px solid;
+            display: inline-block;
+        }
+
+        /* NEW badge */
+        .new-badge {
+            background: #43A047;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+            letter-spacing: 0.5px;
+        }
+
+        /* Section divider labels */
+        .section-divider {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 2px 0;
+            border-top: 1px dashed #ddd;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+<div class="canvas">
+    <h1 class="title">Use Case Diagram — Chanoholic Cafe Inventory Management System</h1>
+
+    <div class="main-layout">
+
+        <!-- ============ LEFT: Admin Actor + Admin-Only Cases ============ -->
+        <div class="actor-col">
+            <div class="stick">
+                <div class="head"></div>
+                <div class="torso"></div>
+                <div class="arms"></div>
+                <div class="leg-l"></div>
+                <div class="leg-r"></div>
+            </div>
+            <div class="actor-label">Admin</div>
+
+            <div class="side-cases">
+                <div class="uc admin-only">
+                    View Business Report
+                </div>
+                <div class="uc admin-only">
+                    Admin Dashboard
+                    <span class="sub">(Staff Performance, Audit Trail)</span>
+                </div>
+                <div class="uc admin-only">
+                    View Staff KPI
+                </div>
+                <div class="uc admin-new">
+                    View Critical<br>Inventory Alerts
+                    <span class="new-badge">NEW</span>
+                </div>
+                <div class="uc admin-only">
+                    Send Email Reports<br>to Admin
+                    <span class="sub">(Daily, Monthly)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ CENTER: System Boundary with Shared Cases ============ -->
+        <div class="center-col">
+            <div class="center-label">System Boundary</div>
+
+            <div class="shared-grid">
+
+                <!-- Login -->
+                <div class="shared-row">
+                    <div class="uc shared">Login</div>
+                </div>
+
+                <!-- User Management -->
+                <div class="shared-row">
+                    <div class="uc shared">
+                        Manage Staff User
+                        <span class="sub">(Create, Edit, Delete, Assign Role)</span>
+                    </div>
+                </div>
+
+                <!-- NEW: POS -->
+                <div class="section-divider">Point of Sale</div>
+                <div class="shared-row">
+                    <div class="uc shared-new">
+                        Point of Sale (POS)
+                        <span class="sub">(Browse, Search, Filter, Cart)</span>
+                        <span class="new-badge">NEW</span>
+                    </div>
+                    <div class="uc shared-new">
+                        Checkout Order
+                        <span class="new-badge">NEW</span>
+                    </div>
+                </div>
+
+                <!-- Products -->
+                <div class="section-divider">Product & Ingredient</div>
+                <div class="shared-row">
+                    <div class="uc shared">
+                        Manage Products
+                        <span class="sub">(Create, Edit, Delete)</span>
+                    </div>
+                    <div class="uc shared-new">
+                        Bulk Import<br>Products
+                        <span class="new-badge">NEW</span>
+                    </div>
+                </div>
+
+                <!-- Ingredients -->
+                <div class="shared-row">
+                    <div class="uc shared">
+                        Manage Ingredients
+                        <span class="sub">(Create, Edit, Delete)</span>
+                    </div>
+                    <div class="uc shared-new">
+                        Bulk Import<br>Ingredients
+                        <span class="new-badge">NEW</span>
+                    </div>
+                </div>
+
+                <!-- Orders -->
+                <div class="section-divider">Order Management</div>
+                <div class="shared-row">
+                    <div class="uc shared">
+                        Manage Order
+                        <span class="sub">(Create, Edit, Delete)</span>
+                    </div>
+                    <div class="uc shared-new">
+                        View Order History
+                        <span class="new-badge">NEW</span>
+                    </div>
+                </div>
+
+                <div class="shared-row">
+                    <div class="uc shared-new">
+                        Export Orders<br>to Excel
+                        <span class="new-badge">NEW</span>
+                    </div>
+                    <div class="uc shared-new">
+                        Delete Pending<br>Order
+                        <span class="new-badge">NEW</span>
+                    </div>
+                </div>
+
+                <!-- Reports -->
+                <div class="section-divider">Reports</div>
+                <div class="shared-row">
+                    <div class="uc shared">
+                        Reports
+                        <span class="sub">(Daily, Monthly)</span>
+                    </div>
+                </div>
+
+                <!-- NEW: Profile -->
+                <div class="section-divider">Profile</div>
+                <div class="shared-row">
+                    <div class="uc shared-new">
+                        Update Profile
+                        <span class="new-badge">NEW</span>
+                    </div>
+                    <div class="uc shared-new">
+                        Change Password
+                        <span class="new-badge">NEW</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ============ RIGHT: Staff Actor + Staff-Side Cases ============ -->
+        <div class="actor-col">
+            <div class="stick">
+                <div class="head"></div>
+                <div class="torso"></div>
+                <div class="arms"></div>
+                <div class="leg-l"></div>
+                <div class="leg-r"></div>
+            </div>
+            <div class="actor-label">Staff</div>
+
+            <div class="side-cases">
+                <div class="uc staff-only">
+                    Check Stock Alert
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============ BOTTOM: Auth0 External Actor ============ -->
+    <div style="display: flex; justify-content: center; margin-top: 22px;">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div class="stick">
+                <div class="head" style="background: #E3F2FD; border-color: #1565C0;"></div>
+                <div class="torso" style="background: #1565C0;"></div>
+                <div class="arms" style="background: #1565C0;"></div>
+                <div class="leg-l" style="background: #1565C0;"></div>
+                <div class="leg-r" style="background: #1565C0;"></div>
+            </div>
+            <div class="actor-label" style="color: #1565C0;">Auth0 <span style="font-size: 11px; font-weight: 400; color: #888;">(External System)</span></div>
+            <div style="font-size: 10px; color: #888; margin-top: 3px;">Participates in: Login, Update Profile, Change Password, Manage Staff Users</div>
+        </div>
+    </div>
+
+    <!-- ============ LEGEND ============ -->
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-swatch" style="background: #E8EAF6; border-color: #3F51B5;"></div>
+            Admin Only
+        </div>
+        <div class="legend-item">
+            <div class="legend-swatch" style="background: #FFF8E1; border-color: #F9A825;"></div>
+            Shared (Admin & Staff)
+        </div>
+        <div class="legend-item">
+            <div class="legend-swatch" style="background: #E0F2F1; border-color: #00897B;"></div>
+            Staff-Side
+        </div>
+        <div class="legend-item">
+            <div class="legend-swatch" style="background: #FFF8E1; border-color: #F9A825; box-shadow: 0 0 0 2.5px #66BB6A;"></div>
+            <span class="new-badge">NEW</span> Newly Added
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

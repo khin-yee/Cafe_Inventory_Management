@@ -96,15 +96,18 @@ public class AuthServices
             throw new Exception("UserId is required");
 
         var token = await GetManagementToken();
+        if (string.IsNullOrEmpty(token))
+            throw new Exception("Failed to get Management token");
 
-        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/users/{userId}";
+        var encodedUserId = Uri.EscapeDataString(userId);
+        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/users/{encodedUserId}";
 
         var request = new ApiRequest(HttpMethod.Delete, url, null, token);
 
         var response = await _apiService.APICall(request);
 
         if (response == null || response.ErrorCode != "00")
-            throw new Exception($"DeleteUser failed: {response?.Detail}");
+            throw new Exception(response?.ErrorMessage ?? response?.Detail ?? "DeleteUser failed");
     }
     public async Task<List<Auth0User>> GetUsersByRole(string roleId, string token)
     {
@@ -173,7 +176,8 @@ public class AuthServices
 
         var body = new { roles = new[] { roleId } };
 
-        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/users/{userId}/roles";
+        var encodedUserId = Uri.EscapeDataString(userId);
+        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/users/{encodedUserId}/roles";
 
         var request = new ApiRequest(HttpMethod.Post, url, body, token);
         var response = await _apiService.APICall(request);
@@ -186,7 +190,8 @@ public class AuthServices
     {
         var token = await GetManagementToken();
 
-        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/users/{id}";
+        var encodedUserId = Uri.EscapeDataString(id);
+        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/users/{encodedUserId}";
 
         var body = new
         {
@@ -212,7 +217,8 @@ public class AuthServices
     {
         var token = await GetManagementToken();
 
-        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/users/{id}";
+        var encodedUserId = Uri.EscapeDataString(id);
+        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/users/{encodedUserId}";
 
         var client = new HttpClient();
 
@@ -228,7 +234,8 @@ public class AuthServices
     {
         var token = await GetManagementToken();
 
-        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/users/{id}";
+        var encodedUserId = Uri.EscapeDataString(id);
+        var url = $"https://{_configuration["Auth0:Domain"]}/api/v2/users/{encodedUserId}";
 
         var bodyObj = new Dictionary<string, object>();
         bodyObj["name"] = name;

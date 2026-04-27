@@ -95,7 +95,7 @@
                 </MudTd>
                 <MudTd>
                     <MudText>
-                        @foreach (var item in context.roles)
+                        @foreach (var item in context.roles ?? Enumerable.Empty<string>())
                         {
                             @item 
                         }

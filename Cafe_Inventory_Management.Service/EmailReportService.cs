@@ -200,7 +200,7 @@ namespace Cafe_Inventory_Management.Service
 
             foreach (var email in adminEmails)
             {
-                message.To.Add(MailboxAddress.Parse(email));
+                message.To.Add(MailboxAddress.Parse(email));//message add
             }
             message.Subject = $"{(isMonthly ? "MONTHLY" : "DAILY")} Sales Report: {start:dd MMM}";
             var body = new BodyBuilder { HtmlBody = $"<p>Attached is the report for {start:dd MMM yyyy}. Total Orders: <b>{count}</b></p>" };
@@ -223,7 +223,6 @@ namespace Cafe_Inventory_Management.Service
                 { "client_secret", _config["Auth0:ClientSecret"]! },
                 { "audience", $"https://{_config["Auth0:Domain"]}/api/v2/" }
             };
-
             var url = $"https://{_config["Auth0:Domain"]}/oauth/token";
 
             try

@@ -66,6 +66,13 @@
             }
 
         </MudStack>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Dense="true" Class="mt-3 rounded-lg" ShowCloseIcon="true" CloseIconClicked="() => _errorMessage = null">
+                    @_errorMessage
+                </MudAlert>
+            }
         </div>
     </DialogContent>
 
@@ -133,6 +140,7 @@
 
 
     private bool _isSaving = false;
+    private string? _errorMessage = null;
 
     async Task Save()
     {
@@ -140,10 +148,20 @@
             string.IsNullOrWhiteSpace(Name) ||
             string.IsNullOrWhiteSpace(SelectedRole))
         {
+            _errorMessage = "Please fill in all required fields (Email, Name, and Role).";
+            if (!IsEdit && string.IsNullOrWhiteSpace(Password))
+                _errorMessage = "Please fill in all required fields including Password.";
+            return;
+        }
+
+        if (!IsEdit && string.IsNullOrWhiteSpace(Password))
+        {
+            _errorMessage = "Password is required when creating a new user.";
             return;
         }
 
         _isSaving = true;
+        _errorMessage = null;
         try
         {
             if (IsEdit)
@@ -160,7 +178,7 @@
         }
         catch (Exception ex)
         {
-            // Error handling can be added here
+            _errorMessage = ex.Message;
         }
         finally
         {
