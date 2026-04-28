@@ -247,7 +247,7 @@ public class OrderRepository : IOrderRepo
         var previousStatus = order.Status;
         order.Status = updatedOrder.Status;
         order.UpdatedAt = DateTime.UtcNow;
-        if (updatedOrder.Status == Status.Success && previousStatus != Status.Success)
+        if (updatedOrder.Status == Status.Preparing && previousStatus != Status.Preparing)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try

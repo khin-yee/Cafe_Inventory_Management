@@ -43,7 +43,7 @@ namespace Cafe_Inventory_Management.Service
 
                 var orders = await _repo.GetOrdersByDate(startDate, endDate);
                 var totalRevenue = orders.Sum(x => x.TotalPrice);
-
+                
                 using var workbook = new XLWorkbook();
                 var ws = workbook.Worksheets.Add("Sales Report");
 
